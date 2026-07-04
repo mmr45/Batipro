@@ -1479,14 +1479,35 @@ animate();
   let currentUser = null;
   let pendingAfterAuth = null;
 
-  function restoreSession(){
+  // Session = Supabase Auth. On hydrate currentUser depuis la session Supabase
+  // (source de vérité), avec fallback local si Supabase n'est pas configuré.
+  async function restoreSession(){
+    const sb = window.__supabase;
+    if (sb) {
+      try {
+        const { data } = await sb.auth.getUser();
+        if (data && data.user) {
+          currentUser = userFromSupabase(data.user);
+          return;
+        }
+      } catch(e){ /* pas de session */ }
+      currentUser = null;
+      return;
+    }
+    // Fallback : ancien stockage local (avant Supabase Auth)
     try {
       const email = localStorage.getItem(LS_SESSION_KEY);
       if (email) currentUser = ACCOUNTS.find(a=>a.email===email) || null;
-    } catch(e){ /* localStorage indisponible (navigation privée…) */ }
+    } catch(e){}
   }
-  function saveSession(email){
-    try { localStorage.setItem(LS_SESSION_KEY, email); } catch(e){}
+  function userFromSupabase(u){
+    const md = (u && u.user_metadata) || {};
+    return {
+      id: u.id,
+      email: u.email,
+      prenom: md.prenom || (u.email ? u.email.split('@')[0] : 'Compte'),
+      nom: md.nom || '',
+    };
   }
   function clearSession(){
     try { localStorage.removeItem(LS_SESSION_KEY); } catch(e){}
