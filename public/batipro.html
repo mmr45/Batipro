@@ -1577,7 +1577,9 @@ animate();
     }
   }
 
-  function logout(){
+  async function logout(){
+    const sb = window.__supabase;
+    if (sb) { try { await sb.auth.signOut(); } catch(e){} }
     currentUser = null;
     clearSession();
     updateAuthUI();
@@ -1589,20 +1591,27 @@ animate();
     const email = document.getElementById('signup-email').value.trim().toLowerCase();
     const password = document.getElementById('signup-password').value;
 
-    if (ACCOUNTS.some(a=>a.email===email)){
-      showAuthError("Un compte existe déjà avec cet email — connectez-vous plutôt.");
-      return;
-    }
     if (password.length < 8){
       showAuthError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
-    const passwordHash = await hashPassword(password);
-    const account = { prenom, nom, email, passwordHash };
-    ACCOUNTS.push(account);
-    saveAccounts(ACCOUNTS);
-    currentUser = account;
-    saveSession(email);
+    const sb = window.__supabase;
+    if (!sb) { showAuthError("Service d'authentification indisponible."); return; }
+
+    const { data, error } = await sb.auth.signUp({
+      email, password,
+      options: { data: { prenom, nom }, emailRedirectTo: window.location.origin },
+    });
+    if (error) {
+      showAuthError(error.message || "Impossible de créer le compte.");
+      return;
+    }
+    if (!data.session) {
+      showAuthError("Compte créé. Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.");
+      setAuthMode('login');
+      return;
+    }
+    currentUser = userFromSupabase(data.user);
     updateAuthUI();
     closeAuth();
     if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
@@ -1611,14 +1620,14 @@ animate();
   async function handleLogin(){
     const email = document.getElementById('login-email').value.trim().toLowerCase();
     const password = document.getElementById('login-password').value;
-    const passwordHash = await hashPassword(password);
-    const account = ACCOUNTS.find(a=>a.email===email && a.passwordHash===passwordHash);
-    if (!account){
+    const sb = window.__supabase;
+    if (!sb) { showAuthError("Service d'authentification indisponible."); return; }
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error || !data.user) {
       showAuthError("Email ou mot de passe incorrect.");
       return;
     }
-    currentUser = account;
-    saveSession(email);
+    currentUser = userFromSupabase(data.user);
     updateAuthUI();
     closeAuth();
     if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
@@ -1631,8 +1640,17 @@ animate();
   window.handleLogin = handleLogin;
   window.requireAuth = requireAuth;
   window.logout = logout;
-  restoreSession();
-  updateAuthUI();
+  restoreSession().then(() => {
+    updateAuthUI();
+    // Reflète les changements de session (login/logout dans un autre onglet, refresh token…)
+    const sb = window.__supabase;
+    if (sb) {
+      sb.auth.onAuthStateChange((_evt, session) => {
+        currentUser = session && session.user ? userFromSupabase(session.user) : null;
+        updateAuthUI();
+      });
+    }
+  });
 
   // ---------- LEGAL MODAL ----------
   const LEGAL_CONTENT = {
