@@ -1779,7 +1779,7 @@ animate();
   // 1) Insert dans Supabase (table `submissions`) si le client est configuré.
   // 2) Fallback localStorage si l'insert échoue ou si Supabase n'est pas dispo,
   //    pour ne pas perdre les données utilisateur.
-  function recordSubmission(type, summary, data){
+  async function recordSubmission(type, summary, data){
     if (!ALLOWED_SUBMISSION_TYPES.includes(type)) {
       console.warn('recordSubmission: type invalide, ignoré:', type);
       return;
@@ -1802,23 +1802,39 @@ animate();
     const sb = window.__supabase;
     if (!sb) { persistLocal(); return; }
 
-    const userId = (currentUser && (currentUser.id || currentUser.user_id)) || null;
+    // On récupère l'utilisateur depuis la session Supabase (source de vérité
+    // pour auth.uid() côté RLS). Si aucune session valide, on demande la
+    // connexion : la table submissions exige un utilisateur authentifié.
+    let authUser = null;
+    try {
+      const { data: udata } = await sb.auth.getUser();
+      authUser = udata && udata.user ? udata.user : null;
+    } catch(e){ authUser = null; }
+
+    if (!authUser) {
+      console.warn('recordSubmission: utilisateur non authentifié, ouverture de la modale de connexion.');
+      persistLocal();
+      if (typeof openAuth === 'function') openAuth();
+      return;
+    }
+
     const row = {
-      user_id: userId,
+      user_id: authUser.id,
       type,           // 'qualif' | 'statut' | 'inpi' | 'assurance' | 'devis'
       summary,
-      payload: { ...entry, ...(data && typeof data === 'object' ? {} : {}) , _data: data },
+      payload: { ...entry, _data: data },
     };
 
-    sb.from('submissions').insert(row).then(({ error }) => {
+    try {
+      const { error } = await sb.from('submissions').insert(row);
       if (error) {
         console.warn('Supabase insert submissions échoué, fallback localStorage:', error);
         persistLocal();
       }
-    }).catch(err => {
+    } catch (err) {
       console.warn('Supabase insert submissions exception, fallback localStorage:', err);
       persistLocal();
-    });
+    }
   }
 
   function openAdmin(){
