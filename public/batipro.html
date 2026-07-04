@@ -102,6 +102,7 @@
     <button onclick="scrollToId('accueil')" class="font-display text-xl font-bold tracking-tight">Bâti<span style="color:var(--brand)">pro</span></button>
     <div class="hidden items-center gap-1 md:flex" id="nav-links"></div>
     <div class="hidden items-center gap-2 md:flex">
+      <span id="nav-user-status" class="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-semibold text-emerald-700">Connecté</span>
       <button id="nav-logout-btn" onclick="logout()" class="hidden rounded-full border border-black/10 px-3 py-2 text-[13px] font-medium text-neutral-500 hover:bg-neutral-50">Se déconnecter</button>
       <button id="nav-auth-btn" onclick="openQualif()" class="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">
         <span id="nav-auth-label">Inscription</span>
@@ -342,49 +343,50 @@
     </div>
 
     <p id="auth-context" class="mb-4 hidden rounded-xl border border-black/10 bg-neutral-50 px-3 py-2 text-[13px] text-neutral-600">Créez votre compte pour tester votre qualification et suivre votre dossier.</p>
+    <p id="auth-success" class="mb-4 hidden rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-medium text-emerald-800"></p>
     <p id="auth-error" class="mb-4 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium" style="color:#b91c1c"></p>
 
     <!-- Signup form -->
-    <form id="signup-form" class="space-y-4" onsubmit="event.preventDefault(); handleSignup();">
+    <form id="signup-form" class="space-y-4" novalidate onsubmit="event.preventDefault(); handleSignup(event);">
       <h3 class="font-display text-2xl font-bold">Créer votre compte</h3>
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
           <label class="block text-[13px] font-semibold text-neutral-900">Prénom</label>
-          <input type="text" id="signup-prenom" required placeholder="Jean" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <input type="text" id="signup-prenom" autocomplete="given-name" placeholder="Jean" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
         </div>
         <div>
           <label class="block text-[13px] font-semibold text-neutral-900">Nom</label>
-          <input type="text" id="signup-nom" required placeholder="Dupont" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <input type="text" id="signup-nom" autocomplete="family-name" placeholder="Dupont" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
         </div>
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
-        <input type="email" id="signup-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <input type="text" inputmode="email" id="signup-email" autocomplete="email" placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
-        <input type="password" id="signup-password" required minlength="8" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <input type="password" id="signup-password" autocomplete="new-password" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
       <label class="flex items-start gap-2 text-[13px] text-neutral-600">
         <input type="checkbox" id="signup-cgu" class="mt-0.5" style="accent-color:var(--brand)">
         <span>J'accepte les conditions générales d'utilisation et la politique de confidentialité.</span>
       </label>
-      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Créer mon compte</button>
+      <button type="submit" id="signup-submit-btn" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Créer mon compte</button>
       <p class="text-center text-[13px] text-neutral-500">Déjà un compte ? <button type="button" onclick="setAuthMode('login')" class="font-semibold" style="color:var(--brand)">Se connecter</button></p>
     </form>
 
     <!-- Login form -->
-    <form id="login-form" class="hidden space-y-4" onsubmit="event.preventDefault(); handleLogin();">
+    <form id="login-form" class="hidden space-y-4" novalidate onsubmit="event.preventDefault(); handleLogin(event);">
       <h3 class="font-display text-2xl font-bold">Se connecter</h3>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
-        <input type="email" id="login-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <input type="text" inputmode="email" id="login-email" autocomplete="email" placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
-        <input type="password" id="login-password" required class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <input type="password" id="login-password" autocomplete="current-password" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
-      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Se connecter</button>
+      <button type="submit" id="login-submit-btn" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Se connecter</button>
       <p class="text-center text-[13px] text-neutral-500">Pas encore de compte ? <button type="button" onclick="setAuthMode('signup')" class="font-semibold" style="color:var(--brand)">Créer un compte</button></p>
     </form>
   </div>
