@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -102,7 +103,6 @@
     <button onclick="scrollToId('accueil')" class="font-display text-xl font-bold tracking-tight">Bâti<span style="color:var(--brand)">pro</span></button>
     <div class="hidden items-center gap-1 md:flex" id="nav-links"></div>
     <div class="hidden items-center gap-2 md:flex">
-      <span id="nav-user-status" class="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-semibold text-emerald-700">Connecté</span>
       <button id="nav-logout-btn" onclick="logout()" class="hidden rounded-full border border-black/10 px-3 py-2 text-[13px] font-medium text-neutral-500 hover:bg-neutral-50">Se déconnecter</button>
       <button id="nav-auth-btn" onclick="openQualif()" class="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">
         <span id="nav-auth-label">Inscription</span>
@@ -343,50 +343,49 @@
     </div>
 
     <p id="auth-context" class="mb-4 hidden rounded-xl border border-black/10 bg-neutral-50 px-3 py-2 text-[13px] text-neutral-600">Créez votre compte pour tester votre qualification et suivre votre dossier.</p>
-    <p id="auth-success" class="mb-4 hidden rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] font-medium text-emerald-800"></p>
     <p id="auth-error" class="mb-4 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium" style="color:#b91c1c"></p>
 
     <!-- Signup form -->
-    <form id="signup-form" class="space-y-4" novalidate onsubmit="event.preventDefault(); handleSignup(event);">
+    <form id="signup-form" class="space-y-4" onsubmit="event.preventDefault(); handleSignup();">
       <h3 class="font-display text-2xl font-bold">Créer votre compte</h3>
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
           <label class="block text-[13px] font-semibold text-neutral-900">Prénom</label>
-          <input type="text" id="signup-prenom" autocomplete="given-name" placeholder="Jean" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <input type="text" id="signup-prenom" required placeholder="Jean" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
         </div>
         <div>
           <label class="block text-[13px] font-semibold text-neutral-900">Nom</label>
-          <input type="text" id="signup-nom" autocomplete="family-name" placeholder="Dupont" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <input type="text" id="signup-nom" required placeholder="Dupont" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
         </div>
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
-        <input type="text" inputmode="email" id="signup-email" autocomplete="email" placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <input type="email" id="signup-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
-        <input type="password" id="signup-password" autocomplete="new-password" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <input type="password" id="signup-password" required minlength="8" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
       <label class="flex items-start gap-2 text-[13px] text-neutral-600">
-        <input type="checkbox" id="signup-cgu" class="mt-0.5" style="accent-color:var(--brand)">
+        <input type="checkbox" id="signup-cgu" required class="mt-0.5" style="accent-color:var(--brand)">
         <span>J'accepte les conditions générales d'utilisation et la politique de confidentialité.</span>
       </label>
-      <button type="submit" id="signup-submit-btn" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Créer mon compte</button>
+      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Créer mon compte</button>
       <p class="text-center text-[13px] text-neutral-500">Déjà un compte ? <button type="button" onclick="setAuthMode('login')" class="font-semibold" style="color:var(--brand)">Se connecter</button></p>
     </form>
 
     <!-- Login form -->
-    <form id="login-form" class="hidden space-y-4" novalidate onsubmit="event.preventDefault(); handleLogin(event);">
+    <form id="login-form" class="hidden space-y-4" onsubmit="event.preventDefault(); handleLogin();">
       <h3 class="font-display text-2xl font-bold">Se connecter</h3>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
-        <input type="text" inputmode="email" id="login-email" autocomplete="email" placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <input type="email" id="login-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
-        <input type="password" id="login-password" autocomplete="current-password" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <input type="password" id="login-password" required class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
-      <button type="submit" id="login-submit-btn" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Se connecter</button>
+      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Se connecter</button>
       <p class="text-center text-[13px] text-neutral-500">Pas encore de compte ? <button type="button" onclick="setAuthMode('signup')" class="font-semibold" style="color:var(--brand)">Créer un compte</button></p>
     </form>
   </div>
@@ -1448,161 +1447,93 @@ animate();
 
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // ---------- AUTH (Supabase Auth : inscription / connexion) ----------
-  const LS_ACCOUNTS_KEY = 'batipro_accounts';
+  // ---------- AUTH (comptes / connexion) ----------
+  // Authentification réelle via Supabase Auth (table auth.users).
+  // Le prénom/nom sont stockés dans les métadonnées utilisateur (user_metadata)
+  // au moment de l'inscription, puis relus depuis la session Supabase.
   const LS_QUALIF_DRAFT_KEY = 'batipro_qualif_draft'; // déclaré tôt : lu dès le premier rendu de la barre de navigation
-  const LS_SESSION_KEY = 'batipro_session';
 
-  function loadAccounts(){
-    try {
-      const raw = localStorage.getItem(LS_ACCOUNTS_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch(e){
-      console.error('Impossible de lire les comptes stockés :', e);
-      return [];
-    }
-  }
-
-  let ACCOUNTS = loadAccounts();
   let currentUser = null;
   let pendingAfterAuth = null;
 
-  function setCurrentUser(user){
-    currentUser = user || null;
-    window.currentUser = currentUser;
-    console.log('[auth] utilisateur courant mis à jour:', currentUser ? { id: currentUser.id, email: currentUser.email } : null);
-  }
-
-  async function restoreSession(){
-    console.log('[auth] restauration de session: début');
-    const sb = window.__supabase;
-    if (!sb) {
-      console.error('[auth] restauration impossible: client Supabase indisponible');
-      setCurrentUser(null);
-      return;
-    }
-    try {
-      const { data, error } = await sb.auth.getUser();
-      console.log('[auth] restauration de session: réponse reçue', { hasUser: !!(data && data.user), error });
-      if (error) throw error;
-      setCurrentUser(data && data.user ? userFromSupabase(data.user) : null);
-    } catch(e){
-      console.error('[auth] restauration de session: erreur', e);
-      setCurrentUser(null);
-    }
-  }
-
-  function userFromSupabase(u){
-    const md = (u && u.user_metadata) || {};
+  // Construit l'objet currentUser utilisé partout dans le site à partir
+  // d'un objet "user" renvoyé par Supabase Auth.
+  function mapSupabaseUser(user){
+    if (!user) return null;
+    const meta = user.user_metadata || {};
     return {
-      id: u.id,
-      email: u.email,
-      prenom: md.prenom || md.first_name || (u.email ? u.email.split('@')[0] : 'Compte'),
-      nom: md.nom || md.last_name || '',
+      id: user.id,
+      email: user.email,
+      prenom: meta.prenom || meta.first_name || '',
+      nom: meta.nom || meta.last_name || '',
     };
   }
-  function clearSession(){
-    try { localStorage.removeItem(LS_SESSION_KEY); } catch(e){}
-  }
 
-  function getAuthEl(id){ return document.getElementById(id); }
-  function getAuthValue(id){
-    const el = getAuthEl(id);
-    return el && typeof el.value === 'string' ? el.value.trim() : '';
-  }
-  function isValidEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
-
-  function clearAuthMessages(){
-    ['auth-error','auth-success'].forEach(id => {
-      const el = getAuthEl(id);
-      if (!el) return;
-      el.textContent = '';
-      el.classList.add('hidden');
+  // Restaure la session existante au chargement de la page (si l'utilisateur
+  // était déjà connecté lors d'une visite précédente), et écoute les
+  // changements de session (connexion/déconnexion) pour garder currentUser
+  // synchronisé avec la vraie session Supabase.
+  async function restoreSession(){
+    const sb = window.__supabase;
+    if (!sb) return;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      currentUser = mapSupabaseUser(session ? session.user : null);
+      updateAuthUI();
+    } catch(e){
+      console.warn('Impossible de restaurer la session Supabase :', e);
+    }
+    sb.auth.onAuthStateChange((_event, session) => {
+      currentUser = mapSupabaseUser(session ? session.user : null);
+      updateAuthUI();
     });
   }
 
-  function showAuthError(msg){
-    console.error('[auth] message erreur:', msg);
-    const success = getAuthEl('auth-success');
-    if (success) success.classList.add('hidden');
-    const el = getAuthEl('auth-error');
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.remove('hidden');
-  }
-
-  function showAuthSuccess(msg){
-    console.log('[auth] message succès:', msg);
-    const error = getAuthEl('auth-error');
-    if (error) error.classList.add('hidden');
-    const el = getAuthEl('auth-success');
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.remove('hidden');
-  }
-
-  function setAuthLoading(mode, loading){
-    const btn = getAuthEl(mode === 'signup' ? 'signup-submit-btn' : 'login-submit-btn');
-    if (!btn) return;
-    btn.disabled = !!loading;
-    btn.setAttribute('aria-busy', loading ? 'true' : 'false');
-    btn.classList.toggle('opacity-70', !!loading);
-    btn.classList.toggle('cursor-wait', !!loading);
-    btn.textContent = loading ? (mode === 'signup' ? 'Création en cours…' : 'Connexion en cours…') : (mode === 'signup' ? 'Créer mon compte' : 'Se connecter');
-  }
-
   function setAuthMode(mode){
-    console.log('[auth] changement de mode:', mode);
-    const signupForm = getAuthEl('signup-form');
-    const loginForm = getAuthEl('login-form');
-    if (signupForm) signupForm.classList.toggle('hidden', mode !== 'signup');
-    if (loginForm) loginForm.classList.toggle('hidden', mode !== 'login');
+    document.getElementById('signup-form').classList.toggle('hidden', mode!=='signup');
+    document.getElementById('login-form').classList.toggle('hidden', mode!=='login');
     document.querySelectorAll('[data-auth-tab]').forEach(b=>{
       const active = b.getAttribute('data-auth-tab')===mode;
       b.style.background = active ? '#fff' : 'transparent';
       b.style.boxShadow = active ? '0 1px 4px rgba(0,0,0,.08)' : 'none';
       b.style.color = active ? '#0a0a0a' : '#525252';
     });
-    clearAuthMessages();
+    document.getElementById('auth-error').classList.add('hidden');
   }
 
   function openAuth(next){
-    console.log('[auth] ouverture modale', { hasPendingAction: typeof next === 'function' });
-    pendingAfterAuth = typeof next === 'function' ? next : null;
-    const m = getAuthEl('auth-modal');
-    if (!m) { console.error('[auth] modale introuvable'); return; }
+    pendingAfterAuth = next || null;
+    const m = document.getElementById('auth-modal');
     m.classList.remove('hidden');
     m.classList.add('flex');
     document.body.style.overflow='hidden';
-    const context = getAuthEl('auth-context');
-    if (context) context.classList.toggle('hidden', !pendingAfterAuth);
+    document.getElementById('auth-context').classList.toggle('hidden', !pendingAfterAuth);
     setAuthMode('signup');
   }
   function closeAuth(){
-    console.log('[auth] fermeture modale');
-    const m = getAuthEl('auth-modal');
-    if (!m) return;
+    const m = document.getElementById('auth-modal');
     m.classList.add('hidden');
     m.classList.remove('flex');
     document.body.style.overflow='';
     pendingAfterAuth = null;
-    setAuthLoading('signup', false);
-    setAuthLoading('login', false);
   }
 
+  // Porte d'accès : exécute next() si connecté, sinon ouvre la modale de compte.
   function requireAuth(next){
-    console.log('[auth] contrôle accès', { isConnected: !!currentUser });
     if (currentUser) { next(); return; }
     openAuth(next);
   }
 
-  function updateAuthUI(){
-    const label = getAuthEl('nav-auth-label');
-    const btn = getAuthEl('nav-auth-btn');
-    const logoutBtn = getAuthEl('nav-logout-btn');
-    const status = getAuthEl('nav-user-status');
-    if (!label || !btn) return;
+  function showAuthError(msg){
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
 
+  function updateAuthUI(){
+    const label = document.getElementById('nav-auth-label');
+    const btn = document.getElementById('nav-auth-btn');
+    const logoutBtn = document.getElementById('nav-logout-btn');
     if (currentUser){
       const draft = (typeof getQualifDraft === 'function') ? getQualifDraft() : null;
       if (draft){
@@ -1614,185 +1545,83 @@ animate();
       }
       btn.onclick = () => requireAuth(openQualifModal);
       if (logoutBtn) logoutBtn.classList.remove('hidden');
-      if (status) {
-        status.textContent = `Connecté : ${currentUser.prenom || currentUser.email}`;
-        status.classList.remove('hidden');
-      }
     } else {
       label.textContent = 'Inscription';
       btn.classList.remove('animate-pulse');
       btn.onclick = () => openQualif();
       if (logoutBtn) logoutBtn.classList.add('hidden');
-      if (status) status.classList.add('hidden');
     }
-    console.log('[auth] UI mise à jour', { isConnected: !!currentUser });
   }
 
   async function logout(){
-    console.log('[auth] clic déconnexion');
     const sb = window.__supabase;
-    if (sb) {
-      try {
-        const { error } = await sb.auth.signOut();
-        console.log('[auth] réponse signOut reçue', { error });
-        if (error) throw error;
-      } catch(e){ console.error('[auth] erreur signOut', e); }
-    }
-    setCurrentUser(null);
-    clearSession();
+    if (sb) { try { await sb.auth.signOut(); } catch(e){ console.warn('Erreur lors de la déconnexion :', e); } }
+    currentUser = null;
     updateAuthUI();
   }
 
-  function runPendingAfterAuth(){
-    const next = pendingAfterAuth;
-    pendingAfterAuth = null;
-    closeAuth();
-    if (typeof next === 'function') {
-      console.log('[auth] exécution action en attente après connexion');
-      next();
-    }
-  }
+  async function handleSignup(){
+    const prenom = document.getElementById('signup-prenom').value.trim();
+    const nom = document.getElementById('signup-nom').value.trim();
+    const email = document.getElementById('signup-email').value.trim().toLowerCase();
+    const password = document.getElementById('signup-password').value;
 
-  async function handleSignup(event){
-    if (event && typeof event.preventDefault === 'function') event.preventDefault();
-    console.log('[auth] clic/soumission Créer mon compte');
-
-    const prenom = getAuthValue('signup-prenom');
-    const nom = getAuthValue('signup-nom');
-    const email = getAuthValue('signup-email').toLowerCase();
-    const passwordEl = getAuthEl('signup-password');
-    const password = passwordEl ? passwordEl.value : '';
-    const cguEl = getAuthEl('signup-cgu');
-    const cgu = !!(cguEl && cguEl.checked);
-
-    clearAuthMessages();
-
-    if (!prenom || !nom || !email || !password) {
-      showAuthError("Merci de remplir tous les champs.");
-      return;
-    }
-    if (!isValidEmail(email)){
-      showAuthError("Merci de saisir une adresse email valide.");
-      return;
-    }
     if (password.length < 8){
       showAuthError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
-    if (!cgu) {
-      showAuthError("Vous devez accepter les conditions générales d'utilisation.");
-      return;
-    }
     const sb = window.__supabase;
-    if (!sb) {
-      showAuthError("Service d'authentification indisponible. Le client Supabase n'est pas initialisé.");
-      console.error('[auth] signUp annulé: window.__supabase absent');
+    if (!sb){
+      showAuthError("Connexion au serveur indisponible. Réessayez dans un instant.");
       return;
     }
 
-    setAuthLoading('signup', true);
-    try {
-      console.log('[auth] appel supabase.auth.signUp', { email, metadata: { prenom, nom } });
-      const { data, error } = await sb.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { prenom, nom, first_name: prenom, last_name: nom },
-          emailRedirectTo: window.location.origin,
-        },
-      });
-      console.log('[auth] réponse signUp reçue', { hasUser: !!(data && data.user), hasSession: !!(data && data.session), error });
-      if (error) throw error;
-      if (!data || !data.user) throw new Error("Aucun utilisateur retourné par Supabase Auth.");
-
-      if (!data.session) {
-        showAuthSuccess("Compte créé. Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.");
-        setAuthMode('login');
-        showAuthSuccess("Compte créé. Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.");
-        const loginEmail = getAuthEl('login-email');
-        if (loginEmail) loginEmail.value = email;
-        return;
-      }
-
-      setCurrentUser(userFromSupabase(data.user));
-      updateAuthUI();
-      showAuthSuccess("Compte créé, vous êtes connecté.");
-      console.log('[auth] inscription réussie, fermeture modale');
-      runPendingAfterAuth();
-    } catch (error) {
-      console.error('[auth] erreur signUp', error);
-      showAuthError(error && error.message ? error.message : "Impossible de créer le compte.");
-    } finally {
-      setAuthLoading('signup', false);
-    }
-  }
-
-  async function handleLogin(event){
-    if (event && typeof event.preventDefault === 'function') event.preventDefault();
-    console.log('[auth] clic/soumission Se connecter');
-
-    const email = getAuthValue('login-email').toLowerCase();
-    const passwordEl = getAuthEl('login-password');
-    const password = passwordEl ? passwordEl.value : '';
-    clearAuthMessages();
-
-    if (!email || !password){
-      showAuthError("Merci de saisir votre email et votre mot de passe.");
-      return;
-    }
-    if (!isValidEmail(email)){
-      showAuthError("Merci de saisir une adresse email valide.");
-      return;
-    }
-    const sb = window.__supabase;
-    if (!sb) {
-      showAuthError("Service d'authentification indisponible. Le client Supabase n'est pas initialisé.");
-      console.error('[auth] signIn annulé: window.__supabase absent');
-      return;
-    }
-
-    setAuthLoading('login', true);
-    try {
-      console.log('[auth] appel supabase.auth.signInWithPassword', { email });
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      console.log('[auth] réponse signInWithPassword reçue', { hasUser: !!(data && data.user), hasSession: !!(data && data.session), error });
-      if (error) throw error;
-      if (!data || !data.user) throw new Error("Aucun utilisateur retourné par Supabase Auth.");
-
-      setCurrentUser(userFromSupabase(data.user));
-      updateAuthUI();
-      showAuthSuccess("Connexion réussie.");
-      console.log('[auth] connexion réussie, fermeture modale');
-      runPendingAfterAuth();
-    } catch (error) {
-      console.error('[auth] erreur signInWithPassword', error);
-      showAuthError(error && error.message ? error.message : "Email ou mot de passe incorrect.");
-    } finally {
-      setAuthLoading('login', false);
-    }
-  }
-
-  function wireAuthForms(){
-    console.log('[auth] câblage des formulaires');
-    const signupForm = getAuthEl('signup-form');
-    const loginForm = getAuthEl('login-form');
-    const signupBtn = getAuthEl('signup-submit-btn');
-    const loginBtn = getAuthEl('login-submit-btn');
-
-    [signupForm, loginForm].forEach(form => {
-      if (!form) return;
-      form.setAttribute('novalidate', 'novalidate');
-      form.querySelectorAll('[required], [disabled]').forEach(el => {
-        console.log('[auth] suppression attribut bloquant potentiel', { id: el.id, required: el.hasAttribute('required'), disabled: el.hasAttribute('disabled') });
-        el.removeAttribute('required');
-        el.removeAttribute('disabled');
-      });
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password,
+      options: { data: { prenom, nom } },
     });
 
-    if (signupForm) signupForm.onsubmit = handleSignup;
-    if (loginForm) loginForm.onsubmit = handleLogin;
-    if (signupBtn) signupBtn.addEventListener('click', () => console.log('[auth] bouton Créer mon compte cliqué'));
-    if (loginBtn) loginBtn.addEventListener('click', () => console.log('[auth] bouton Se connecter cliqué'));
+    if (error){
+      if (/already registered|already exists/i.test(error.message)) {
+        showAuthError("Un compte existe déjà avec cet email — connectez-vous plutôt.");
+      } else {
+        showAuthError("Erreur lors de la création du compte : " + error.message);
+      }
+      return;
+    }
+
+    if (!data.session){
+      // La confirmation par email est activée côté Supabase : pas de session
+      // immédiate, l'utilisateur doit cliquer sur le lien reçu par email.
+      showAuthError("Compte créé ! Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous.");
+      setAuthMode('login');
+      return;
+    }
+
+    currentUser = mapSupabaseUser(data.user);
+    updateAuthUI();
+    closeAuth();
+    if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
+  }
+
+  async function handleLogin(){
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+    const sb = window.__supabase;
+    if (!sb){
+      showAuthError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error){
+      showAuthError("Email ou mot de passe incorrect.");
+      return;
+    }
+    currentUser = mapSupabaseUser(data.user);
+    updateAuthUI();
+    closeAuth();
+    if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
   }
 
   window.openAuth = openAuth;
@@ -1802,19 +1631,8 @@ animate();
   window.handleLogin = handleLogin;
   window.requireAuth = requireAuth;
   window.logout = logout;
-
-  wireAuthForms();
-  restoreSession().then(() => {
-    updateAuthUI();
-    const sb = window.__supabase;
-    if (sb) {
-      sb.auth.onAuthStateChange((event, session) => {
-        console.log('[auth] événement auth reçu', { event, hasSession: !!session });
-        setCurrentUser(session && session.user ? userFromSupabase(session.user) : null);
-        updateAuthUI();
-      });
-    }
-  });
+  restoreSession();
+  updateAuthUI();
 
   // ---------- LEGAL MODAL ----------
   const LEGAL_CONTENT = {
@@ -1943,7 +1761,7 @@ animate();
   // 1) Insert dans Supabase (table `submissions`) si le client est configuré.
   // 2) Fallback localStorage si l'insert échoue ou si Supabase n'est pas dispo,
   //    pour ne pas perdre les données utilisateur.
-  async function recordSubmission(type, summary, data){
+  function recordSubmission(type, summary, data){
     if (!ALLOWED_SUBMISSION_TYPES.includes(type)) {
       console.warn('recordSubmission: type invalide, ignoré:', type);
       return;
@@ -1966,39 +1784,23 @@ animate();
     const sb = window.__supabase;
     if (!sb) { persistLocal(); return; }
 
-    // On récupère l'utilisateur depuis la session Supabase (source de vérité
-    // pour auth.uid() côté RLS). Si aucune session valide, on demande la
-    // connexion : la table submissions exige un utilisateur authentifié.
-    let authUser = null;
-    try {
-      const { data: udata } = await sb.auth.getUser();
-      authUser = udata && udata.user ? udata.user : null;
-    } catch(e){ authUser = null; }
-
-    if (!authUser) {
-      console.warn('recordSubmission: utilisateur non authentifié, ouverture de la modale de connexion.');
-      persistLocal();
-      if (typeof openAuth === 'function') openAuth();
-      return;
-    }
-
+    const userId = (currentUser && (currentUser.id || currentUser.user_id)) || null;
     const row = {
-      user_id: authUser.id,
+      user_id: userId,
       type,           // 'qualif' | 'statut' | 'inpi' | 'assurance' | 'devis'
       summary,
-      payload: { ...entry, _data: data },
+      payload: { ...entry, ...(data && typeof data === 'object' ? {} : {}) , _data: data },
     };
 
-    try {
-      const { error } = await sb.from('submissions').insert(row);
+    sb.from('submissions').insert(row).then(({ error }) => {
       if (error) {
         console.warn('Supabase insert submissions échoué, fallback localStorage:', error);
         persistLocal();
       }
-    } catch (err) {
+    }).catch(err => {
       console.warn('Supabase insert submissions exception, fallback localStorage:', err);
       persistLocal();
-    }
+    });
   }
 
   function openAdmin(){
@@ -2041,7 +1843,11 @@ animate();
   }
 
   function renderAdminDashboard(){
-    const accounts = loadAccounts();
+    // Les comptes utilisateurs sont désormais gérés par Supabase Auth (et non
+    // plus stockés en localStorage) : consultez Supabase → Authentication →
+    // Users pour la liste réelle des comptes. On ne peut pas la lister ici en
+    // toute sécurité sans exposer une clé secrète côté navigateur.
+    const accounts = [];
     const submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
 
     const byType = { qualif:0, statut:0, inpi:0, assurance:0 };
@@ -2066,10 +1872,8 @@ animate();
       </div>
     `;
 
-    document.getElementById('admin-accounts-body').innerHTML = accounts.length ? accounts.map(a=>{
-      const nb = submissions.filter(s=>s.email===a.email).length;
-      return `<tr class="border-t border-neutral-100"><td class="px-4 py-2.5">${a.prenom} ${a.nom}</td><td class="px-4 py-2.5">${a.email}</td><td class="px-4 py-2.5">${nb}</td></tr>`;
-    }).join('') : `<tr><td class="px-4 py-3 text-neutral-400" colspan="3">Aucun compte pour l'instant.</td></tr>`;
+    document.getElementById('admin-accounts-body').innerHTML =
+      `<tr><td class="px-4 py-3 text-neutral-400" colspan="3">Les comptes sont désormais gérés par Supabase — voir Authentication → Users dans le dashboard Supabase.</td></tr>`;
 
     const typeLabel = { qualif:'Test de qualification', statut:'Simulateur de statut', inpi:'Dossier INPI', assurance:'Assurance décennale' };
     document.getElementById('admin-submissions-body').innerHTML = submissions.length ? submissions.map(s=>`
@@ -2083,7 +1887,10 @@ animate();
   }
 
   function exportAdminData(){
-    const payload = { exportedAt: new Date().toISOString(), accounts: loadAccounts(), submissions: loadSubmissions() };
+    // Les comptes utilisateurs vivent maintenant dans Supabase Auth (plus en
+    // localStorage) : seules les soumissions non-synchronisées (fallback
+    // local) restent exportables depuis ce navigateur.
+    const payload = { exportedAt: new Date().toISOString(), submissions: loadSubmissions() };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2092,13 +1899,8 @@ animate();
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
   function resetAdminData(){
-    if (!confirm('Supprimer définitivement tous les comptes et soumissions stockés sur ce navigateur ? Cette action est irréversible.')) return;
-    localStorage.removeItem(LS_ACCOUNTS_KEY);
+    if (!confirm('Supprimer définitivement les soumissions stockées en fallback sur ce navigateur ? Cette action est irréversible. (Les comptes utilisateurs, gérés par Supabase, ne sont pas affectés.)')) return;
     localStorage.removeItem(LS_SUBMISSIONS_KEY);
-    localStorage.removeItem(LS_SESSION_KEY);
-    ACCOUNTS = [];
-    currentUser = null;
-    updateAuthUI();
     renderAdminDashboard();
   }
 
@@ -2121,7 +1923,7 @@ animate();
   // conservé même si l'utilisateur quitte le site, ferme l'onglet ou éteint
   // son ordinateur) et rattaché à son compte, pour reprendre là où il s'était
   // arrêté. Effacé automatiquement une fois le test validé.
-  // (clé LS_QUALIF_DRAFT_KEY déclarée plus haut, avec LS_ACCOUNTS_KEY, pour
+  // (clé LS_QUALIF_DRAFT_KEY déclarée plus haut, pour
   // être disponible dès le tout premier rendu de la barre de navigation)
 
   function loadQualifDrafts(){
@@ -3259,7 +3061,7 @@ animate();
       em_adresse: [inpi.adresse, inpi.cp, inpi.ville].filter(Boolean).join(', ') || (inpi.adresse||''),
       em_siren: '',
       em_tva: '',
-      em_email: (window.currentUser && window.currentUser.email) || '',
+      em_email: (currentUser && currentUser.email) || '',
       em_tel: inpi.tel || '',
       em_assureur: assur.metier ? `Décennale ${assur.decMin||''} k€ · RC Pro ${assur.rcMin||''} k€` : '',
       em_zone: 'France métropolitaine',
