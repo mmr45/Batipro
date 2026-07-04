@@ -1448,12 +1448,7 @@ animate();
 
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // ---------- AUTH (comptes / connexion) ----------
-  // Persistance via localStorage : les comptes et la session survivent au
-  // rechargement de la page et à la fermeture du navigateur (même appareil).
-  // ⚠️ Ceci reste une démo front-end : les mots de passe sont hachés (SHA-256)
-  // côté navigateur avant stockage, mais un vrai backend (API + hachage
-  // salé côté serveur, ex. bcrypt/argon2) reste indispensable en production.
+  // ---------- AUTH (Supabase Auth : inscription / connexion) ----------
   const LS_ACCOUNTS_KEY = 'batipro_accounts';
   const LS_QUALIF_DRAFT_KEY = 'batipro_qualif_draft'; // déclaré tôt : lu dès le premier rendu de la barre de navigation
   const LS_SESSION_KEY = 'batipro_session';
@@ -1467,99 +1462,147 @@ animate();
       return [];
     }
   }
-  function saveAccounts(accounts){
-    try { localStorage.setItem(LS_ACCOUNTS_KEY, JSON.stringify(accounts)); }
-    catch(e){ console.error('Impossible d\'enregistrer les comptes :', e); }
-  }
-  async function hashPassword(password){
-    const data = new TextEncoder().encode(password);
-    const digest = await crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
-  }
 
   let ACCOUNTS = loadAccounts();
   let currentUser = null;
   let pendingAfterAuth = null;
 
-  // Session = Supabase Auth. On hydrate currentUser depuis la session Supabase
-  // (source de vérité), avec fallback local si Supabase n'est pas configuré.
+  function setCurrentUser(user){
+    currentUser = user || null;
+    window.currentUser = currentUser;
+    console.log('[auth] utilisateur courant mis à jour:', currentUser ? { id: currentUser.id, email: currentUser.email } : null);
+  }
+
   async function restoreSession(){
+    console.log('[auth] restauration de session: début');
     const sb = window.__supabase;
-    if (sb) {
-      try {
-        const { data } = await sb.auth.getUser();
-        if (data && data.user) {
-          currentUser = userFromSupabase(data.user);
-          return;
-        }
-      } catch(e){ /* pas de session */ }
-      currentUser = null;
+    if (!sb) {
+      console.error('[auth] restauration impossible: client Supabase indisponible');
+      setCurrentUser(null);
       return;
     }
-    // Fallback : ancien stockage local (avant Supabase Auth)
     try {
-      const email = localStorage.getItem(LS_SESSION_KEY);
-      if (email) currentUser = ACCOUNTS.find(a=>a.email===email) || null;
-    } catch(e){}
+      const { data, error } = await sb.auth.getUser();
+      console.log('[auth] restauration de session: réponse reçue', { hasUser: !!(data && data.user), error });
+      if (error) throw error;
+      setCurrentUser(data && data.user ? userFromSupabase(data.user) : null);
+    } catch(e){
+      console.error('[auth] restauration de session: erreur', e);
+      setCurrentUser(null);
+    }
   }
+
   function userFromSupabase(u){
     const md = (u && u.user_metadata) || {};
     return {
       id: u.id,
       email: u.email,
-      prenom: md.prenom || (u.email ? u.email.split('@')[0] : 'Compte'),
-      nom: md.nom || '',
+      prenom: md.prenom || md.first_name || (u.email ? u.email.split('@')[0] : 'Compte'),
+      nom: md.nom || md.last_name || '',
     };
   }
   function clearSession(){
     try { localStorage.removeItem(LS_SESSION_KEY); } catch(e){}
   }
 
+  function getAuthEl(id){ return document.getElementById(id); }
+  function getAuthValue(id){
+    const el = getAuthEl(id);
+    return el && typeof el.value === 'string' ? el.value.trim() : '';
+  }
+  function isValidEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+  function clearAuthMessages(){
+    ['auth-error','auth-success'].forEach(id => {
+      const el = getAuthEl(id);
+      if (!el) return;
+      el.textContent = '';
+      el.classList.add('hidden');
+    });
+  }
+
+  function showAuthError(msg){
+    console.error('[auth] message erreur:', msg);
+    const success = getAuthEl('auth-success');
+    if (success) success.classList.add('hidden');
+    const el = getAuthEl('auth-error');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function showAuthSuccess(msg){
+    console.log('[auth] message succès:', msg);
+    const error = getAuthEl('auth-error');
+    if (error) error.classList.add('hidden');
+    const el = getAuthEl('auth-success');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function setAuthLoading(mode, loading){
+    const btn = getAuthEl(mode === 'signup' ? 'signup-submit-btn' : 'login-submit-btn');
+    if (!btn) return;
+    btn.disabled = !!loading;
+    btn.setAttribute('aria-busy', loading ? 'true' : 'false');
+    btn.classList.toggle('opacity-70', !!loading);
+    btn.classList.toggle('cursor-wait', !!loading);
+    btn.textContent = loading ? (mode === 'signup' ? 'Création en cours…' : 'Connexion en cours…') : (mode === 'signup' ? 'Créer mon compte' : 'Se connecter');
+  }
+
   function setAuthMode(mode){
-    document.getElementById('signup-form').classList.toggle('hidden', mode!=='signup');
-    document.getElementById('login-form').classList.toggle('hidden', mode!=='login');
+    console.log('[auth] changement de mode:', mode);
+    const signupForm = getAuthEl('signup-form');
+    const loginForm = getAuthEl('login-form');
+    if (signupForm) signupForm.classList.toggle('hidden', mode !== 'signup');
+    if (loginForm) loginForm.classList.toggle('hidden', mode !== 'login');
     document.querySelectorAll('[data-auth-tab]').forEach(b=>{
       const active = b.getAttribute('data-auth-tab')===mode;
       b.style.background = active ? '#fff' : 'transparent';
       b.style.boxShadow = active ? '0 1px 4px rgba(0,0,0,.08)' : 'none';
       b.style.color = active ? '#0a0a0a' : '#525252';
     });
-    document.getElementById('auth-error').classList.add('hidden');
+    clearAuthMessages();
   }
 
   function openAuth(next){
-    pendingAfterAuth = next || null;
-    const m = document.getElementById('auth-modal');
+    console.log('[auth] ouverture modale', { hasPendingAction: typeof next === 'function' });
+    pendingAfterAuth = typeof next === 'function' ? next : null;
+    const m = getAuthEl('auth-modal');
+    if (!m) { console.error('[auth] modale introuvable'); return; }
     m.classList.remove('hidden');
     m.classList.add('flex');
     document.body.style.overflow='hidden';
-    document.getElementById('auth-context').classList.toggle('hidden', !pendingAfterAuth);
+    const context = getAuthEl('auth-context');
+    if (context) context.classList.toggle('hidden', !pendingAfterAuth);
     setAuthMode('signup');
   }
   function closeAuth(){
-    const m = document.getElementById('auth-modal');
+    console.log('[auth] fermeture modale');
+    const m = getAuthEl('auth-modal');
+    if (!m) return;
     m.classList.add('hidden');
     m.classList.remove('flex');
     document.body.style.overflow='';
     pendingAfterAuth = null;
+    setAuthLoading('signup', false);
+    setAuthLoading('login', false);
   }
 
-  // Porte d'accès : exécute next() si connecté, sinon ouvre la modale de compte.
   function requireAuth(next){
+    console.log('[auth] contrôle accès', { isConnected: !!currentUser });
     if (currentUser) { next(); return; }
     openAuth(next);
   }
 
-  function showAuthError(msg){
-    const el = document.getElementById('auth-error');
-    el.textContent = msg;
-    el.classList.remove('hidden');
-  }
-
   function updateAuthUI(){
-    const label = document.getElementById('nav-auth-label');
-    const btn = document.getElementById('nav-auth-btn');
-    const logoutBtn = document.getElementById('nav-logout-btn');
+    const label = getAuthEl('nav-auth-label');
+    const btn = getAuthEl('nav-auth-btn');
+    const logoutBtn = getAuthEl('nav-logout-btn');
+    const status = getAuthEl('nav-user-status');
+    if (!label || !btn) return;
+
     if (currentUser){
       const draft = (typeof getQualifDraft === 'function') ? getQualifDraft() : null;
       if (draft){
@@ -1571,32 +1614,66 @@ animate();
       }
       btn.onclick = () => requireAuth(openQualifModal);
       if (logoutBtn) logoutBtn.classList.remove('hidden');
+      if (status) {
+        status.textContent = `Connecté : ${currentUser.prenom || currentUser.email}`;
+        status.classList.remove('hidden');
+      }
     } else {
       label.textContent = 'Inscription';
       btn.classList.remove('animate-pulse');
       btn.onclick = () => openQualif();
       if (logoutBtn) logoutBtn.classList.add('hidden');
+      if (status) status.classList.add('hidden');
     }
+    console.log('[auth] UI mise à jour', { isConnected: !!currentUser });
   }
 
   async function logout(){
+    console.log('[auth] clic déconnexion');
     const sb = window.__supabase;
-    if (sb) { try { await sb.auth.signOut(); } catch(e){} }
-    currentUser = null;
+    if (sb) {
+      try {
+        const { error } = await sb.auth.signOut();
+        console.log('[auth] réponse signOut reçue', { error });
+        if (error) throw error;
+      } catch(e){ console.error('[auth] erreur signOut', e); }
+    }
+    setCurrentUser(null);
     clearSession();
     updateAuthUI();
   }
 
-  async function handleSignup(){
-    const prenom = document.getElementById('signup-prenom').value.trim();
-    const nom = document.getElementById('signup-nom').value.trim();
-    const email = document.getElementById('signup-email').value.trim().toLowerCase();
-    const password = document.getElementById('signup-password').value;
+  function runPendingAfterAuth(){
+    const next = pendingAfterAuth;
+    pendingAfterAuth = null;
+    closeAuth();
+    if (typeof next === 'function') {
+      console.log('[auth] exécution action en attente après connexion');
+      next();
+    }
+  }
 
-    const cgu = document.getElementById('signup-cgu').checked;
+  async function handleSignup(event){
+    if (event && typeof event.preventDefault === 'function') event.preventDefault();
+    console.log('[auth] clic/soumission Créer mon compte');
+
+    const prenom = getAuthValue('signup-prenom');
+    const nom = getAuthValue('signup-nom');
+    const email = getAuthValue('signup-email').toLowerCase();
+    const passwordEl = getAuthEl('signup-password');
+    const password = passwordEl ? passwordEl.value : '';
+    const cguEl = getAuthEl('signup-cgu');
+    const cgu = !!(cguEl && cguEl.checked);
+
+    clearAuthMessages();
 
     if (!prenom || !nom || !email || !password) {
-      showAuthError("Merci de remplir tous les champs."); return;
+      showAuthError("Merci de remplir tous les champs.");
+      return;
+    }
+    if (!isValidEmail(email)){
+      showAuthError("Merci de saisir une adresse email valide.");
+      return;
     }
     if (password.length < 8){
       showAuthError("Le mot de passe doit contenir au moins 8 caractères.");
@@ -1607,41 +1684,115 @@ animate();
       return;
     }
     const sb = window.__supabase;
-    if (!sb) { showAuthError("Service d'authentification indisponible."); return; }
+    if (!sb) {
+      showAuthError("Service d'authentification indisponible. Le client Supabase n'est pas initialisé.");
+      console.error('[auth] signUp annulé: window.__supabase absent');
+      return;
+    }
 
-    const { data, error } = await sb.auth.signUp({
-      email, password,
-      options: { data: { prenom, nom }, emailRedirectTo: window.location.origin },
-    });
-    if (error) {
-      showAuthError(error.message || "Impossible de créer le compte.");
-      return;
+    setAuthLoading('signup', true);
+    try {
+      console.log('[auth] appel supabase.auth.signUp', { email, metadata: { prenom, nom } });
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { prenom, nom, first_name: prenom, last_name: nom },
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      console.log('[auth] réponse signUp reçue', { hasUser: !!(data && data.user), hasSession: !!(data && data.session), error });
+      if (error) throw error;
+      if (!data || !data.user) throw new Error("Aucun utilisateur retourné par Supabase Auth.");
+
+      if (!data.session) {
+        showAuthSuccess("Compte créé. Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.");
+        setAuthMode('login');
+        showAuthSuccess("Compte créé. Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.");
+        const loginEmail = getAuthEl('login-email');
+        if (loginEmail) loginEmail.value = email;
+        return;
+      }
+
+      setCurrentUser(userFromSupabase(data.user));
+      updateAuthUI();
+      showAuthSuccess("Compte créé, vous êtes connecté.");
+      console.log('[auth] inscription réussie, fermeture modale');
+      runPendingAfterAuth();
+    } catch (error) {
+      console.error('[auth] erreur signUp', error);
+      showAuthError(error && error.message ? error.message : "Impossible de créer le compte.");
+    } finally {
+      setAuthLoading('signup', false);
     }
-    if (!data.session) {
-      showAuthError("Compte créé. Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.");
-      setAuthMode('login');
-      return;
-    }
-    currentUser = userFromSupabase(data.user);
-    updateAuthUI();
-    closeAuth();
-    if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
   }
 
-  async function handleLogin(){
-    const email = document.getElementById('login-email').value.trim().toLowerCase();
-    const password = document.getElementById('login-password').value;
-    const sb = window.__supabase;
-    if (!sb) { showAuthError("Service d'authentification indisponible."); return; }
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    if (error || !data.user) {
-      showAuthError("Email ou mot de passe incorrect.");
+  async function handleLogin(event){
+    if (event && typeof event.preventDefault === 'function') event.preventDefault();
+    console.log('[auth] clic/soumission Se connecter');
+
+    const email = getAuthValue('login-email').toLowerCase();
+    const passwordEl = getAuthEl('login-password');
+    const password = passwordEl ? passwordEl.value : '';
+    clearAuthMessages();
+
+    if (!email || !password){
+      showAuthError("Merci de saisir votre email et votre mot de passe.");
       return;
     }
-    currentUser = userFromSupabase(data.user);
-    updateAuthUI();
-    closeAuth();
-    if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
+    if (!isValidEmail(email)){
+      showAuthError("Merci de saisir une adresse email valide.");
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb) {
+      showAuthError("Service d'authentification indisponible. Le client Supabase n'est pas initialisé.");
+      console.error('[auth] signIn annulé: window.__supabase absent');
+      return;
+    }
+
+    setAuthLoading('login', true);
+    try {
+      console.log('[auth] appel supabase.auth.signInWithPassword', { email });
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      console.log('[auth] réponse signInWithPassword reçue', { hasUser: !!(data && data.user), hasSession: !!(data && data.session), error });
+      if (error) throw error;
+      if (!data || !data.user) throw new Error("Aucun utilisateur retourné par Supabase Auth.");
+
+      setCurrentUser(userFromSupabase(data.user));
+      updateAuthUI();
+      showAuthSuccess("Connexion réussie.");
+      console.log('[auth] connexion réussie, fermeture modale');
+      runPendingAfterAuth();
+    } catch (error) {
+      console.error('[auth] erreur signInWithPassword', error);
+      showAuthError(error && error.message ? error.message : "Email ou mot de passe incorrect.");
+    } finally {
+      setAuthLoading('login', false);
+    }
+  }
+
+  function wireAuthForms(){
+    console.log('[auth] câblage des formulaires');
+    const signupForm = getAuthEl('signup-form');
+    const loginForm = getAuthEl('login-form');
+    const signupBtn = getAuthEl('signup-submit-btn');
+    const loginBtn = getAuthEl('login-submit-btn');
+
+    [signupForm, loginForm].forEach(form => {
+      if (!form) return;
+      form.setAttribute('novalidate', 'novalidate');
+      form.querySelectorAll('[required], [disabled]').forEach(el => {
+        console.log('[auth] suppression attribut bloquant potentiel', { id: el.id, required: el.hasAttribute('required'), disabled: el.hasAttribute('disabled') });
+        el.removeAttribute('required');
+        el.removeAttribute('disabled');
+      });
+    });
+
+    if (signupForm) signupForm.onsubmit = handleSignup;
+    if (loginForm) loginForm.onsubmit = handleLogin;
+    if (signupBtn) signupBtn.addEventListener('click', () => console.log('[auth] bouton Créer mon compte cliqué'));
+    if (loginBtn) loginBtn.addEventListener('click', () => console.log('[auth] bouton Se connecter cliqué'));
   }
 
   window.openAuth = openAuth;
@@ -1651,13 +1802,15 @@ animate();
   window.handleLogin = handleLogin;
   window.requireAuth = requireAuth;
   window.logout = logout;
+
+  wireAuthForms();
   restoreSession().then(() => {
     updateAuthUI();
-    // Reflète les changements de session (login/logout dans un autre onglet, refresh token…)
     const sb = window.__supabase;
     if (sb) {
-      sb.auth.onAuthStateChange((_evt, session) => {
-        currentUser = session && session.user ? userFromSupabase(session.user) : null;
+      sb.auth.onAuthStateChange((event, session) => {
+        console.log('[auth] événement auth reçu', { event, hasSession: !!session });
+        setCurrentUser(session && session.user ? userFromSupabase(session.user) : null);
         updateAuthUI();
       });
     }
