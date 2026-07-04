@@ -1591,6 +1591,22 @@ animate();
       return;
     }
 
+    // Enregistrement (best-effort) des infos dans la table "profiles", en plus
+    // des métadonnées Supabase Auth. Ne bloque jamais la création de compte :
+    // si ça échoue (colonne manquante, RLS, etc.), on continue quand même.
+    if (data.user){
+      try {
+        const { error: profileError } = await sb.from('profiles').insert({
+          user_id: data.user.id,
+          prenom,
+          nom,
+        });
+        if (profileError) console.warn('Insertion profiles échouée (compte créé quand même) :', profileError);
+      } catch(e){
+        console.warn('Exception insertion profiles (compte créé quand même) :', e);
+      }
+    }
+
     if (!data.session){
       // La confirmation par email est activée côté Supabase : pas de session
       // immédiate, l'utilisateur doit cliquer sur le lien reçu par email.
