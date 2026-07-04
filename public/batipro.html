@@ -385,8 +385,34 @@
         <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
         <input type="password" id="login-password" required class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
+      <div class="flex justify-end">
+        <button type="button" onclick="setAuthMode('forgot')" class="text-[13px] font-semibold" style="color:var(--brand)">Mot de passe oublié ?</button>
+      </div>
       <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Se connecter</button>
       <p class="text-center text-[13px] text-neutral-500">Pas encore de compte ? <button type="button" onclick="setAuthMode('signup')" class="font-semibold" style="color:var(--brand)">Créer un compte</button></p>
+    </form>
+
+    <!-- Forgot password form -->
+    <form id="forgot-form" class="hidden space-y-4" onsubmit="event.preventDefault(); handleForgotPassword();">
+      <h3 class="font-display text-2xl font-bold">Mot de passe oublié</h3>
+      <p class="text-[13px] text-neutral-500">Entrez votre email, nous vous enverrons un lien pour réinitialiser votre mot de passe.</p>
+      <div>
+        <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
+        <input type="email" id="forgot-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+      </div>
+      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Envoyer le lien</button>
+      <p class="text-center text-[13px] text-neutral-500"><button type="button" onclick="setAuthMode('login')" class="font-semibold" style="color:var(--brand)">← Retour à la connexion</button></p>
+    </form>
+
+    <!-- Reset password form (affiché automatiquement après clic sur le lien reçu par email) -->
+    <form id="reset-form" class="hidden space-y-4" onsubmit="event.preventDefault(); handleResetPassword();">
+      <h3 class="font-display text-2xl font-bold">Nouveau mot de passe</h3>
+      <p class="text-[13px] text-neutral-500">Choisissez un nouveau mot de passe pour votre compte.</p>
+      <div>
+        <label class="block text-[13px] font-semibold text-neutral-900">Nouveau mot de passe</label>
+        <input type="password" id="reset-password" required minlength="8" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+      </div>
+      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Mettre à jour le mot de passe</button>
     </form>
   </div>
 </div>
@@ -1486,12 +1512,67 @@ animate();
     sb.auth.onAuthStateChange((_event, session) => {
       currentUser = mapSupabaseUser(session ? session.user : null);
       updateAuthUI();
+      // Quand l'utilisateur clique sur le lien "mot de passe oublié" reçu par
+      // email, Supabase le renvoie ici avec une session temporaire et cet
+      // événement PASSWORD_RECOVERY : on ouvre directement le formulaire de
+      // nouveau mot de passe, sans avoir besoin d'une page séparée.
+      if (_event === 'PASSWORD_RECOVERY') {
+        openAuth();
+        setAuthMode('reset');
+      }
     });
+  }
+
+  // Étape 1 : demande d'envoi de l'email de réinitialisation.
+  async function handleForgotPassword(){
+    const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+    const sb = window.__supabase;
+    if (!sb){
+      showAuthError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      // On redirige vers la page actuelle : le SPA détecte ensuite l'événement
+      // PASSWORD_RECOVERY (ci-dessus) et affiche le formulaire "reset-form".
+      redirectTo: window.location.origin + window.location.pathname,
+    });
+    if (error){
+      showAuthError("Erreur : " + error.message);
+      return;
+    }
+    showAuthError("Email envoyé ! Vérifiez votre boîte de réception (et vos spams).", true);
+  }
+
+  // Étape 2 : l'utilisateur choisit son nouveau mot de passe (après avoir
+  // cliqué sur le lien reçu par email).
+  async function handleResetPassword(){
+    const password = document.getElementById('reset-password').value;
+    if (password.length < 8){
+      showAuthError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb){
+      showAuthError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+    const { error } = await sb.auth.updateUser({ password });
+    if (error){
+      showAuthError("Erreur : " + error.message);
+      return;
+    }
+    showAuthError("Mot de passe mis à jour ! Vous pouvez continuer.", true);
+    setTimeout(() => { closeAuth(); }, 1500);
   }
 
   function setAuthMode(mode){
     document.getElementById('signup-form').classList.toggle('hidden', mode!=='signup');
     document.getElementById('login-form').classList.toggle('hidden', mode!=='login');
+    document.getElementById('forgot-form').classList.toggle('hidden', mode!=='forgot');
+    document.getElementById('reset-form').classList.toggle('hidden', mode!=='reset');
+    // Les onglets "Créer un compte / Se connecter" n'ont pas de sens en mode
+    // mot-de-passe-oublié ou nouveau-mot-de-passe : on les masque.
+    document.getElementById('auth-tabs').classList.toggle('hidden', mode==='forgot' || mode==='reset');
     document.querySelectorAll('[data-auth-tab]').forEach(b=>{
       const active = b.getAttribute('data-auth-tab')===mode;
       b.style.background = active ? '#fff' : 'transparent';
@@ -1524,10 +1605,19 @@ animate();
     openAuth(next);
   }
 
-  function showAuthError(msg){
+  function showAuthError(msg, isSuccess){
     const el = document.getElementById('auth-error');
     el.textContent = msg;
     el.classList.remove('hidden');
+    if (isSuccess){
+      el.classList.remove('border-red-200', 'bg-red-50');
+      el.classList.add('border-green-200', 'bg-green-50');
+      el.style.color = '#15803d';
+    } else {
+      el.classList.remove('border-green-200', 'bg-green-50');
+      el.classList.add('border-red-200', 'bg-red-50');
+      el.style.color = '#b91c1c';
+    }
   }
 
   function updateAuthUI(){
@@ -1645,6 +1735,8 @@ animate();
   window.setAuthMode = setAuthMode;
   window.handleSignup = handleSignup;
   window.handleLogin = handleLogin;
+  window.handleForgotPassword = handleForgotPassword;
+  window.handleResetPassword = handleResetPassword;
   window.requireAuth = requireAuth;
   window.logout = logout;
   restoreSession();
