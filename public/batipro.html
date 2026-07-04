@@ -366,7 +366,7 @@
         <input type="password" id="signup-password" required minlength="8" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
       <label class="flex items-start gap-2 text-[13px] text-neutral-600">
-        <input type="checkbox" id="signup-cgu" required class="mt-0.5" style="accent-color:var(--brand)">
+        <input type="checkbox" id="signup-cgu" class="mt-0.5" style="accent-color:var(--brand)">
         <span>J'accepte les conditions générales d'utilisation et la politique de confidentialité.</span>
       </label>
       <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Créer mon compte</button>
@@ -1591,8 +1591,17 @@ animate();
     const email = document.getElementById('signup-email').value.trim().toLowerCase();
     const password = document.getElementById('signup-password').value;
 
+    const cgu = document.getElementById('signup-cgu').checked;
+
+    if (!prenom || !nom || !email || !password) {
+      showAuthError("Merci de remplir tous les champs."); return;
+    }
     if (password.length < 8){
       showAuthError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+    if (!cgu) {
+      showAuthError("Vous devez accepter les conditions générales d'utilisation.");
       return;
     }
     const sb = window.__supabase;
