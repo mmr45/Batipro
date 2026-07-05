@@ -132,8 +132,8 @@
     <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8">
       <div class="flex flex-col" data-reveal="left">
         <div class="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-black/5 glass px-3 py-1.5">
-          <div class="flex items-center gap-0.5" id="stars"></div>
-          <span class="text-[13px] font-medium text-neutral-700">Noté 4.9/5 par plus de 2 700 artisans</span>
+          <span class="grid h-2 w-2 place-items-center rounded-full" style="background:#10b981"></span>
+          <span class="text-[13px] font-medium text-neutral-700">Nouveau — rejoignez les premiers artisans à tester Bâtipro</span>
         </div>
         <h1 class="font-display font-bold text-neutral-950" style="font-size:clamp(44px,6vw,75px);line-height:1.05">Lancez votre boîte du bâtiment, sans friction.</h1>
         <p class="mt-6 max-w-xl text-neutral-600" style="font-size:18px;line-height:1.5">De la vérification de qualification au premier devis conforme : un parcours guidé, automatisé et 100% en ligne pour créer votre entreprise d'artisan en toute sérénité.</p>
@@ -204,6 +204,87 @@
         <div class="relative overflow-hidden rounded-3xl border border-black/5 p-10 glass" style="background:linear-gradient(135deg, rgba(0,132,255,.08), rgba(255,255,255,.7), rgba(255,128,30,.08))">
           <div class="grid grid-cols-2 gap-6" id="stats"></div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXEMPLE CONCRET -->
+  <section id="exemple" class="scroll-mt-28 py-28">
+    <div class="max-w-2xl" data-reveal>
+      <p class="text-sm font-medium uppercase tracking-[0.15em]" style="color:var(--brand)">Exemple concret</p>
+      <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Voici ce que vous obtenez, en vrai.</h2>
+      <p class="mt-4 text-neutral-600">Pas de promesse abstraite : un aperçu réel du devis généré par l'outil, avec les mentions légales BTP intégrées automatiquement.</p>
+    </div>
+
+    <div class="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-5 lg:items-center">
+      <!-- Mockup devis -->
+      <div class="lg:col-span-3" data-reveal="left">
+        <div class="relative overflow-hidden rounded-3xl border border-black/10 bg-white p-6 shadow-2xl shadow-black/5 md:p-9">
+          <div class="flex items-start justify-between border-b border-neutral-100 pb-5">
+            <div>
+              <div class="font-display text-lg font-bold">DEVIS</div>
+              <div class="mt-1 text-[12px] text-neutral-500">N° DEV-2026-04821 · Émis le 05/07/2026</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[13px] font-semibold text-neutral-900">Dupont Rénovation</div>
+              <div class="text-[12px] text-neutral-500">SIRET 123 456 789 00012</div>
+            </div>
+          </div>
+          <div class="mt-5 grid grid-cols-2 gap-4 text-[12.5px]">
+            <div class="rounded-xl bg-neutral-50 p-3">
+              <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Client</div>
+              <div class="mt-1 text-neutral-800">Mme Martin<br>5 av. de la République, 75011 Paris</div>
+            </div>
+            <div class="rounded-xl bg-neutral-50 p-3">
+              <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Chantier</div>
+              <div class="mt-1 text-neutral-800">Rénovation salle de bains — 6 m²<br>TVA 10% (logement &gt; 2 ans)</div>
+            </div>
+          </div>
+          <table class="mt-5 w-full text-[12.5px]">
+            <thead class="text-left text-[10.5px] uppercase tracking-wide text-neutral-400">
+              <tr><th class="pb-2">Désignation</th><th class="pb-2 text-right">Qté</th><th class="pb-2 text-right">PU HT</th><th class="pb-2 text-right">Total HT</th></tr>
+            </thead>
+            <tbody class="text-neutral-700">
+              <tr class="border-t border-neutral-100"><td class="py-2">Dépose ancien équipement</td><td class="py-2 text-right">1 forfait</td><td class="py-2 text-right">180,00 €</td><td class="py-2 text-right">180,00 €</td></tr>
+              <tr class="border-t border-neutral-100"><td class="py-2">Pose (main d'œuvre)</td><td class="py-2 text-right">16 h</td><td class="py-2 text-right">55,00 €</td><td class="py-2 text-right">880,00 €</td></tr>
+              <tr class="border-t border-neutral-100"><td class="py-2">Matériaux et fournitures</td><td class="py-2 text-right">1 forfait</td><td class="py-2 text-right">640,00 €</td><td class="py-2 text-right">640,00 €</td></tr>
+            </tbody>
+          </table>
+          <div class="mt-5 flex justify-end">
+            <div class="w-full max-w-[220px] space-y-1.5 text-[13px]">
+              <div class="flex justify-between text-neutral-600"><span>Total HT</span><span>1 700,00 €</span></div>
+              <div class="flex justify-between text-neutral-600"><span>TVA 10%</span><span>170,00 €</span></div>
+              <div class="flex justify-between border-t border-neutral-200 pt-1.5 font-semibold text-neutral-900"><span>Total TTC</span><span>1 870,00 €</span></div>
+            </div>
+          </div>
+          <div class="mt-5 rounded-xl bg-neutral-50 p-3 text-[11px] leading-relaxed text-neutral-500">
+            Garantie décennale — Police n° 000123, MAAF Pro · Pénalités de retard : taux BCE + 10 pts · Médiation de la consommation : art. L612-1 C. conso. · Devis valable 30 jours.
+          </div>
+        </div>
+      </div>
+
+      <!-- Points clés -->
+      <div class="lg:col-span-2" data-reveal="right">
+        <ul class="space-y-5">
+          <li class="flex gap-3">
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full" style="background:rgba(0,132,255,.1); color:var(--brand)"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="text-[14px] text-neutral-700"><b>Mentions légales BTP automatiques</b> — décennale, RC Pro, pénalités de retard, médiation : rien à rédiger vous-même.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full" style="background:rgba(0,132,255,.1); color:var(--brand)"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="text-[14px] text-neutral-700"><b>TVA calculée automatiquement</b> selon la nature des travaux (5,5% / 10% / 20%).</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full" style="background:rgba(0,132,255,.1); color:var(--brand)"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="text-[14px] text-neutral-700"><b>Export PDF prêt à envoyer</b> à votre client, en moins de 3 minutes.</span>
+          </li>
+        </ul>
+        <button onclick="openQualif()" class="btn-primary group mt-8 inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.03]">
+          <span class="text-[15px] font-semibold">Essayer gratuitement</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45" style="color:var(--brand)">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+          </span>
+        </button>
       </div>
     </div>
   </section>
@@ -328,9 +409,12 @@
     <div id="admin-login">
       <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(10,10,10,.06);color:#0a0a0a">Accès restreint</span>
       <h3 class="mt-4 font-display text-3xl font-bold">Dashboard créateur</h3>
-     <p class="mt-2 text-[14px] text-neutral-600">Réservé à l'administrateur de Bâtipro. Connectez-vous avec votre compte, puis vérifiez votre accès.</p>
-<button onclick="checkAdminAccess();" class="btn-primary mt-6 rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Vérifier mon accès admin</button>
-<p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium" style="color:#b91c1c"></p>
+      <p class="mt-2 text-[14px] text-neutral-600">Réservé à l'administrateur de Bâtipro. Saisissez le mot de passe admin pour continuer.</p>
+      <form class="mt-6 flex flex-col gap-3 sm:flex-row" onsubmit="event.preventDefault(); checkAdminPassword();">
+        <input type="password" id="admin-password" placeholder="Mot de passe admin" class="flex-1 rounded-xl border border-black/10 px-4 py-3 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <button type="submit" class="btn-primary rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Entrer</button>
+      </form>
+      <p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium" style="color:#b91c1c">Mot de passe incorrect.</p>
     </div>
 
     <!-- Dashboard -->
@@ -1409,10 +1493,10 @@ animate();
   ];
 
   const STATS = [
-    { k:"2 700+", v:"artisans accompagnés" },
-    { k:"48 h", v:"délai moyen jusqu'au dépôt INPI" },
-    { k:"6", v:"modules intégrés" },
+    { k:"5", v:"modules intégrés" },
     { k:"0", v:"coup de fil requis" },
+    { k:"100%", v:"conforme Guichet Unique INPI" },
+    { k:"UE", v:"hébergement RGPD" },
   ];
 
   const PRICING = [
@@ -1454,7 +1538,7 @@ animate();
   document.getElementById('footer-nav').innerHTML = NAV.map(n=>`<button onclick="scrollToId('${n.id}')" class="hover:text-neutral-900">${n.label}</button>`).join('');
 
   // Stars
-  document.getElementById('stars').innerHTML = Array.from({length:5}).map(()=>iconFilled('star','h-3.5 w-3.5','#FF801E')).join('');
+  // (badge étoiles retiré — plus de preuve sociale fictive)
 
   // Marquee
   const brands = ["CAPEB","FFB","Qualibat","INPI","Urssaf","ORIAS","CMA"];
@@ -2122,7 +2206,11 @@ animate();
   window.closeLegal = closeLegal;
 
   // ---------- ADMIN DASHBOARD (créateur uniquement) ----------
-  // Accès protégé par Supabase Auth + table `app_admins` (voir checkAdminAccess ci-dessous).
+  // ⚠️ Protection uniquement côté navigateur (mot de passe visible dans le
+  // code source si quelqu'un l'inspecte). Suffisant pour un usage perso tant
+  // qu'il n'y a pas de backend, mais À CHANGER avant toute mise en ligne,
+  // et à remplacer par une vraie authentification serveur dès que possible.
+  const ADMIN_PASSWORD = '56?@87hjdHG/:%ksye98'; // <-- changez ce mot de passe
   const LS_SUBMISSIONS_KEY = 'batipro_submissions';
   const LS_ADMIN_SESSION_KEY = 'batipro_admin_session'; // sessionStorage : expire à la fermeture de l'onglet
 
@@ -2192,7 +2280,7 @@ animate();
     const isAuthed = sessionStorage.getItem(LS_ADMIN_SESSION_KEY) === 'ok';
     document.getElementById('admin-login').classList.toggle('hidden', isAuthed);
     document.getElementById('admin-dashboard').classList.toggle('hidden', !isAuthed);
-    if (isAuthed) await renderAdminDashboard();
+if (isAuthed) await renderAdminDashboard();
   }
 
   // Donne (ou confirme) l'accès Pro au compte actuellement connecté sur le
@@ -2247,47 +2335,20 @@ animate();
     m.classList.add('hidden');
     m.classList.remove('flex');
     document.body.style.overflow = '';
-    
+    document.getElementById('admin-password').value = '';
     document.getElementById('admin-login-error').classList.add('hidden');
   }
-  async function checkAdminAccess(){
-  const errorEl = document.getElementById('admin-login-error');
-  errorEl.classList.remove('hidden');
-  errorEl.style.color = '#0a0a0a';
-  errorEl.textContent = 'Vérification en cours...';
-
-  try {
-    const { data: sessionData } = await window.__supabase.auth.getSession();
-    const session = sessionData?.session;
-
-    if (!session) {
-      errorEl.style.color = '#b91c1c';
-      errorEl.textContent = "Vous devez d'abord vous connecter avec votre compte.";
-      return;
+  function checkAdminPassword(){
+    const val = document.getElementById('admin-password').value;
+    if (val === ADMIN_PASSWORD){
+      sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
+      document.getElementById('admin-login').classList.add('hidden');cd batipro-backend\supabase\batiproo
+      document.getElementById('admin-dashboard').classList.remove('hidden');
+      renderAdminDashboard();
+    } else {
+      document.getElementById('admin-login-error').classList.remove('hidden');
     }
-
-    const { data, error } = await window.__supabase
-      .from('app_admins')
-      .select('user_id')
-      .eq('user_id', session.user.id)
-      .maybeSingle();
-
-    if (error || !data) {
-      errorEl.style.color = '#b91c1c';
-      errorEl.textContent = "Accès refusé : ce compte n'est pas administrateur.";
-      return;
-    }
-
-    sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
-    document.getElementById('admin-login').classList.add('hidden');
-    document.getElementById('admin-dashboard').classList.remove('hidden');
-    await renderAdminDashboard();
-  } catch(e) {
-    errorEl.style.color = '#b91c1c';
-    errorEl.textContent = 'Erreur de vérification. Réessayez.';
-    console.error('checkAdminAccess error:', e);
   }
-}
   // Déconnexion du dashboard admin : efface la session admin (le mot de passe
   // sera de nouveau demandé) et referme le dashboard.
   function logoutAdmin(){
@@ -2305,24 +2366,24 @@ animate();
     // toute sécurité sans exposer une clé secrète côté navigateur.
     const accounts = [];
     let submissions = [];
-    const sb = window.__supabase;
-    if (sb) {
-      const { data, error } = await sb.from('submissions').select('*').order('created_at', { ascending: false });
-      if (error) {
-        console.warn('renderAdminDashboard: lecture Supabase échouée, fallback localStorage:', error);
-        submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
-      } else {
-        submissions = (data || []).map(row => ({
-          date: row.created_at,
-          email: row.payload?.email || null,
-          nom: row.payload?.nom || 'Inconnu',
-          type: row.type,
-          summary: row.summary,
-        }));
-      }
-    } else {
-      submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
-    }
+const sb = window.__supabase;
+if (sb) {
+  const { data, error } = await sb.from('submissions').select('*').order('created_at', { ascending: false });
+  if (error) {
+    console.warn('renderAdminDashboard: lecture Supabase échouée, fallback localStorage:', error);
+    submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+  } else {
+    submissions = (data || []).map(row => ({
+      date: row.created_at,
+      email: row.payload?.email || null,
+      nom: row.payload?.nom || 'Inconnu',
+      type: row.type,
+      summary: row.summary,
+    }));
+  }
+} else {
+  submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+}
 
     // Bloc "Mon accès" : montre le compte actuellement connecté sur le site
     // (celui qui recevra l'accès Pro si on clique sur le bouton).
@@ -2385,15 +2446,14 @@ animate();
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
-  async function resetAdminData(){
-    if (!confirm('Supprimer définitivement les soumissions stockées en fallback sur ce navigateur ? Cette action est irréversible. (Les comptes utilisateurs, gérés par Supabase, ne sont pas affectés.)')) return;
+async function resetAdminData(){    if (!confirm('Supprimer définitivement les soumissions stockées en fallback sur ce navigateur ? Cette action est irréversible. (Les comptes utilisateurs, gérés par Supabase, ne sont pas affectés.)')) return;
     localStorage.removeItem(LS_SUBMISSIONS_KEY);
-   await renderAdminDashboard();
+    await renderAdminDashboard();
   }
 
   window.openAdmin = openAdmin;
   window.closeAdmin = closeAdmin;
-  window.checkAdminAccess = checkAdminAccess;
+  window.checkAdminPassword = checkAdminPassword;
   window.exportAdminData = exportAdminData;
   window.resetAdminData = resetAdminData;
   window.logoutAdmin = logoutAdmin;
