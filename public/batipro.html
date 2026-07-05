@@ -1491,7 +1491,19 @@ animate();
       const url = data && (data.url || data.checkoutUrl);
       if (!url) throw new Error("Réponse inattendue du serveur de paiement (pas d'URL reçue).");
 
-      window.location.href = url;
+      // Le site est chargé à l'intérieur d'un <iframe> (structure Lovable) :
+      // Stripe refuse de s'afficher dans un cadre imbriqué et exige une
+      // navigation au niveau supérieur de la fenêtre. window.top cible la
+      // fenêtre du navigateur elle-même plutôt que l'iframe intérieur.
+      // (Si le site est un jour servi sans iframe, window.top === window et
+      // ce code continue de fonctionner normalement.)
+      try {
+        window.top.location.href = url;
+      } catch(_e){
+        // Cas rare : iframe cross-origin où l'accès à window.top est bloqué
+        // par le navigateur. On retente une navigation classique en dernier recours.
+        window.location.href = url;
+      }
     } catch(e){
       console.error('Erreur création session de paiement :', e);
       alert("Une erreur est survenue lors de la préparation du paiement. Réessayez dans un instant.\n\n(" + (e.message || e) + ")");
