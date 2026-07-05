@@ -2342,7 +2342,7 @@ if (isAuthed) await renderAdminDashboard();
     const val = document.getElementById('admin-password').value;
     if (val === ADMIN_PASSWORD){
       sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
-      document.getElementById('admin-login').classList.add('hidden');cd batipro-backend\supabase\batiproo
+      document.getElementById('admin-login').classList.add('hidden');
       document.getElementById('admin-dashboard').classList.remove('hidden');
       renderAdminDashboard();
     } else {
