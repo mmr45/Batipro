@@ -209,6 +209,37 @@
     <div class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3" id="pricing"></div>
   </section>
 
+  <!-- Espace client -->
+  <section id="espace-client" class="hidden scroll-mt-28 py-28">
+    <div class="mx-auto max-w-2xl px-6">
+      <h2 class="font-display text-3xl font-bold md:text-4xl">Mon espace</h2>
+
+      <div class="mt-10 rounded-2xl border border-neutral-200 p-6 space-y-6">
+        <div>
+          <p class="text-sm text-neutral-500">Nom</p>
+          <p id="espace-nom" class="font-medium">—</p>
+        </div>
+        <div>
+          <p class="text-sm text-neutral-500">Email</p>
+          <p id="espace-email" class="font-medium">—</p>
+        </div>
+        <div>
+          <p class="text-sm text-neutral-500">Abonnement</p>
+          <p id="espace-statut" class="font-medium">Chargement…</p>
+        </div>
+
+        <button
+          id="espace-manage-btn"
+          data-manage-subscription-btn
+          onclick="openBillingPortal()"
+          class="hidden inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait"
+          style="background:#0a0a0a">
+          Gérer mon abonnement
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section id="inscription" class="scroll-mt-28 pb-28">
     <div data-reveal class="relative overflow-hidden rounded-[32px] border border-black/5 bg-neutral-950 p-10 text-white md:p-16">
@@ -1705,11 +1736,12 @@ animate();
       if (draft){
         label.textContent = '↩ Reprendre mon test de qualification';
         btn.classList.add('animate-pulse');
+        btn.onclick = () => requireAuth(openQualifModal);
       } else {
         label.textContent = `${currentUser.prenom} — Mon espace`;
         btn.classList.remove('animate-pulse');
+        btn.onclick = () => requireAuth(goToEspaceClient);
       }
-      btn.onclick = () => requireAuth(openQualifModal);
       if (logoutBtn) logoutBtn.classList.remove('hidden');
     } else {
       label.textContent = 'Inscription';
@@ -1724,6 +1756,98 @@ animate();
     if (sb) { try { await sb.auth.signOut(); } catch(e){ console.warn('Erreur lors de la déconnexion :', e); } }
     currentUser = null;
     updateAuthUI();
+  }
+
+  // ---------- Espace client ----------
+  function goToEspaceClient(){
+    document.getElementById('espace-client').scrollIntoView({ behavior: 'smooth' });
+    loadEspaceClient();
+  }
+
+  async function loadEspaceClient(){
+    const section = document.getElementById('espace-client');
+    if (!currentUser){ section.classList.add('hidden'); return; }
+
+    section.classList.remove('hidden');
+    document.getElementById('espace-nom').textContent = `${currentUser.prenom} ${currentUser.nom}`;
+    document.getElementById('espace-email').textContent = currentUser.email;
+
+    const statutEl = document.getElementById('espace-statut');
+    const manageBtn = document.getElementById('espace-manage-btn');
+    statutEl.textContent = 'Chargement…';
+    manageBtn.classList.add('hidden');
+
+    const sb = window.__supabase;
+    if (!sb){ statutEl.textContent = 'Indisponible pour le moment.'; return; }
+
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+
+    if (error){
+      console.error('Erreur chargement entitlements :', error);
+      statutEl.textContent = 'Impossible de charger le statut.';
+      return;
+    }
+
+    const hasPro = (data || []).some(e => e.product_key === 'pro');
+    const hasDossier = (data || []).some(e => e.product_key === 'dossier');
+
+    if (hasPro){
+      statutEl.textContent = 'Abonnement Pro actif (19 €/mois)';
+      manageBtn.classList.remove('hidden'); // abonnement récurrent : gérable via le portail Stripe
+    } else if (hasDossier){
+      statutEl.textContent = 'Dossier Lancement acheté (paiement unique)';
+      // pas de bouton "gérer" : ce n'est pas un abonnement récurrent
+    } else {
+      statutEl.textContent = 'Aucun abonnement actif — offre Gratuite';
+    }
+  }
+
+  // Convention attendue côté fonction Supabase "create-portal-session" :
+  //   - reçoit juste le token d'auth de l'utilisateur (pas de body nécessaire)
+  //   - répond avec : { url: "https://billing.stripe.com/..." }
+  async function openBillingPortal(){
+    const sb = window.__supabase;
+    if (!sb){
+      alert("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+
+    const btn = document.getElementById('espace-manage-btn');
+    const originalHTML = btn ? btn.innerHTML : null;
+    if (btn){ btn.disabled = true; btn.textContent = 'Ouverture…'; }
+
+    try {
+      const { data, error } = await sb.functions.invoke('create-portal-session');
+
+      if (error) {
+        let detail = error.message;
+        try {
+          if (error.context && typeof error.context.json === 'function'){
+            const body = await error.context.clone().json();
+            if (body && body.error) detail = body.error;
+          }
+        } catch(_e){ /* corps non-JSON */ }
+        throw new Error(detail);
+      }
+
+      const url = data && data.url;
+      if (!url) throw new Error("Réponse inattendue du serveur (pas d'URL reçue).");
+
+      try {
+        window.top.location.href = url;
+      } catch(_e){
+        window.location.href = url;
+      }
+    } catch(e){
+      console.error('Erreur ouverture portail client :', e);
+      alert("Impossible d'ouvrir la gestion d'abonnement pour le moment.\n\n(" + (e.message || e) + ")");
+      if (btn){ btn.disabled = false; btn.innerHTML = originalHTML; }
+    }
   }
 
   async function handleSignup(){
