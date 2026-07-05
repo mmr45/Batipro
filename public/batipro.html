@@ -2187,7 +2187,7 @@ animate();
     });
   }
 
-  function openAdmin(){
+  async function openAdmin(){
     const m = document.getElementById('admin-modal');
     m.classList.remove('hidden');
     m.classList.add('flex');
@@ -2195,7 +2195,7 @@ animate();
     const isAuthed = sessionStorage.getItem(LS_ADMIN_SESSION_KEY) === 'ok';
     document.getElementById('admin-login').classList.toggle('hidden', isAuthed);
     document.getElementById('admin-dashboard').classList.toggle('hidden', !isAuthed);
-    if (isAuthed) renderAdminDashboard();
+    if (isAuthed) await renderAdminDashboard();
   }
 
   // Donne (ou confirme) l'accès Pro au compte actuellement connecté sur le
@@ -2284,7 +2284,7 @@ animate();
     sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
     document.getElementById('admin-login').classList.add('hidden');
     document.getElementById('admin-dashboard').classList.remove('hidden');
-    renderAdminDashboard();
+    await renderAdminDashboard();
   } catch(e) {
     errorEl.style.color = '#b91c1c';
     errorEl.textContent = 'Erreur de vérification. Réessayez.';
@@ -2301,13 +2301,31 @@ animate();
     closeAdmin();
   }
 
-  function renderAdminDashboard(){
+  async function renderAdminDashboard(){
     // Les comptes utilisateurs sont désormais gérés par Supabase Auth (et non
     // plus stockés en localStorage) : consultez Supabase → Authentication →
     // Users pour la liste réelle des comptes. On ne peut pas la lister ici en
     // toute sécurité sans exposer une clé secrète côté navigateur.
     const accounts = [];
-    const submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+    let submissions = [];
+    const sb = window.__supabase;
+    if (sb) {
+      const { data, error } = await sb.from('submissions').select('*').order('created_at', { ascending: false });
+      if (error) {
+        console.warn('renderAdminDashboard: lecture Supabase échouée, fallback localStorage:', error);
+        submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+      } else {
+        submissions = (data || []).map(row => ({
+          date: row.created_at,
+          email: row.payload?.email || null,
+          nom: row.payload?.nom || 'Inconnu',
+          type: row.type,
+          summary: row.summary,
+        }));
+      }
+    } else {
+      submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+    }
 
     // Bloc "Mon accès" : montre le compte actuellement connecté sur le site
     // (celui qui recevra l'accès Pro si on clique sur le bouton).
@@ -2370,10 +2388,10 @@ animate();
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
-  function resetAdminData(){
+  async function resetAdminData(){
     if (!confirm('Supprimer définitivement les soumissions stockées en fallback sur ce navigateur ? Cette action est irréversible. (Les comptes utilisateurs, gérés par Supabase, ne sont pas affectés.)')) return;
     localStorage.removeItem(LS_SUBMISSIONS_KEY);
-    renderAdminDashboard();
+   await renderAdminDashboard();
   }
 
   window.openAdmin = openAdmin;
