@@ -2353,7 +2353,7 @@ animate();
   window.handleResetPassword = handleResetPassword;
   window.requireAuth = requireAuth;
   window.logout = logout;
-  restoreSession();
+  const sessionReady = restoreSession();
   updateAuthUI();
 
   // ---------- LEGAL MODAL ----------
@@ -2484,6 +2484,11 @@ animate();
   // qu'il n'y a pas de backend, mais À CHANGER avant toute mise en ligne,
   // et à remplacer par une vraie authentification serveur dès que possible.
   const ADMIN_PASSWORD = '56?@87hjdHG/:%ksye98'; // <-- changez ce mot de passe
+  // Comptes Supabase considérés comme admin : si l'utilisateur connecté sur le
+  // site a l'un de ces emails, l'accès au dashboard se fait en 1 clic, sans
+  // redemander le mot de passe (qui reste un fallback si l'email ne correspond
+  // pas ou si l'utilisateur n'est pas connecté).
+  const ADMIN_EMAILS = ['osman874pro@gmail.com'];
   const LS_SUBMISSIONS_KEY = 'batipro_submissions';
   const LS_ADMIN_SESSION_KEY = 'batipro_admin_session'; // sessionStorage : expire à la fermeture de l'onglet
 
@@ -2550,7 +2555,13 @@ animate();
     m.classList.remove('hidden');
     m.classList.add('flex');
     document.body.style.overflow = 'hidden';
-    const isAuthed = sessionStorage.getItem(LS_ADMIN_SESSION_KEY) === 'ok';
+    // Accès en 1 clic : si le compte Supabase actuellement connecté sur le
+    // site est un email admin reconnu, on saute l'écran de mot de passe.
+    const isRecognizedAdmin = !!(currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase()));
+    if (isRecognizedAdmin) {
+      sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
+    }
+    const isAuthed = isRecognizedAdmin || sessionStorage.getItem(LS_ADMIN_SESSION_KEY) === 'ok';
     document.getElementById('admin-login').classList.toggle('hidden', isAuthed);
     document.getElementById('admin-dashboard').classList.toggle('hidden', !isAuthed);
 if (isAuthed) await renderAdminDashboard();
@@ -2736,7 +2747,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   window.addEventListener('keydown', e=>{
     if (e.ctrlKey && e.altKey && e.key.toLowerCase()==='a'){ e.preventDefault(); openAdmin(); }
   });
-  if (window.location.hash === '#admin') openAdmin();
+  if (window.location.hash === '#admin') sessionReady.then(openAdmin);
 
   // ---------- QUALIFICATION MODAL ----------
   // Brouillon du test de qualification : enregistré dans localStorage (donc
