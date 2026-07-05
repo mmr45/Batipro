@@ -1560,7 +1560,7 @@ animate();
   }
 
   // Qualification form population
-  document.getElementById('metier').innerHTML = METIERS.map(m=>`<option value="${m.v}">${m.l}${m.reglemente?' — activité réglementée':''}</option>`).join('');
+  document.getElementById('metier').innerHTML = '<option value="" selected>Choisissez votre métier…</option>' + METIERS.map(m=>`<option value="${m.v}">${m.l}${m.reglemente?' — activité réglementée':''}</option>`).join('');
   document.getElementById('diplome-group').innerHTML = DIPLOMES.map((d,i)=>`
     <label class="radio-card flex cursor-pointer items-center gap-3 rounded-[12px] border border-black/10 bg-white/60 px-4 py-3 text-[14px] transition hover:border-[color:var(--brand)]/40 hover:bg-white">
       <input type="radio" name="diplome" value="${d.v}" class="h-4 w-4" style="accent-color:var(--brand)" ${i===0?'checked':''} onchange="saveQualifDraft()"/>
@@ -2412,7 +2412,7 @@ animate();
     document.getElementById('qualif-draft-banner').classList.remove('flex');
     // Réinitialise le formulaire à ses valeurs par défaut
     const metierEl = document.getElementById('metier');
-    if (metierEl) metierEl.selectedIndex = 0;
+    if (metierEl) metierEl.value = '';
     const firstDiplome = document.querySelector('input[name="diplome"]');
     if (firstDiplome) firstDiplome.checked = true;
     const expEl = document.getElementById('experience');
@@ -2520,6 +2520,10 @@ animate();
 
   function submitQualif(){
     const metier = document.getElementById('metier').value;
+    if (!metier){
+      alert('Merci de choisir votre métier avant de vérifier votre qualification.');
+      return;
+    }
     const diplome = document.querySelector('input[name="diplome"]:checked').value;
     const experience = document.getElementById('experience').value;
     const ueDiploma = document.getElementById('ueDiploma').checked;
