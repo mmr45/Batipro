@@ -327,12 +327,9 @@
     <div id="admin-login">
       <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(10,10,10,.06);color:#0a0a0a">Accès restreint</span>
       <h3 class="mt-4 font-display text-3xl font-bold">Dashboard créateur</h3>
-      <p class="mt-2 text-[14px] text-neutral-600">Réservé à l'administrateur de Bâtipro. Saisissez le mot de passe admin pour continuer.</p>
-      <form class="mt-6 flex flex-col gap-3 sm:flex-row" onsubmit="event.preventDefault(); checkAdminPassword();">
-        <input type="password" id="admin-password" placeholder="Mot de passe admin" class="flex-1 rounded-xl border border-black/10 px-4 py-3 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
-        <button type="submit" class="btn-primary rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Entrer</button>
-      </form>
-      <p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium" style="color:#b91c1c">Mot de passe incorrect.</p>
+     <p class="mt-2 text-[14px] text-neutral-600">Réservé à l'administrateur de Bâtipro. Connectez-vous avec votre compte, puis vérifiez votre accès.</p>
+<button onclick="checkAdminAccess();" class="btn-primary mt-6 rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Vérifier mon accès admin</button>
+<p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium" style="color:#b91c1c"></p>
     </div>
 
     <!-- Dashboard -->
@@ -2253,20 +2250,47 @@ animate();
     m.classList.add('hidden');
     m.classList.remove('flex');
     document.body.style.overflow = '';
-    document.getElementById('admin-password').value = '';
+    
     document.getElementById('admin-login-error').classList.add('hidden');
   }
-  function checkAdminPassword(){
-    const val = document.getElementById('admin-password').value;
-    if (val === ADMIN_PASSWORD){
-      sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
-      document.getElementById('admin-login').classList.add('hidden');
-      document.getElementById('admin-dashboard').classList.remove('hidden');
-      renderAdminDashboard();
-    } else {
-      document.getElementById('admin-login-error').classList.remove('hidden');
+  async function checkAdminAccess(){
+  const errorEl = document.getElementById('admin-login-error');
+  errorEl.classList.remove('hidden');
+  errorEl.style.color = '#0a0a0a';
+  errorEl.textContent = 'Vérification en cours...';
+
+  try {
+    const { data: sessionData } = await window.__supabase.auth.getSession();
+    const session = sessionData?.session;
+
+    if (!session) {
+      errorEl.style.color = '#b91c1c';
+      errorEl.textContent = "Vous devez d'abord vous connecter avec votre compte.";
+      return;
     }
+
+    const { data, error } = await window.__supabase
+      .from('app_admins')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    if (error || !data) {
+      errorEl.style.color = '#b91c1c';
+      errorEl.textContent = "Accès refusé : ce compte n'est pas administrateur.";
+      return;
+    }
+
+    sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
+    document.getElementById('admin-login').classList.add('hidden');
+    document.getElementById('admin-dashboard').classList.remove('hidden');
+    renderAdminDashboard();
+  } catch(e) {
+    errorEl.style.color = '#b91c1c';
+    errorEl.textContent = 'Erreur de vérification. Réessayez.';
+    console.error('checkAdminAccess error:', e);
   }
+}
   // Déconnexion du dashboard admin : efface la session admin (le mot de passe
   // sera de nouveau demandé) et referme le dashboard.
   function logoutAdmin(){
@@ -2354,7 +2378,7 @@ animate();
 
   window.openAdmin = openAdmin;
   window.closeAdmin = closeAdmin;
-  window.checkAdminPassword = checkAdminPassword;
+  window.checkAdminAccess = checkAdminAccess;
   window.exportAdminData = exportAdminData;
   window.resetAdminData = resetAdminData;
   window.logoutAdmin = logoutAdmin;
