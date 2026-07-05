@@ -104,6 +104,13 @@
     <div class="hidden items-center gap-1 md:flex" id="nav-links"></div>
     <div class="hidden items-center gap-2 md:flex">
       <button id="nav-logout-btn" onclick="logout()" class="hidden rounded-full border border-black/10 px-3 py-2 text-[13px] font-medium text-neutral-500 hover:bg-neutral-50">Se déconnecter</button>
+      <button id="nav-resume-btn" onclick="requireAuth(openQualifModal)" class="hidden animate-pulse items-center gap-2 rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">
+        <span>↩ Reprendre mon test de qualification</span>
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+      </button>
+      <button id="nav-account-btn" onclick="requireAuth(goToEspaceClient)" class="hidden items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50">
+        <span id="nav-account-label">Mon compte</span>
+      </button>
       <button id="nav-auth-btn" onclick="openQualif()" class="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">
         <span id="nav-auth-label">Inscription</span>
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
@@ -1740,22 +1747,40 @@ animate();
     const label = document.getElementById('nav-auth-label');
     const btn = document.getElementById('nav-auth-btn');
     const logoutBtn = document.getElementById('nav-logout-btn');
+    const resumeBtn = document.getElementById('nav-resume-btn');
+    const accountBtn = document.getElementById('nav-account-btn');
+    const accountLabel = document.getElementById('nav-account-label');
+
     if (currentUser){
+      // Connecté : le bouton "Inscription" disparaît, remplacé par "Mon
+      // compte" (toujours visible) + "Reprendre mon test" (seulement si un
+      // vrai brouillon est en cours).
+      btn.classList.add('hidden');
+
+      accountBtn.classList.remove('hidden');
+      accountBtn.classList.add('inline-flex');
+      accountLabel.textContent = `${currentUser.prenom} — Mon compte`;
+
       const draft = (typeof getQualifDraft === 'function') ? getQualifDraft() : null;
       if (draft){
-        label.textContent = '↩ Reprendre mon test de qualification';
-        btn.classList.add('animate-pulse');
-        btn.onclick = () => requireAuth(openQualifModal);
+        resumeBtn.classList.remove('hidden');
+        resumeBtn.classList.add('inline-flex');
       } else {
-        label.textContent = `${currentUser.prenom} — Mon espace`;
-        btn.classList.remove('animate-pulse');
-        btn.onclick = () => requireAuth(goToEspaceClient);
+        resumeBtn.classList.add('hidden');
+        resumeBtn.classList.remove('inline-flex');
       }
+
       if (logoutBtn) logoutBtn.classList.remove('hidden');
     } else {
+      // Déconnecté : seul le bouton "Inscription" est visible.
+      btn.classList.remove('hidden');
       label.textContent = 'Inscription';
-      btn.classList.remove('animate-pulse');
       btn.onclick = () => openQualif();
+
+      accountBtn.classList.add('hidden');
+      accountBtn.classList.remove('inline-flex');
+      resumeBtn.classList.add('hidden');
+      resumeBtn.classList.remove('inline-flex');
       if (logoutBtn) logoutBtn.classList.add('hidden');
     }
   }
@@ -2317,12 +2342,35 @@ animate();
     if (!currentUser) return; // le test nécessite un compte, mais on protège quand même l'appel
     const modal = document.getElementById('qualif-modal');
     if (!modal || modal.classList.contains('hidden')) return;
+
+    // Ne sauvegarde que si on est vraiment sur le formulaire (pas sur l'écran
+    // de résultat/récapitulatif) : sinon, fermer la fenêtre après avoir
+    // terminé ou réinitialisé le test recréerait un faux brouillon à partir
+    // des valeurs par défaut encore présentes dans les champs cachés.
+    const formWrap = document.getElementById('qualif-form-wrap');
+    if (!formWrap || formWrap.classList.contains('hidden')) return;
+
     const diplomeEl = document.querySelector('input[name="diplome"]:checked');
+    const metierEl = document.getElementById('metier');
+    const expEl = document.getElementById('experience');
+    const ueEl = document.getElementById('ueDiploma');
+
+    const metier = metierEl ? metierEl.value : '';
+    const experience = expEl ? expEl.value : '0';
+    const ueDiploma = ueEl ? ueEl.checked : false;
+
+    // Ne sauvegarde que si l'utilisateur a réellement commencé à répondre :
+    // un métier choisi, une expérience non nulle, ou la case UE cochée.
+    // Sinon (formulaire encore vierge à ses valeurs par défaut), pas de
+    // brouillon à créer.
+    const hasRealProgress = !!metier || Number(experience) > 0 || ueDiploma;
+    if (!hasRealProgress) { clearQualifDraft(); return; }
+
     const draft = {
-      metier: document.getElementById('metier') ? document.getElementById('metier').value : '',
+      metier,
       diplome: diplomeEl ? diplomeEl.value : '',
-      experience: document.getElementById('experience') ? document.getElementById('experience').value : '0',
-      ueDiploma: document.getElementById('ueDiploma') ? document.getElementById('ueDiploma').checked : false,
+      experience,
+      ueDiploma,
       savedAt: new Date().toISOString(),
     };
     const drafts = loadQualifDrafts();
