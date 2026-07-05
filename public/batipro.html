@@ -1346,9 +1346,13 @@ animate();
   ];
 
   const PRICING = [
-    { name:"Gratuit", price:"0 €", sub:"pour toujours", features:["Test de qualification complet","Simulateur de statut","Alertes de risque","Support par email"], cta:"Commencer", highlight:false },
-    { name:"Lancement", price:"89 €", sub:"paiement unique", features:["Tout Gratuit +","Générateur de dossier INPI","Pièces justificatives incluses","Redirection partenaires trackée"], cta:"Créer ma boîte", highlight:true },
-    { name:"Pro", price:"19 €", sub:"/ mois", features:["Tout Lancement +","Éditeur de devis conforme","Mises à jour TVA & décennale","Archivage horodaté"], cta:"Passer Pro", highlight:false },
+    // plan:null => offre gratuite, pas de paiement Stripe (ouvre juste l'inscription).
+    // plan:"lancement" / "pro" => identifiants envoyés tels quels à la fonction
+    // Supabase "create-checkout", qui doit savoir faire correspondre chaque
+    // identifiant à son Price ID Stripe (le site ne connaît pas les Price IDs).
+    { name:"Gratuit", price:"0 €", sub:"pour toujours", features:["Test de qualification complet","Simulateur de statut","Alertes de risque","Support par email"], cta:"Commencer", highlight:false, plan:null },
+    { name:"Lancement", price:"89 €", sub:"paiement unique", features:["Tout Gratuit +","Générateur de dossier INPI","Pièces justificatives incluses","Redirection partenaires trackée"], cta:"Créer ma boîte", highlight:true, plan:"lancement" },
+    { name:"Pro", price:"19 €", sub:"/ mois", features:["Tout Lancement +","Éditeur de devis conforme","Mises à jour TVA & décennale","Archivage horodaté"], cta:"Passer Pro", highlight:false, plan:"pro" },
   ];
 
   const ICONS = {
@@ -1432,9 +1436,55 @@ animate();
       <ul class="mt-6 space-y-3">
         ${p.features.map(f=>`<li class="flex items-start gap-2 text-sm text-neutral-700"><span class="mt-0.5 shrink-0" style="color:var(--brand)">${icon('check','h-4 w-4')}</span>${f}</li>`).join('')}
       </ul>
-      <button onclick="openQualif()" class="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02]" style="background:${p.highlight?'var(--brand)':'#0a0a0a'}">${p.cta} ${icon('arrow','h-4 w-4')}</button>
+      <button data-plan-btn="${p.plan||'gratuit'}" onclick="handlePricingClick(${p.plan?`'${p.plan}'`:'null'})" class="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait" style="background:${p.highlight?'var(--brand)':'#0a0a0a'}"><span data-plan-btn-label>${p.cta} ${icon('arrow','h-4 w-4')}</span></button>
     </div>
   `).join('');
+
+  // ---------- Paiement Stripe (offres Lancement / Pro) ----------
+  // Convention attendue côté fonction Supabase "create-checkout" :
+  //   - reçoit en POST (JSON) : { plan: "lancement"|"pro", email, userId }
+  //   - répond avec : { url: "https://checkout.stripe.com/..." }
+  // Si ta fonction déployée utilise un contrat différent (ex: renvoie un
+  // sessionId au lieu d'une url), ajuste juste la fonction startCheckout()
+  // ci-dessous — le reste du site n'a pas besoin de changer.
+  function handlePricingClick(planKey){
+    if (!planKey){ openQualif(); return; } // offre Gratuite : pas de paiement
+    requireAuth(() => startCheckout(planKey));
+  }
+
+  async function startCheckout(planKey){
+    const sb = window.__supabase;
+    if (!sb){
+      alert("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+    const btn = document.querySelector(`[data-plan-btn="${planKey}"]`);
+    const label = btn ? btn.querySelector('[data-plan-btn-label]') : null;
+    const originalHTML = label ? label.innerHTML : null;
+    if (btn){ btn.disabled = true; }
+    if (label){ label.textContent = 'Redirection vers le paiement…'; }
+
+    try {
+      const { data, error } = await sb.functions.invoke('create-checkout', {
+        body: {
+          plan: planKey,
+          email: currentUser ? currentUser.email : null,
+          userId: currentUser ? (currentUser.id || currentUser.user_id) : null,
+        },
+      });
+      if (error) throw error;
+
+      const url = data && (data.url || data.checkoutUrl);
+      if (!url) throw new Error("Réponse inattendue du serveur de paiement (pas d'URL reçue).");
+
+      window.location.href = url;
+    } catch(e){
+      console.error('Erreur création session de paiement :', e);
+      alert("Une erreur est survenue lors de la préparation du paiement. Réessayez dans un instant.\n\n(" + (e.message || e) + ")");
+      if (btn){ btn.disabled = false; }
+      if (label && originalHTML !== null){ label.innerHTML = originalHTML; }
+    }
+  }
 
   // Qualification form population
   document.getElementById('metier').innerHTML = METIERS.map(m=>`<option value="${m.v}">${m.l}${m.reglemente?' — activité réglementée':''}</option>`).join('');
@@ -3480,6 +3530,4 @@ animate();
 
 </script>
 </body>
-</html> 
-
-
+</html>
