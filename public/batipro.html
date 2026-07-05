@@ -7,7 +7,6 @@
 <title>Bâtipro — Lancez votre boîte du bâtiment, sans friction</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='64' height='64'%3E%3Crect width='24' height='24' rx='6' fill='%230084FF'/%3E%3Cpath d='M3 11L12 4L21 11' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M5 9.5V20H19V9.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Crect x='10' y='13' width='4' height='7' fill='white'/%3E%3C/svg%3E" />
 <meta name="description" content="Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." />
-<meta name="google-site-verification" content="oOxKuEScJ97Fa9OoO57ncdJkPIetpabSj1WQEty-GJQ" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
@@ -328,12 +327,9 @@
     <div id="admin-login">
       <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(10,10,10,.06);color:#0a0a0a">Accès restreint</span>
       <h3 class="mt-4 font-display text-3xl font-bold">Dashboard créateur</h3>
-      <p class="mt-2 text-[14px] text-neutral-600">Réservé à l'administrateur de Bâtipro. Saisissez le mot de passe admin pour continuer.</p>
-      <form class="mt-6 flex flex-col gap-3 sm:flex-row" onsubmit="event.preventDefault(); checkAdminPassword();">
-        <input type="password" id="admin-password" placeholder="Mot de passe admin" class="flex-1 rounded-xl border border-black/10 px-4 py-3 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
-        <button type="submit" class="btn-primary rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Entrer</button>
-      </form>
-      <p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium" style="color:#b91c1c">Mot de passe incorrect.</p>
+     <p class="mt-2 text-[14px] text-neutral-600">Réservé à l'administrateur de Bâtipro. Connectez-vous avec votre compte, puis vérifiez votre accès.</p>
+<button onclick="checkAdminAccess();" class="btn-primary mt-6 rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Vérifier mon accès admin</button>
+<p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium" style="color:#b91c1c"></p>
     </div>
 
     <!-- Dashboard -->
@@ -2125,11 +2121,7 @@ animate();
   window.closeLegal = closeLegal;
 
   // ---------- ADMIN DASHBOARD (créateur uniquement) ----------
-  // ⚠️ Protection uniquement côté navigateur (mot de passe visible dans le
-  // code source si quelqu'un l'inspecte). Suffisant pour un usage perso tant
-  // qu'il n'y a pas de backend, mais À CHANGER avant toute mise en ligne,
-  // et à remplacer par une vraie authentification serveur dès que possible.
-  const ADMIN_PASSWORD = '56?@87hjdHG/:%ksye98'; // <-- changez ce mot de passe
+  // Accès protégé par Supabase Auth + table `app_admins` (voir checkAdminAccess ci-dessous).
   const LS_SUBMISSIONS_KEY = 'batipro_submissions';
   const LS_ADMIN_SESSION_KEY = 'batipro_admin_session'; // sessionStorage : expire à la fermeture de l'onglet
 
@@ -2199,7 +2191,7 @@ animate();
     const isAuthed = sessionStorage.getItem(LS_ADMIN_SESSION_KEY) === 'ok';
     document.getElementById('admin-login').classList.toggle('hidden', isAuthed);
     document.getElementById('admin-dashboard').classList.toggle('hidden', !isAuthed);
-if (isAuthed) await renderAdminDashboard();
+    if (isAuthed) await renderAdminDashboard();
   }
 
   // Donne (ou confirme) l'accès Pro au compte actuellement connecté sur le
@@ -2254,20 +2246,47 @@ if (isAuthed) await renderAdminDashboard();
     m.classList.add('hidden');
     m.classList.remove('flex');
     document.body.style.overflow = '';
-    document.getElementById('admin-password').value = '';
+    
     document.getElementById('admin-login-error').classList.add('hidden');
   }
-  function checkAdminPassword(){
-    const val = document.getElementById('admin-password').value;
-    if (val === ADMIN_PASSWORD){
-      sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
-      document.getElementById('admin-login').classList.add('hidden');cd batipro-backend\supabase\batiproo
-      document.getElementById('admin-dashboard').classList.remove('hidden');
-      renderAdminDashboard();
-    } else {
-      document.getElementById('admin-login-error').classList.remove('hidden');
+  async function checkAdminAccess(){
+  const errorEl = document.getElementById('admin-login-error');
+  errorEl.classList.remove('hidden');
+  errorEl.style.color = '#0a0a0a';
+  errorEl.textContent = 'Vérification en cours...';
+
+  try {
+    const { data: sessionData } = await window.__supabase.auth.getSession();
+    const session = sessionData?.session;
+
+    if (!session) {
+      errorEl.style.color = '#b91c1c';
+      errorEl.textContent = "Vous devez d'abord vous connecter avec votre compte.";
+      return;
     }
+
+    const { data, error } = await window.__supabase
+      .from('app_admins')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    if (error || !data) {
+      errorEl.style.color = '#b91c1c';
+      errorEl.textContent = "Accès refusé : ce compte n'est pas administrateur.";
+      return;
+    }
+
+    sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
+    document.getElementById('admin-login').classList.add('hidden');
+    document.getElementById('admin-dashboard').classList.remove('hidden');
+    await renderAdminDashboard();
+  } catch(e) {
+    errorEl.style.color = '#b91c1c';
+    errorEl.textContent = 'Erreur de vérification. Réessayez.';
+    console.error('checkAdminAccess error:', e);
   }
+}
   // Déconnexion du dashboard admin : efface la session admin (le mot de passe
   // sera de nouveau demandé) et referme le dashboard.
   function logoutAdmin(){
@@ -2285,24 +2304,24 @@ if (isAuthed) await renderAdminDashboard();
     // toute sécurité sans exposer une clé secrète côté navigateur.
     const accounts = [];
     let submissions = [];
-const sb = window.__supabase;
-if (sb) {
-  const { data, error } = await sb.from('submissions').select('*').order('created_at', { ascending: false });
-  if (error) {
-    console.warn('renderAdminDashboard: lecture Supabase échouée, fallback localStorage:', error);
-    submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
-  } else {
-    submissions = (data || []).map(row => ({
-      date: row.created_at,
-      email: row.payload?.email || null,
-      nom: row.payload?.nom || 'Inconnu',
-      type: row.type,
-      summary: row.summary,
-    }));
-  }
-} else {
-  submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
-}
+    const sb = window.__supabase;
+    if (sb) {
+      const { data, error } = await sb.from('submissions').select('*').order('created_at', { ascending: false });
+      if (error) {
+        console.warn('renderAdminDashboard: lecture Supabase échouée, fallback localStorage:', error);
+        submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+      } else {
+        submissions = (data || []).map(row => ({
+          date: row.created_at,
+          email: row.payload?.email || null,
+          nom: row.payload?.nom || 'Inconnu',
+          type: row.type,
+          summary: row.summary,
+        }));
+      }
+    } else {
+      submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+    }
 
     // Bloc "Mon accès" : montre le compte actuellement connecté sur le site
     // (celui qui recevra l'accès Pro si on clique sur le bouton).
@@ -2365,14 +2384,15 @@ if (sb) {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
-async function resetAdminData(){    if (!confirm('Supprimer définitivement les soumissions stockées en fallback sur ce navigateur ? Cette action est irréversible. (Les comptes utilisateurs, gérés par Supabase, ne sont pas affectés.)')) return;
+  async function resetAdminData(){
+    if (!confirm('Supprimer définitivement les soumissions stockées en fallback sur ce navigateur ? Cette action est irréversible. (Les comptes utilisateurs, gérés par Supabase, ne sont pas affectés.)')) return;
     localStorage.removeItem(LS_SUBMISSIONS_KEY);
-    await renderAdminDashboard();
+   await renderAdminDashboard();
   }
 
   window.openAdmin = openAdmin;
   window.closeAdmin = closeAdmin;
-  window.checkAdminPassword = checkAdminPassword;
+  window.checkAdminAccess = checkAdminAccess;
   window.exportAdminData = exportAdminData;
   window.resetAdminData = resetAdminData;
   window.logoutAdmin = logoutAdmin;
