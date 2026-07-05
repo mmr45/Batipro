@@ -85,6 +85,46 @@
   #hero-canvas { width: 100%; height: 100%; display: block; cursor: grab; }
   #hero-canvas:active { cursor: grabbing; }
 
+  /* Logo texte "Bâtipro" animé en pseudo-3D (extrusion + rotation) */
+  .brand-logo-3d {
+    position: relative;
+    display: inline-block;
+    transform-style: preserve-3d;
+    animation: brandLogoSpin 7s ease-in-out infinite;
+    transform-origin: 50% 50%;
+    cursor: pointer;
+  }
+  .brand-logo-3d .bl-layer {
+    position: absolute;
+    inset: 0;
+    left: 0;
+    top: 0;
+    white-space: nowrap;
+    backface-visibility: hidden;
+  }
+  .brand-logo-3d .bl-layer.bl-front { position: static; }
+  @keyframes brandLogoSpin {
+    0%, 12%   { transform: rotateY(0deg); }
+    45%, 60%  { transform: rotateY(360deg); }
+    100%      { transform: rotateY(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-logo-3d { animation: none; }
+  }
+
+  /* Cartes de fonctionnalités animées (modale de connexion) */
+  .auth-feature-row {
+    opacity: 0;
+    transform: translateX(-14px);
+    animation: authFeatureIn .6s cubic-bezier(.2,.8,.3,1) forwards;
+    transition: background-color .25s ease, transform .25s ease;
+  }
+  .auth-feature-row:hover { background: rgba(255,255,255,0.09); transform: translateX(2px); }
+  @keyframes authFeatureIn { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .auth-feature-row { animation: none; opacity: 1; transform: none; }
+  }
+
   .noise::before {
     content:""; position:absolute; inset:0; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/></svg>");
@@ -104,7 +144,9 @@
 <!-- NAV -->
 <header class="sticky top-4 z-50 mx-auto max-w-[1600px] px-4 md:px-8">
   <nav class="flex items-center justify-between gap-4 rounded-2xl border border-black/5 glass px-4 py-3 shadow-sm md:px-6">
-    <button onclick="scrollToId('accueil')" class="font-display text-xl font-bold tracking-tight">Bâti<span style="color:var(--brand)">pro</span></button>
+    <button onclick="scrollToId('accueil')" class="font-display text-xl font-bold tracking-tight" style="perspective:600px;">
+      <span id="brand-logo-3d" class="brand-logo-3d" aria-label="Bâtipro"></span>
+    </button>
     <div class="hidden items-center gap-1 md:flex" id="nav-links"></div>
     <div class="hidden items-center gap-2 md:flex">
       <button id="nav-logout-btn" onclick="logout()" class="hidden rounded-full border border-black/10 px-3 py-2 text-[13px] font-medium text-neutral-500 hover:bg-neutral-50">Se déconnecter</button>
@@ -126,6 +168,47 @@
   </nav>
   <div id="mobile-menu" class="mt-2 hidden rounded-2xl border border-black/5 glass p-3 md:hidden"></div>
 </header>
+
+<script>
+  (function(){
+    var DEPTH = 9; // nombre de couches d'extrusion
+    function shade(hex, i, total){
+      var f = i / total; // 0 = face avant, 1 = fond
+      var c = hex.replace('#','');
+      var r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+      var k = 1 - f * 0.55;
+      r = Math.round(r*k); g = Math.round(g*k); b = Math.round(b*k);
+      return 'rgb(' + r + ',' + g + ',' + b + ')';
+    }
+    function buildBrandLogo(elId, batiColor, proColor){
+      var el = document.getElementById(elId);
+      if (!el) return;
+      var frag = document.createDocumentFragment();
+      for (var i = DEPTH; i >= 0; i--) {
+        var layer = document.createElement('span');
+        layer.className = 'bl-layer' + (i === 0 ? ' bl-front' : '');
+        layer.style.transform = 'translateZ(-' + i + 'px)';
+        var batiSpan = document.createElement('span');
+        batiSpan.textContent = 'Bâti';
+        batiSpan.style.color = shade(batiColor, i, DEPTH);
+        var proSpan = document.createElement('span');
+        proSpan.textContent = 'pro';
+        proSpan.style.color = shade(proColor, i, DEPTH);
+        layer.appendChild(batiSpan);
+        layer.appendChild(proSpan);
+        frag.appendChild(layer);
+      }
+      el.appendChild(frag);
+    }
+    // Logo nav (fond clair) : texte foncé + bleu marque
+    // Logo modale de connexion (fond bleu nuit) : texte blanc + bleu clair
+    // (la modale est plus bas dans le DOM, on attend qu'elle soit parsée)
+    document.addEventListener('DOMContentLoaded', function(){
+      buildBrandLogo('brand-logo-3d', '#0a0a0a', '#0084ff');
+      buildBrandLogo('brand-logo-3d-modal', '#ffffff', '#60b1ff');
+    });
+  })();
+</script>
 
 <!-- Bulle statut serveur -->
 <div id="server-status" class="fixed bottom-5 right-5 z-[60] flex items-center gap-2 rounded-full border border-black/5 glass px-3 py-2 text-[12px] font-medium text-neutral-700 shadow-lg">
@@ -555,16 +638,41 @@
       <div class="anim-blob-a absolute -right-16 -top-16 h-[280px] w-[280px] rounded-full opacity-40 blur-[100px]" style="background:#0084FF"></div>
       <div class="anim-blob-b absolute -left-10 bottom-10 h-[220px] w-[220px] rounded-full opacity-30 blur-[100px]" style="background:#FF801E"></div>
       <div class="relative z-10">
-        <span class="text-2xl">🏗️</span>
+        <div class="relative inline-block" style="perspective:600px;">
+          <div class="absolute inset-0 -z-10 rounded-full blur-xl" style="background:radial-gradient(circle, rgba(0,132,255,.55), transparent 70%)"></div>
+          <span id="brand-logo-3d-modal" class="brand-logo-3d font-display text-3xl font-bold tracking-tight" aria-label="Bâtipro" style="display:inline-block; padding:6px 2px;"></span>
+        </div>
         <h3 class="mt-4 font-display text-3xl font-bold leading-tight">Lancez votre boîte du bâtiment, sans friction.</h3>
         <p class="mt-3 text-[14px] text-white/70">Qualification, statut, dossier INPI et premier devis conforme : tout au même endroit.</p>
       </div>
-      <div class="relative z-10 mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-        <div class="flex items-center justify-between text-[11px] text-white/50">
-          <span>DEVIS</span><span>1 870,00 €</span>
+      <div class="relative z-10 mt-8 space-y-2.5" id="auth-feature-list">
+        <div class="auth-feature-row flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur" style="animation-delay:.05s">
+          <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style="background:rgba(0,132,255,.18)">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="#60B1FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] font-semibold text-white">Qualification en 5 minutes</div>
+            <div class="text-[11px] text-white/50">Un questionnaire guidé, sans jargon</div>
+          </div>
         </div>
-        <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10"><div class="h-full w-3/4 rounded-full" style="background:var(--brand-2)"></div></div>
-        <div class="mt-2 text-[11px] text-white/50">Mentions légales BTP incluses automatiquement</div>
+        <div class="auth-feature-row flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur" style="animation-delay:.2s">
+          <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style="background:rgba(255,128,30,.18)">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="#FF801E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V6z"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] font-semibold text-white">Assurance décennale vérifiée</div>
+            <div class="text-[11px] text-white/50">Seuils conformes à la loi Spinetta</div>
+          </div>
+        </div>
+        <div class="auth-feature-row flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur" style="animation-delay:.35s">
+          <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style="background:rgba(96,177,255,.18)">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="#60B1FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h3"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] font-semibold text-white">Devis conforme en un clic</div>
+            <div class="text-[11px] text-white/50">Mentions légales BTP incluses automatiquement</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -590,20 +698,6 @@
           <label class="block text-[13px] font-semibold text-neutral-900">Nom</label>
           <input type="text" id="signup-nom" required placeholder="Dupont" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
         </div>
-      </div>
-
-      <div class="flex items-center gap-3 text-[12px] font-medium uppercase tracking-wide text-neutral-400">
-        <span class="h-px flex-1 bg-neutral-200"></span>ou<span class="h-px flex-1 bg-neutral-200"></span>
-      </div>
-      <div class="space-y-2.5">
-        <button type="button" onclick="oauthSignIn('google')" class="flex w-full items-center justify-center gap-2 rounded-xl border border-black/10 py-2.5 text-[14px] font-medium text-neutral-800 hover:bg-neutral-50">
-          <svg class="h-4 w-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.87c2.27-2.09 3.58-5.17 3.58-8.82Z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.08 7.94-2.91l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.37-2.28V6.63H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.37l4-3.09Z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.63l4 3.09C6.22 6.86 8.87 4.75 12 4.75Z"/></svg>
-          Continuer avec Google
-        </button>
-        <button type="button" onclick="oauthSignIn('azure')" class="flex w-full items-center justify-center gap-2 rounded-xl border border-black/10 py-2.5 text-[14px] font-medium text-neutral-800 hover:bg-neutral-50">
-          <svg class="h-4 w-4" viewBox="0 0 24 24"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="13" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="13" width="10" height="10" fill="#00A4EF"/><rect x="13" y="13" width="10" height="10" fill="#FFB900"/></svg>
-          Continuer avec Microsoft
-        </button>
       </div>
 
       <div>
