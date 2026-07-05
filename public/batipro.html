@@ -1998,6 +1998,13 @@ animate();
     sb.auth.onAuthStateChange((_event, session) => {
       currentUser = mapSupabaseUser(session ? session.user : null);
       updateAuthUI();
+      // Sécurité : on efface toujours la session admin locale dès qu'un
+      // changement de compte/connexion/déconnexion survient, pour qu'un
+      // compte ne puisse jamais hériter de l'accès dashboard obtenu par un
+      // autre compte (ou par le mot de passe) sur ce même onglet. L'accès
+      // admin par email (voir openAdmin) est de toute façon recalculé à
+      // chaque ouverture et n'a pas besoin de cette clé.
+      sessionStorage.removeItem(LS_ADMIN_SESSION_KEY);
       // Quand l'utilisateur clique sur le lien "mot de passe oublié" reçu par
       // email, Supabase le renvoie ici avec une session temporaire et cet
       // événement PASSWORD_RECOVERY : on ouvre directement le formulaire de
