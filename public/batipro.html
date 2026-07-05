@@ -319,6 +319,15 @@
 
       <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4" id="admin-stats"></div>
 
+      <div class="mt-8 rounded-2xl border border-neutral-200 p-5">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Mon accès (compte actuellement connecté)</h4>
+        <p id="admin-mon-compte-info" class="mt-2 text-[14px] text-neutral-600">—</p>
+        <p id="admin-mon-compte-statut" class="mt-1 text-[14px] font-medium">—</p>
+        <button onclick="grantMyProAccess()" class="mt-4 rounded-[12px] bg-neutral-950 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-neutral-800">
+          M'activer l'accès Pro
+        </button>
+      </div>
+
       <div class="mt-8">
         <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Comptes créés</h4>
         <div class="mt-3 overflow-x-auto rounded-2xl border border-neutral-200">
@@ -2121,6 +2130,54 @@ animate();
     document.getElementById('admin-dashboard').classList.toggle('hidden', !isAuthed);
     if (isAuthed) renderAdminDashboard();
   }
+
+  // Donne (ou confirme) l'accès Pro au compte actuellement connecté sur le
+  // site — c'est-à-dire "currentUser", pas un compte cherché par email.
+  // Utile pour que le créateur du site se donne l'accès complet sans payer.
+  async function grantMyProAccess(){
+    if (!currentUser){
+      alert("Tu dois être connecté sur le site (avec ton compte) pour utiliser ce bouton. Connecte-toi d'abord, puis rouvre ce dashboard.");
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb){ alert("Connexion au serveur indisponible."); return; }
+
+    const userId = currentUser.id || currentUser.user_id;
+    const statutEl = document.getElementById('admin-mon-compte-statut');
+
+    try {
+      // Vérifie si une ligne existe déjà pour ce compte + ce produit.
+      const { data: existing, error: selectError } = await sb
+        .from('entitlements')
+        .select('user_id, product_key, active')
+        .eq('user_id', userId)
+        .eq('product_key', 'pro')
+        .maybeSingle();
+
+      if (selectError) throw selectError;
+
+      if (existing){
+        const { error: updateError } = await sb
+          .from('entitlements')
+          .update({ active: true })
+          .eq('user_id', userId)
+          .eq('product_key', 'pro');
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await sb
+          .from('entitlements')
+          .insert({ user_id: userId, product_key: 'pro', active: true });
+        if (insertError) throw insertError;
+      }
+
+      statutEl.textContent = '✅ Accès Pro activé pour ce compte.';
+      statutEl.style.color = '#15803d';
+    } catch(e){
+      console.error('Erreur activation accès Pro :', e);
+      statutEl.textContent = "❌ Échec : " + (e.message || e) + " (vérifie les règles RLS de la table entitlements dans Supabase — il faut autoriser insert/update pour l'utilisateur connecté).";
+      statutEl.style.color = '#b91c1c';
+    }
+  }
   function closeAdmin(){
     const m = document.getElementById('admin-modal');
     m.classList.add('hidden');
@@ -2157,6 +2214,19 @@ animate();
     // toute sécurité sans exposer une clé secrète côté navigateur.
     const accounts = [];
     const submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+    // Bloc "Mon accès" : montre le compte actuellement connecté sur le site
+    // (celui qui recevra l'accès Pro si on clique sur le bouton).
+    const infoEl = document.getElementById('admin-mon-compte-info');
+    const statutEl = document.getElementById('admin-mon-compte-statut');
+    if (currentUser){
+      infoEl.textContent = `Connecté en tant que ${currentUser.prenom} ${currentUser.nom} (${currentUser.email})`;
+      statutEl.textContent = '';
+    } else {
+      infoEl.textContent = "Aucun compte connecté sur le site pour l'instant.";
+      statutEl.textContent = 'Connecte-toi d\'abord avec ton compte, puis reviens ici.';
+      statutEl.style.color = '#b91c1c';
+    }
 
     const byType = { qualif:0, statut:0, inpi:0, assurance:0 };
     submissions.forEach(s=>{ if (byType[s.type]!==undefined) byType[s.type]++; });
