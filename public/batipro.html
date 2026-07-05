@@ -1351,7 +1351,7 @@ animate();
     // Supabase "create-checkout", qui doit savoir faire correspondre chaque
     // identifiant à son Price ID Stripe (le site ne connaît pas les Price IDs).
     { name:"Gratuit", price:"0 €", sub:"pour toujours", features:["Test de qualification complet","Simulateur de statut","Alertes de risque","Support par email"], cta:"Commencer", highlight:false, plan:null },
-    { name:"Lancement", price:"89 €", sub:"paiement unique", features:["Tout Gratuit +","Générateur de dossier INPI","Pièces justificatives incluses","Redirection partenaires trackée"], cta:"Créer ma boîte", highlight:true, plan:"lancement" },
+    { name:"Lancement", price:"89 €", sub:"paiement unique", features:["Tout Gratuit +","Générateur de dossier INPI","Pièces justificatives incluses","Redirection partenaires trackée"], cta:"Créer ma boîte", highlight:true, plan:"dossier" },
     { name:"Pro", price:"19 €", sub:"/ mois", features:["Tout Lancement +","Éditeur de devis conforme","Mises à jour TVA & décennale","Archivage horodaté"], cta:"Passer Pro", highlight:false, plan:"pro" },
   ];
 
@@ -1442,7 +1442,8 @@ animate();
 
   // ---------- Paiement Stripe (offres Lancement / Pro) ----------
   // Convention attendue côté fonction Supabase "create-checkout" :
-  //   - reçoit en POST (JSON) : { plan: "lancement"|"pro", email, userId }
+  //   - reçoit en POST (JSON) : { plan: "dossier"|"pro" } (+ le token d'auth
+  //     de l'utilisateur, envoyé automatiquement par supabase.functions.invoke())
   //   - répond avec : { url: "https://checkout.stripe.com/..." }
   // Si ta fonction déployée utilise un contrat différent (ex: renvoie un
   // sessionId au lieu d'une url), ajuste juste la fonction startCheckout()
@@ -1472,7 +1473,20 @@ animate();
           userId: currentUser ? (currentUser.id || currentUser.user_id) : null,
         },
       });
-      if (error) throw error;
+      if (error) {
+        // Le SDK Supabase ne remonte par défaut qu'un message générique
+        // ("Edge Function returned a non-2xx status code") ; on va chercher
+        // le vrai message d'erreur renvoyé par la fonction dans le corps de
+        // la réponse (ex: "Offre inconnue.", "Utilisateur non authentifié.").
+        let detail = error.message;
+        try {
+          if (error.context && typeof error.context.json === 'function'){
+            const body = await error.context.clone().json();
+            if (body && body.error) detail = body.error;
+          }
+        } catch(_e){ /* corps non-JSON ou déjà consommé : on garde le message générique */ }
+        throw new Error(detail);
+      }
 
       const url = data && (data.url || data.checkoutUrl);
       if (!url) throw new Error("Réponse inattendue du serveur de paiement (pas d'URL reçue).");
