@@ -2121,11 +2121,7 @@ animate();
   window.closeLegal = closeLegal;
 
   // ---------- ADMIN DASHBOARD (créateur uniquement) ----------
-  // ⚠️ Protection uniquement côté navigateur (mot de passe visible dans le
-  // code source si quelqu'un l'inspecte). Suffisant pour un usage perso tant
-  // qu'il n'y a pas de backend, mais À CHANGER avant toute mise en ligne,
-  // et à remplacer par une vraie authentification serveur dès que possible.
-  const ADMIN_PASSWORD = '56?@87hjdHG/:%ksye98'; // <-- changez ce mot de passe
+  // Accès protégé par Supabase Auth + table `app_admins` (voir checkAdminAccess ci-dessous).
   const LS_SUBMISSIONS_KEY = 'batipro_submissions';
   const LS_ADMIN_SESSION_KEY = 'batipro_admin_session'; // sessionStorage : expire à la fermeture de l'onglet
 
