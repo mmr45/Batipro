@@ -52,6 +52,8 @@
   @keyframes blobB { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-80px,30px) scale(1.15)} }
   @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
   @keyframes fadeInScale { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+  @keyframes pingDot { 0%{transform:scale(1);opacity:.75} 75%,100%{transform:scale(2.2);opacity:0} }
+  #server-status-pulse { animation: pingDot 1.8s cubic-bezier(0,0,0.2,1) infinite; }
   .anim-blob-a{animation:blobA 18s ease-in-out infinite}
   .anim-blob-b{animation:blobB 22s ease-in-out infinite}
   .anim-float{animation:floaty 9s ease-in-out infinite}
@@ -124,6 +126,14 @@
   </nav>
   <div id="mobile-menu" class="mt-2 hidden rounded-2xl border border-black/5 glass p-3 md:hidden"></div>
 </header>
+
+<!-- Bulle statut serveur -->
+<div id="server-status" class="fixed bottom-5 right-5 z-[60] flex items-center gap-2 rounded-full border border-black/5 glass px-3 py-2 text-[12px] font-medium text-neutral-700 shadow-lg">
+  <span id="server-status-dot" class="relative grid h-2 w-2 place-items-center rounded-full" style="background:#9ca3af">
+    <span id="server-status-pulse" class="absolute inline-flex h-full w-full rounded-full opacity-75" style="background:#9ca3af"></span>
+  </span>
+  <span id="server-status-label">Connexion…</span>
+</div>
 
 <main class="relative z-10 mx-auto max-w-[1600px] px-6 md:px-12">
 
@@ -219,6 +229,14 @@
     <div class="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-5 lg:items-center">
       <!-- Mockup devis -->
       <div class="lg:col-span-3" data-reveal="left">
+        <div class="relative">
+          <!-- Cartes empilées en arrière-plan pour montrer plusieurs rendus -->
+          <div class="absolute inset-0 -z-10 translate-x-4 translate-y-6 rotate-[2deg] rounded-3xl border border-black/5 bg-white/70 shadow-xl"></div>
+          <div class="absolute inset-0 -z-20 translate-x-8 translate-y-12 rotate-[4deg] rounded-3xl border border-black/5 bg-white/40"></div>
+          <span class="absolute -top-3 right-6 z-10 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold text-white shadow-lg" style="background:var(--brand)">
+            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            Rendu réel exporté
+          </span>
         <div class="relative overflow-hidden rounded-3xl border border-black/10 bg-white p-6 shadow-2xl shadow-black/5 md:p-9">
           <div class="flex items-start justify-between border-b border-neutral-100 pb-5">
             <div>
@@ -261,6 +279,7 @@
             Garantie décennale — Police n° 000123, MAAF Pro · Pénalités de retard : taux BCE + 10 pts · Médiation de la consommation : art. L612-1 C. conso. · Devis valable 30 jours.
           </div>
         </div>
+        </div>
       </div>
 
       <!-- Points clés -->
@@ -279,12 +298,25 @@
             <span class="text-[14px] text-neutral-700"><b>Export PDF prêt à envoyer</b> à votre client, en moins de 3 minutes.</span>
           </li>
         </ul>
-        <button onclick="openQualif()" class="btn-primary group mt-8 inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.03]">
-          <span class="text-[15px] font-semibold">Essayer gratuitement</span>
-          <span class="grid h-9 w-9 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45" style="color:var(--brand)">
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-          </span>
-        </button>
+
+        <!-- Pack Lancement 89€ -->
+        <div class="mt-8 rounded-3xl border p-6" style="border-color:rgba(0,132,255,.25); background:linear-gradient(135deg, rgba(0,132,255,.08), rgba(255,255,255,.9))">
+          <div class="flex items-center justify-between">
+            <span class="text-[12px] font-semibold uppercase tracking-wide" style="color:var(--brand)">Pack Lancement</span>
+            <span class="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white" style="background:var(--brand)">Paiement unique</span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1.5">
+            <span class="font-display text-4xl font-bold">89 €</span>
+            <span class="text-[13px] text-neutral-500">une seule fois</span>
+          </div>
+          <p class="mt-2 text-[13px] text-neutral-600">Générateur de dossier INPI, pièces justificatives incluses et éditeur de devis conforme comme celui ci-dessus.</p>
+          <button onclick="handlePricingClick('dossier')" class="btn-primary group mt-5 inline-flex w-full items-center justify-center gap-3 rounded-[14px] py-3.5 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.02]">
+            <span class="text-[15px] font-semibold">Acheter le pack — 89 €</span>
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45" style="color:var(--brand)">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -350,48 +382,75 @@
     </div>
   </section>
 
-  <footer class="border-t border-black/5 py-14 text-sm text-neutral-500">
+  <footer class="-mx-6 mt-10 rounded-t-[32px] bg-neutral-950 px-6 py-14 text-sm text-neutral-400 md:-mx-12 md:px-12">
     <div class="grid grid-cols-2 gap-10 sm:grid-cols-4">
       <div class="col-span-2 sm:col-span-1">
-        <div class="flex h-9 w-9 items-center justify-center rounded-[10px] text-white" style="background:var(--brand)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 11L12 4L21 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M5 9.5V20H19V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="10" y="13" width="4" height="7" fill="currentColor"/>
-          </svg>
+        <div class="flex items-center gap-2">
+          <div class="flex h-9 w-9 items-center justify-center rounded-[10px] text-white" style="background:var(--brand)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 11L12 4L21 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 9.5V20H19V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="10" y="13" width="4" height="7" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="font-display text-lg font-bold text-white">Bâti<span style="color:var(--brand-2)">pro</span></span>
         </div>
-        <div class="mt-3 font-display font-bold text-neutral-900">Bâti<span style="color:var(--brand)">pro</span></div>
-        <p class="mt-2 max-w-[220px] text-[13px] text-neutral-500">Le parcours guidé pour lancer votre entreprise du bâtiment, en toute conformité.</p>
-      </div>
-      <div>
-        <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Navigation</div>
-        <div class="mt-3 flex flex-col gap-2" id="footer-nav"></div>
-      </div>
-      <div>
-        <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Légal</div>
-        <div class="mt-3 flex flex-col gap-2">
-          <button onclick="openLegal('mentions')" class="w-fit text-left hover:text-neutral-900">Mentions légales</button>
-          <button onclick="openLegal('confidentialite')" class="w-fit text-left hover:text-neutral-900">Confidentialité</button>
-          <button onclick="openLegal('cgu')" class="w-fit text-left hover:text-neutral-900">Conditions d'utilisation</button>
-          <button onclick="openLegal('dmca')" class="w-fit text-left hover:text-neutral-900">DMCA</button>
+        <p class="mt-3 max-w-[240px] text-[13px] leading-relaxed text-neutral-400">Un outil fait en France. Simple par choix, conforme par design. Pour les artisans qui veulent avancer, pas s'administrer.</p>
+        <div class="mt-5 flex items-center gap-3">
+          <div class="flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-medium text-neutral-300">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="12" fill="#fff"/></svg>
+            Hébergement UE
+          </div>
+          <div class="flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-medium text-neutral-300">
+            Conforme RGPD
+          </div>
         </div>
       </div>
       <div>
-        <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Contact</div>
-        <div class="mt-3 flex flex-col gap-2">
-          <a href="mailto:osman874pro@gmail.com" class="w-fit hover:text-neutral-900">osman874pro@gmail.com</a>
-          <a href="https://www.linkedin.com/in/osman-undefined-316228420/?skipRedirect=true" target="_blank" rel="noopener noreferrer" class="w-fit hover:text-neutral-900">LinkedIn</a>
+        <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Navigation</div>
+        <div class="mt-3 flex flex-col gap-2.5" id="footer-nav-dark"></div>
+      </div>
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Ressources</div>
+        <div class="mt-3 flex flex-col gap-2.5">
+          <button onclick="scrollToId('apropos')" class="w-fit text-left text-neutral-400 hover:text-white">À propos</button>
+          <button onclick="scrollToId('tarifs')" class="w-fit text-left text-neutral-400 hover:text-white">Tarifs</button>
+          <a href="mailto:osman874pro@gmail.com" class="w-fit text-neutral-400 hover:text-white">Nous contacter</a>
+          <a href="https://www.linkedin.com/in/osman-undefined-316228420/?skipRedirect=true" target="_blank" rel="noopener noreferrer" class="w-fit text-neutral-400 hover:text-white">LinkedIn</a>
+        </div>
+      </div>
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Légal &amp; Sécurité</div>
+        <div class="mt-3 flex flex-col gap-2.5">
+          <button onclick="openLegal('mentions')" class="w-fit text-left text-neutral-400 hover:text-white">Mentions légales</button>
+          <button onclick="openLegal('confidentialite')" class="w-fit text-left text-neutral-400 hover:text-white">Confidentialité</button>
+          <button onclick="openLegal('cgu')" class="w-fit text-left text-neutral-400 hover:text-white">Conditions d'utilisation</button>
+          <button onclick="openLegal('dmca')" class="w-fit text-left text-neutral-400 hover:text-white">DMCA</button>
         </div>
       </div>
     </div>
-    <div class="mt-10 flex flex-col items-center gap-4 border-t border-black/5 pt-6 text-center sm:flex-row sm:justify-between sm:text-left">
-      <div>© <span id="year"></span> Bâtipro — Fait en France.</div>
-      <div class="flex items-center gap-2 text-[12px] text-neutral-400">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M3 10H21" stroke="currentColor" stroke-width="1.6"/>
-        </svg>
-        Paiement sécurisé par Stripe
+
+    <div class="mt-10 flex flex-col items-center gap-4 border-t border-white/10 pt-6 text-center sm:flex-row sm:justify-between sm:text-left">
+      <div class="text-[13px] text-neutral-500">© <span id="year"></span> Bâtipro — Créé en France pour vous.</div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-[12px] text-neutral-400">
+          🇫🇷 FR
+        </div>
+        <div class="flex items-center gap-3 text-neutral-500">
+          <a href="mailto:osman874pro@gmail.com" aria-label="Email" class="hover:text-white">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          </a>
+          <a href="https://www.linkedin.com/in/osman-undefined-316228420/?skipRedirect=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="hover:text-white">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.11 20.45H3.56V9h3.55v11.45z"/></svg>
+          </a>
+        </div>
+        <div class="flex items-center gap-2 text-[12px] text-neutral-500">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M3 10H21" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          Stripe
+        </div>
       </div>
     </div>
   </footer>
@@ -486,10 +545,30 @@
 <!-- AUTH MODAL (Connexion / Inscription) -->
 <div id="auth-modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
   <div class="modal-backdrop absolute inset-0 bg-neutral-950/60 backdrop-blur-sm" onclick="closeAuth()"></div>
-  <div class="modal-panel relative z-10 w-full max-w-[440px] max-h-[92vh] overflow-y-auto rounded-[24px] border border-black/5 bg-white p-6 shadow-2xl md:p-8">
-    <button onclick="closeAuth()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200" aria-label="Fermer">
+  <div class="modal-panel relative z-10 grid w-full max-w-[900px] max-h-[92vh] grid-cols-1 overflow-hidden overflow-y-auto rounded-[24px] border border-black/5 bg-white shadow-2xl md:grid-cols-2">
+    <button onclick="closeAuth()" class="absolute right-4 top-4 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-neutral-500 shadow hover:bg-neutral-100" aria-label="Fermer">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>
+
+    <!-- Volet visuel de marque -->
+    <div class="relative hidden overflow-hidden p-10 text-white md:flex md:flex-col md:justify-end" style="background:linear-gradient(160deg, #04070d 0%, #0a1a33 45%, var(--brand) 130%)">
+      <div class="anim-blob-a absolute -right-16 -top-16 h-[280px] w-[280px] rounded-full opacity-40 blur-[100px]" style="background:#0084FF"></div>
+      <div class="anim-blob-b absolute -left-10 bottom-10 h-[220px] w-[220px] rounded-full opacity-30 blur-[100px]" style="background:#FF801E"></div>
+      <div class="relative z-10">
+        <span class="text-2xl">🏗️</span>
+        <h3 class="mt-4 font-display text-3xl font-bold leading-tight">Lancez votre boîte du bâtiment, sans friction.</h3>
+        <p class="mt-3 text-[14px] text-white/70">Qualification, statut, dossier INPI et premier devis conforme : tout au même endroit.</p>
+      </div>
+      <div class="relative z-10 mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+        <div class="flex items-center justify-between text-[11px] text-white/50">
+          <span>DEVIS</span><span>1 870,00 €</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10"><div class="h-full w-3/4 rounded-full" style="background:var(--brand-2)"></div></div>
+        <div class="mt-2 text-[11px] text-white/50">Mentions légales BTP incluses automatiquement</div>
+      </div>
+    </div>
+
+    <div class="p-6 md:p-8">
 
     <div class="mb-6 flex rounded-full bg-neutral-100 p-1" id="auth-tabs">
       <button onclick="setAuthMode('signup')" data-auth-tab="signup" class="flex-1 rounded-full px-4 py-2 text-[14px] font-semibold transition">Créer un compte</button>
@@ -512,6 +591,21 @@
           <input type="text" id="signup-nom" required placeholder="Dupont" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
         </div>
       </div>
+
+      <div class="flex items-center gap-3 text-[12px] font-medium uppercase tracking-wide text-neutral-400">
+        <span class="h-px flex-1 bg-neutral-200"></span>ou<span class="h-px flex-1 bg-neutral-200"></span>
+      </div>
+      <div class="space-y-2.5">
+        <button type="button" onclick="oauthSignIn('google')" class="flex w-full items-center justify-center gap-2 rounded-xl border border-black/10 py-2.5 text-[14px] font-medium text-neutral-800 hover:bg-neutral-50">
+          <svg class="h-4 w-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.87c2.27-2.09 3.58-5.17 3.58-8.82Z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.08 7.94-2.91l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.37-2.28V6.63H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.37l4-3.09Z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.63l4 3.09C6.22 6.86 8.87 4.75 12 4.75Z"/></svg>
+          Continuer avec Google
+        </button>
+        <button type="button" onclick="oauthSignIn('azure')" class="flex w-full items-center justify-center gap-2 rounded-xl border border-black/10 py-2.5 text-[14px] font-medium text-neutral-800 hover:bg-neutral-50">
+          <svg class="h-4 w-4" viewBox="0 0 24 24"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="13" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="13" width="10" height="10" fill="#00A4EF"/><rect x="13" y="13" width="10" height="10" fill="#FFB900"/></svg>
+          Continuer avec Microsoft
+        </button>
+      </div>
+
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
         <input type="email" id="signup-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
@@ -568,6 +662,8 @@
       </div>
       <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Mettre à jour le mot de passe</button>
     </form>
+
+    </div>
   </div>
 </div>
 
@@ -1404,6 +1500,7 @@ animate();
     { id: "fonctionnalites", label: "Fonctionnalités" },
     { id: "how", label: "Comment ça marche" },
     { id: "apropos", label: "À propos" },
+    { id: "exemple", label: "Exemple concret" },
     { id: "tarifs", label: "Tarifs" },
   ];
 
@@ -1528,6 +1625,31 @@ animate();
   function scrollToId(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth', block:'start'}); }
   function toggleMenu(){ document.getElementById('mobile-menu').classList.toggle('hidden'); }
 
+  // ---------- Statut serveur (ping en direct) ----------
+  async function pingServer(){
+    const dot = document.getElementById('server-status-dot');
+    const pulse = document.getElementById('server-status-pulse');
+    const label = document.getElementById('server-status-label');
+    if (!dot || !label) return;
+    const url = window.SUPABASE_URL;
+    if (!url){ label.textContent = 'Hors ligne'; dot.style.background = '#9ca3af'; if(pulse) pulse.style.background = '#9ca3af'; return; }
+    const started = performance.now();
+    try {
+      // Requête légère en mode no-cors : on ne lit pas la réponse, on mesure juste le temps d'aller-retour réseau.
+      await fetch(url + '/auth/v1/health', { mode: 'no-cors', cache: 'no-store' });
+      const ms = Math.max(1, Math.round(performance.now() - started));
+      label.textContent = ms + ' ms';
+      dot.style.background = '#10b981';
+      if (pulse) pulse.style.background = '#10b981';
+    } catch (e) {
+      label.textContent = 'Hors ligne';
+      dot.style.background = '#ef4444';
+      if (pulse) pulse.style.background = '#ef4444';
+    }
+  }
+  pingServer();
+  setInterval(pingServer, 8000);
+
   // Nav
   document.getElementById('nav-links').innerHTML = NAV.map(n=>`
     <button data-nav="${n.id}" onclick="scrollToId('${n.id}')" class="nav-link relative rounded-full px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-950">${n.label}</button>
@@ -1535,7 +1657,7 @@ animate();
   document.getElementById('mobile-menu').innerHTML = NAV.map(n=>`
     <button onclick="scrollToId('${n.id}'); toggleMenu();" class="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-neutral-800 hover:bg-neutral-100">${n.label}</button>
   `).join('');
-  document.getElementById('footer-nav').innerHTML = NAV.map(n=>`<button onclick="scrollToId('${n.id}')" class="hover:text-neutral-900">${n.label}</button>`).join('');
+  document.getElementById('footer-nav-dark').innerHTML = NAV.map(n=>`<button onclick="scrollToId('${n.id}')" class="w-fit text-left text-neutral-400 hover:text-white">${n.label}</button>`).join('');
 
   // Stars
   // (badge étoiles retiré — plus de preuve sociale fictive)
@@ -1990,6 +2112,23 @@ animate();
       if (btn){ btn.disabled = false; btn.innerHTML = originalHTML; }
     }
   }
+
+  // Connexion via un fournisseur externe (Google / Microsoft) — nécessite que
+  // le provider correspondant soit activé côté projet Supabase (Auth > Providers).
+  async function oauthSignIn(provider){
+    const sb = window.__supabase;
+    if (!sb){ alert("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    try {
+      const { error } = await sb.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: window.location.href },
+      });
+      if (error) throw error;
+    } catch(e){
+      alert("Connexion " + (provider === 'google' ? 'Google' : 'Microsoft') + " indisponible pour le moment.\n\n(" + (e.message || e) + ")");
+    }
+  }
+  window.oauthSignIn = oauthSignIn;
 
   async function handleSignup(){
     const prenom = document.getElementById('signup-prenom').value.trim();
