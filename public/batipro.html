@@ -2616,6 +2616,9 @@ animate();
     if (sb) { try { await sb.auth.signOut(); } catch(e){ console.warn('Erreur lors de la déconnexion :', e); } }
     currentUser = null;
     updateAuthUI();
+    // Masque immédiatement "Mon espace" (sinon il ne disparaît qu'au
+    // prochain rechargement de page).
+    document.getElementById('espace-client').classList.add('hidden');
   }
 
   // ---------- Espace client ----------
@@ -3784,15 +3787,13 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
         </div>` : ''}
 
         <div class="mt-6 flex flex-wrap gap-3">
+          <button onclick="closeQualif(); goToEspaceClient();" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
+            <span class="text-[15px] font-semibold">Voir mon orientation dans mon espace</span>
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">${icon('arrow','h-4 w-4')}</span>
+          </button>
           ${res.status==='eligible' ? `
-            <button onclick="closeQualif(); openStatut();" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
-              <span class="text-[15px] font-semibold">${res.next}</span>
-              <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">${icon('arrow','h-4 w-4')}</span>
-            </button>` : `
-            <button onclick="resetQualif()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
-              <span class="text-[15px] font-semibold">Recommencer le test</span>
-              <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">${icon('arrow','h-4 w-4')}</span>
-            </button>`}
+            <button onclick="closeQualif(); openStatut();" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">${res.next}</button>` : `
+            <button onclick="resetQualif()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Recommencer le test</button>`}
           <button onclick="resetQualif()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier mes réponses</button>
         </div>
 
