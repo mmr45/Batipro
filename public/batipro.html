@@ -588,10 +588,47 @@
           </div>
         </div>
       </div>
+
+      <!-- Paramètres du compte -->
+      <div class="dash-card mt-5 p-6" data-reveal>
+        <div class="flex items-center gap-3">
+          <div class="dash-stat-icon" style="background:rgba(0,132,255,.08);color:var(--brand)">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <div>
+            <h3 class="text-[15px] font-semibold text-neutral-900">Paramètres du compte</h3>
+            <p class="text-[13px] text-neutral-500">Email, mot de passe, téléphone</p>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <!-- Email -->
+          <div>
+            <label class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Adresse email</label>
+            <input id="settings-email" type="email" placeholder="votre@email.com" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            <button onclick="updateAccountEmail()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Mettre à jour</button>
+            <p id="settings-email-msg" class="mt-1.5 min-h-[16px] text-[12px]"></p>
+          </div>
+
+          <!-- Mot de passe -->
+          <div>
+            <label class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Nouveau mot de passe</label>
+            <input id="settings-password" type="password" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            <button onclick="updateAccountPassword()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Mettre à jour</button>
+            <p id="settings-password-msg" class="mt-1.5 min-h-[16px] text-[12px]"></p>
+          </div>
+
+          <!-- Téléphone -->
+          <div>
+            <label class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Numéro de téléphone</label>
+            <input id="settings-telephone" type="tel" placeholder="06 12 34 56 78" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            <button onclick="updateAccountPhone()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Mettre à jour</button>
+            <p id="settings-telephone-msg" class="mt-1.5 min-h-[16px] text-[12px]"></p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
-
-  <!-- Page de rapport de qualification (vue imprimable / téléchargeable) -->
   <div id="rapport-qualif-page" class="fixed inset-0 z-[200] hidden overflow-y-auto bg-white">
     <div class="rapport-shell">
       <div class="rapport-noprint mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-6">
@@ -2350,6 +2387,7 @@ animate();
       email: user.email,
       prenom: meta.prenom || meta.first_name || '',
       nom: meta.nom || meta.last_name || '',
+      telephone: meta.telephone || meta.phone || '',
     };
   }
 
@@ -2584,6 +2622,11 @@ animate();
     document.getElementById('espace-email').textContent = currentUser.email;
     const initials = ((currentUser.prenom||'')[0]||'') + ((currentUser.nom||'')[0]||'');
     document.getElementById('espace-avatar').textContent = (initials || (currentUser.email||'?')[0]).toUpperCase();
+
+    const emailInput = document.getElementById('settings-email');
+    const phoneInput = document.getElementById('settings-telephone');
+    if (emailInput) emailInput.value = currentUser.email || '';
+    if (phoneInput) phoneInput.value = currentUser.telephone || '';
 
     const statutEl = document.getElementById('espace-statut');
     const manageBtn = document.getElementById('espace-manage-btn');
@@ -2934,7 +2977,9 @@ animate();
     currentUser = mapSupabaseUser(data.user);
     updateAuthUI();
     closeAuth();
-    if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
+    const fn = pendingAfterAuth || goToEspaceClient;
+    pendingAfterAuth = null;
+    fn();
   }
 
   function togglePasswordVisibility(inputId, btn){
@@ -2964,7 +3009,9 @@ animate();
     currentUser = mapSupabaseUser(data.user);
     updateAuthUI();
     closeAuth();
-    if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
+    const fn = pendingAfterAuth || goToEspaceClient;
+    pendingAfterAuth = null;
+    fn();
   }
 
   window.openAuth = openAuth;
@@ -2974,6 +3021,78 @@ animate();
   window.handleLogin = handleLogin;
   window.handleForgotPassword = handleForgotPassword;
   window.handleResetPassword = handleResetPassword;
+
+  // ---------- Paramètres du compte (email / mot de passe / téléphone) ----------
+  function setSettingsMsg(id, text, ok){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = ok ? '#10b981' : '#ef4444';
+  }
+
+  async function updateAccountEmail(){
+    const input = document.getElementById('settings-email');
+    const email = (input.value || '').trim();
+    if (!email || !email.includes('@')){
+      setSettingsMsg('settings-email-msg', 'Adresse email invalide.', false);
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb){
+      setSettingsMsg('settings-email-msg', 'Connexion indisponible, réessayez.', false);
+      return;
+    }
+    setSettingsMsg('settings-email-msg', 'Mise à jour…', true);
+    const { error } = await sb.auth.updateUser({ email });
+    if (error){
+      setSettingsMsg('settings-email-msg', 'Erreur : ' + error.message, false);
+      return;
+    }
+    setSettingsMsg('settings-email-msg', 'Email de confirmation envoyé à la nouvelle adresse.', true);
+  }
+  window.updateAccountEmail = updateAccountEmail;
+
+  async function updateAccountPassword(){
+    const input = document.getElementById('settings-password');
+    const password = input.value || '';
+    if (password.length < 8){
+      setSettingsMsg('settings-password-msg', 'Minimum 8 caractères.', false);
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb){
+      setSettingsMsg('settings-password-msg', 'Connexion indisponible, réessayez.', false);
+      return;
+    }
+    setSettingsMsg('settings-password-msg', 'Mise à jour…', true);
+    const { error } = await sb.auth.updateUser({ password });
+    if (error){
+      setSettingsMsg('settings-password-msg', 'Erreur : ' + error.message, false);
+      return;
+    }
+    input.value = '';
+    setSettingsMsg('settings-password-msg', 'Mot de passe mis à jour.', true);
+  }
+  window.updateAccountPassword = updateAccountPassword;
+
+  async function updateAccountPhone(){
+    const input = document.getElementById('settings-telephone');
+    const telephone = (input.value || '').trim();
+    const sb = window.__supabase;
+    if (!sb){
+      setSettingsMsg('settings-telephone-msg', 'Connexion indisponible, réessayez.', false);
+      return;
+    }
+    setSettingsMsg('settings-telephone-msg', 'Mise à jour…', true);
+    const { error } = await sb.auth.updateUser({ data: { telephone } });
+    if (error){
+      setSettingsMsg('settings-telephone-msg', 'Erreur : ' + error.message, false);
+      return;
+    }
+    if (currentUser) currentUser.telephone = telephone;
+    setSettingsMsg('settings-telephone-msg', 'Numéro enregistré.', true);
+  }
+  window.updateAccountPhone = updateAccountPhone;
   window.requireAuth = requireAuth;
   window.logout = logout;
   const sessionReady = restoreSession();
