@@ -613,7 +613,12 @@
           <!-- Mot de passe -->
           <div>
             <label class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Mot de passe</label>
-            <input id="settings-password-old" type="password" placeholder="Mot de passe actuel" autocomplete="current-password" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            <div class="relative mt-2">
+              <input id="settings-password-old" type="password" placeholder="Mot de passe actuel" autocomplete="current-password" class="w-full rounded-xl border border-black/10 px-3.5 py-2.5 pr-10 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+              <button type="button" onclick="togglePasswordVisibility('settings-password-old', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800" aria-label="Afficher le mot de passe" tabindex="-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
             <button onclick="updateAccountPassword()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Recevoir le lien de changement</button>
             <p class="mt-1.5 text-[11px] text-neutral-400">Un email de vérification vous permettra de choisir le nouveau mot de passe.</p>
             <p id="settings-password-msg" class="mt-1.5 min-h-[16px] text-[12px]"></p>
@@ -977,7 +982,12 @@
       <p class="text-[13px] text-neutral-500">Choisissez un nouveau mot de passe pour votre compte.</p>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Nouveau mot de passe</label>
-        <input type="password" id="reset-password" required minlength="8" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <div class="relative mt-2">
+          <input type="password" id="reset-password" required minlength="8" placeholder="8 caractères minimum" class="w-full rounded-xl border border-black/10 px-3 py-2 pr-10 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <button type="button" onclick="togglePasswordVisibility('reset-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800" aria-label="Afficher le mot de passe" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
       </div>
       <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Mettre à jour le mot de passe</button>
     </form>
@@ -5011,4 +5021,3 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
 </script>
 </body>
 </html>
- 
