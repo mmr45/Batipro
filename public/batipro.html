@@ -144,6 +144,74 @@
     background: rgba(0,132,255,.08);
     color: var(--brand);
   }
+
+  /* ---------- Dashboard "Mon espace" ---------- */
+  .dash-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    padding: 40px 32px;
+    background: radial-gradient(120% 140% at 0% 0%, #101425 0%, #05070f 55%, #000 100%);
+    color: #fff;
+  }
+  .dash-hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(340px 340px at 88% -10%, rgba(0,132,255,.45), transparent 60%),
+      radial-gradient(280px 280px at 100% 100%, rgba(255,128,30,.28), transparent 60%);
+    pointer-events: none;
+  }
+  .dash-hero::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(circle at 85% 0%, black, transparent 65%);
+    mask-image: radial-gradient(circle at 85% 0%, black, transparent 65%);
+    pointer-events: none;
+  }
+  .dash-avatar {
+    display: grid; place-items: center;
+    height: 64px; width: 64px; border-radius: 20px;
+    font-weight: 700; font-size: 22px; letter-spacing: .02em;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    box-shadow: 0 10px 30px rgba(0,132,255,.45);
+    color: #fff;
+  }
+  .dash-card {
+    position: relative;
+    border-radius: 22px;
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(0,0,0,.06);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 12px 28px -12px rgba(16,24,40,.10);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .dash-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 20px 40px -14px rgba(16,24,40,.16);
+    border-color: rgba(0,132,255,.25);
+  }
+  .dash-glow-btn {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    box-shadow: 0 8px 20px -6px rgba(0,132,255,.55);
+  }
+  .dash-glow-btn:hover { box-shadow: 0 10px 26px -6px rgba(0,132,255,.7); }
+  .dash-stat-icon {
+    display:grid; place-items:center; height:44px; width:44px; border-radius:14px;
+  }
+
+  /* ---------- Page de rapport imprimable (qualification) ---------- */
+  #rapport-qualif-page { background:#fff; }
+  #rapport-qualif-page .rapport-shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  @media print {
+    body * { visibility: hidden; }
+    #rapport-qualif-page, #rapport-qualif-page * { visibility: visible; }
+    #rapport-qualif-page { position: absolute; inset: 0; padding: 0; }
+    .rapport-noprint { display: none !important; }
+    .rapport-shell { max-width: 100% !important; padding: 0 24px !important; }
+  }
   @media (prefers-reduced-motion: reduce) {
     #devis-carousel-track { transition: none; }
   }
@@ -457,44 +525,97 @@
 
   <!-- Espace client -->
   <section id="espace-client" class="hidden scroll-mt-28 py-28">
-    <div class="mx-auto max-w-2xl px-6">
-      <h2 class="font-display text-3xl font-bold md:text-4xl">Mon espace</h2>
+    <div class="mx-auto max-w-4xl px-6">
 
-      <div class="mt-10 rounded-2xl border border-neutral-200 p-6 space-y-6">
-        <div>
-          <p class="text-sm text-neutral-500">Nom</p>
-          <p id="espace-nom" class="font-medium">—</p>
+      <!-- Hero -->
+      <div class="dash-hero" data-reveal>
+        <div class="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-4">
+            <div id="espace-avatar" class="dash-avatar">--</div>
+            <div>
+              <p class="text-[13px] font-medium uppercase tracking-[0.15em] text-white/50">Mon espace</p>
+              <h2 id="espace-nom" class="font-display text-2xl font-bold md:text-3xl">—</h2>
+              <p id="espace-email" class="mt-0.5 text-[13px] text-white/60">—</p>
+            </div>
+          </div>
+          <button onclick="logout()" class="rapport-noprint inline-flex items-center justify-center gap-2 self-start rounded-2xl border border-white/15 bg-white/5 px-4 py-2.5 text-[13px] font-semibold text-white/80 backdrop-blur transition-colors hover:bg-white/10 sm:self-auto">
+            Se déconnecter
+          </button>
         </div>
-        <div>
-          <p class="text-sm text-neutral-500">Email</p>
-          <p id="espace-email" class="font-medium">—</p>
-        </div>
-        <div>
-          <p class="text-sm text-neutral-500">Abonnement</p>
-          <p id="espace-statut" class="font-medium">Chargement…</p>
-        </div>
-
-        <button
-          id="espace-manage-btn"
-          data-manage-subscription-btn
-          onclick="openBillingPortal()"
-          class="hidden inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait"
-          style="background:#0a0a0a">
-          Gérer mon abonnement
-        </button>
       </div>
 
-      <div class="mt-6 rounded-2xl border border-neutral-200 p-6">
-        <div class="flex items-center justify-between gap-4">
-          <p class="text-sm text-neutral-500">Test de qualification</p>
-          <button onclick="openQualif()" class="text-[13px] font-semibold" style="color:var(--brand)">Refaire le test</button>
+      <!-- Cartes -->
+      <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+
+        <!-- Abonnement -->
+        <div class="dash-card p-6" data-reveal>
+          <div class="flex items-start justify-between gap-3">
+            <div class="dash-stat-icon" style="background:rgba(0,132,255,.08);color:var(--brand)">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
+            </div>
+            <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Abonnement</span>
+          </div>
+          <p id="espace-statut" class="mt-4 text-[15px] font-semibold text-neutral-900">Chargement…</p>
+          <button
+            id="espace-manage-btn"
+            data-manage-subscription-btn
+            onclick="openBillingPortal()"
+            class="hidden mt-4 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait"
+            style="background:#0a0a0a">
+            Gérer mon abonnement
+          </button>
         </div>
-        <div id="espace-qualif" class="mt-3">
-          <p class="text-neutral-500 text-[14px]">Chargement…</p>
+
+        <!-- Qualification -->
+        <div class="dash-card p-6" data-reveal>
+          <div class="flex items-start justify-between gap-3">
+            <div id="espace-qualif-icon" class="dash-stat-icon" style="background:rgba(0,132,255,.08);color:var(--brand)">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+            </div>
+            <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Test de qualification</span>
+          </div>
+          <div id="espace-qualif" class="mt-4">
+            <p class="text-neutral-500 text-[14px]">Chargement…</p>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <button id="espace-qualif-voir-btn" onclick="openQualifReport()" class="hidden inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02]" style="background:var(--brand)">
+              Voir le rapport
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </button>
+            <button onclick="openQualif()" class="inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              Refaire le test
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Page de rapport de qualification (vue imprimable / téléchargeable) -->
+  <div id="rapport-qualif-page" class="fixed inset-0 z-[200] hidden overflow-y-auto bg-white">
+    <div class="rapport-shell">
+      <div class="rapport-noprint mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-6">
+        <div class="flex items-center gap-2">
+          <div class="flex h-8 w-8 items-center justify-center rounded-[9px] text-white" style="background:var(--brand)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 11L12 4L21 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 9.5V20H19V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="10" y="13" width="4" height="7" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="font-display text-[15px] font-bold">Bâti<span style="color:var(--brand-2)">pro</span></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="dash-glow-btn inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white">
+            Télécharger en PDF
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          </button>
+          <button onclick="closeQualifReport()" class="rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Fermer</button>
+        </div>
+      </div>
+      <div id="rapport-qualif-content"></div>
+    </div>
+  </div>
 
   <!-- CTA -->
   <section id="inscription" class="scroll-mt-28 pb-28">
@@ -2458,8 +2579,11 @@ animate();
     if (!currentUser){ section.classList.add('hidden'); return; }
 
     section.classList.remove('hidden');
-    document.getElementById('espace-nom').textContent = `${currentUser.prenom} ${currentUser.nom}`;
+    const fullName = `${currentUser.prenom} ${currentUser.nom}`.trim();
+    document.getElementById('espace-nom').textContent = fullName || currentUser.email;
     document.getElementById('espace-email').textContent = currentUser.email;
+    const initials = ((currentUser.prenom||'')[0]||'') + ((currentUser.nom||'')[0]||'');
+    document.getElementById('espace-avatar').textContent = (initials || (currentUser.email||'?')[0]).toUpperCase();
 
     const statutEl = document.getElementById('espace-statut');
     const manageBtn = document.getElementById('espace-manage-btn');
@@ -2502,9 +2626,16 @@ animate();
   // connecté : d'abord dans Supabase (table `submissions`), avec repli sur
   // localStorage si Supabase est indisponible ou si la ligne n'a pas encore
   // été synchronisée (cas d'un envoi fait avant configuration de la table).
+  // Conserve le dernier résultat complet de qualification (objet `res`) pour
+  // permettre l'ouverture de la page de rapport détaillée / imprimable.
+  window.__lastQualifSubmission = null;
+
   async function loadEspaceQualif(userId){
     const box = document.getElementById('espace-qualif');
+    const voirBtn = document.getElementById('espace-qualif-voir-btn');
     box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+    if (voirBtn) voirBtn.classList.add('hidden');
+    window.__lastQualifSubmission = null;
 
     const sb = window.__supabase;
     let submission = null;
@@ -2520,7 +2651,8 @@ animate();
       if (error){
         console.warn('Erreur chargement du test de qualification :', error);
       } else if (data && data.length){
-        submission = { summary: data[0].summary, date: data[0].created_at };
+        const payload = data[0].payload || {};
+        submission = { summary: data[0].summary, date: data[0].created_at, res: payload._data || payload.data || null };
       }
     }
 
@@ -2529,18 +2661,158 @@ animate();
       const list = loadSubmissions().filter(s => s.type === 'qualif' && currentUser && s.email === currentUser.email);
       if (list.length){
         const last = list[list.length - 1];
-        submission = { summary: last.summary, date: last.date };
+        submission = { summary: last.summary, date: last.date, res: last.data || null };
       }
     }
 
     if (submission){
       const d = new Date(submission.date);
+      const status = submission.res ? submission.res.status : null;
+      const color = status==='eligible' ? '#10b981' : status==='presque' ? '#f59e0b' : status==='non' ? '#ef4444' : 'var(--brand)';
+      const bg = status==='eligible' ? 'rgba(16,185,129,.08)' : status==='presque' ? 'rgba(245,158,11,.08)' : status==='non' ? 'rgba(239,68,68,.08)' : 'rgba(0,132,255,.08)';
+      const icon = document.getElementById('espace-qualif-icon');
+      if (icon) icon.style.cssText = `background:${bg};color:${color}`;
       box.innerHTML = `
         <p class="font-medium">${submission.summary}</p>
         <p class="mt-1 text-[13px] text-neutral-500">Réalisé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
       `;
+      if (submission.res){
+        window.__lastQualifSubmission = submission;
+        if (voirBtn) voirBtn.classList.remove('hidden');
+      }
     } else {
       box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore réalisé le test de qualification.</p>`;
+    }
+  }
+
+  // ---------- Rapport de qualification (page dédiée, imprimable / PDF) ----------
+  // Construit le contenu HTML détaillé du rapport à partir d'un objet `res`
+  // (même structure que celle produite par evaluateQualif) et des métadonnées
+  // de la soumission (nom, email, date).
+  function buildQualifReportHTML(res, meta){
+    const status = res.status;
+    const color = status==='eligible' ? '#10b981' : status==='presque' ? '#f59e0b' : '#ef4444';
+    const bg = status==='eligible' ? 'rgba(16,185,129,.08)' : status==='presque' ? 'rgba(245,158,11,.08)' : 'rgba(239,68,68,.08)';
+    const badge = status==='eligible' ? 'Éligible' : status==='presque' ? 'Presque éligible' : 'Non éligible en l\'état';
+    const d = new Date(meta.date);
+
+    return `
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:${bg};color:${color}">Résultat — ${badge}</span>
+      <h1 class="mt-4 font-display text-3xl font-bold md:text-4xl">${res.title}</h1>
+      <p class="mt-3 text-[14px] text-neutral-600">Titulaire : <b>${meta.nom || '—'}</b>${meta.email ? ` · ${meta.email}` : ''}</p>
+      <p class="mt-1 text-[14px] text-neutral-600">Métier : <b>${res.metier.l}</b> · Diplôme : <b>${res.diplome.l}</b> · Expérience : <b>${res.exp} an(s)</b>${res.ueDiploma?' · <b>Diplôme UE reconnu</b>':''}</p>
+      <p class="mt-1 text-[13px] text-neutral-500">Test réalisé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+
+      <div class="mt-6 rounded-2xl border p-6" style="border-color:${color}30;background:${bg}">
+        <h4 class="font-semibold text-neutral-900">Motifs de la décision</h4>
+        <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-700 list-disc list-inside">
+          ${res.reasons.map(r=>`<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+
+      ${res.warnings && res.warnings.length?`
+      <div class="mt-4 rounded-2xl border border-neutral-200 bg-white p-5">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">À retenir</h4>
+        <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-700 list-disc list-inside">
+          ${res.warnings.map(w=>`<li>${w}</li>`).join('')}
+        </ul>
+      </div>`:''}
+
+      ${res.specifics && res.specifics.length ? `
+      <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide" style="color:#b45309">Exigences spécifiques au métier « ${res.metier.l} »</h4>
+        <ul class="mt-3 space-y-3 text-[14px] text-neutral-800">
+          ${res.specifics.map(s=>`<li class="flex flex-col rounded-xl border border-black/5 bg-white p-3"><span class="font-semibold">${s.label}</span><span class="text-[12px] text-neutral-600 mt-0.5">${s.detail}</span></li>`).join('')}
+        </ul>
+      </div>` : ''}
+
+      <p class="mt-8 text-[12px] text-neutral-400">Document généré par Bâtipro — ${new Date().toLocaleString('fr-FR')}. Ce rapport a valeur d'auto-évaluation ; la Chambre de Métiers et de l'Artisanat validera formellement la qualification lors de l'immatriculation.</p>
+    `;
+  }
+
+  // Ouvre la page de rapport dans un nouvel onglet (URL dédiée avec ?rapport=qualification).
+  function openQualifReport(){
+    const url = new URL(window.location.href);
+    url.search = '?rapport=qualification';
+    url.hash = '';
+    window.open(url.toString(), '_blank', 'noopener');
+  }
+  window.openQualifReport = openQualifReport;
+
+  function closeQualifReport(){
+    const page = document.getElementById('rapport-qualif-page');
+    if (page) page.classList.add('hidden');
+    document.body.style.overflow = '';
+    // Si l'onglet a été ouvert uniquement pour le rapport, on retire le
+    // paramètre d'URL pour retrouver le site normal sans le rouvrir.
+    const url = new URL(window.location.href);
+    url.search = '';
+    window.history.replaceState({}, '', url.toString());
+  }
+  window.closeQualifReport = closeQualifReport;
+
+  // Affiche la page de rapport plein écran, en récupérant le dernier test de
+  // qualification de l'utilisateur connecté (Supabase, avec repli localStorage).
+  async function showQualifReportPage(){
+    const page = document.getElementById('rapport-qualif-page');
+    const content = document.getElementById('rapport-qualif-content');
+    if (!page || !content) return;
+    page.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    content.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement du rapport…</p>';
+
+    if (!currentUser){
+      content.innerHTML = `
+        <p class="text-neutral-600 text-[14px]">Vous devez être connecté pour consulter votre rapport de qualification.</p>
+        <button onclick="closeQualifReport(); openAuth();" class="rapport-noprint mt-4 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white" style="background:var(--brand)">Se connecter</button>
+      `;
+      return;
+    }
+
+    const userId = currentUser.id || currentUser.user_id;
+    let submission = window.__lastQualifSubmission;
+
+    if (!submission){
+      const sb = window.__supabase;
+      if (sb && userId){
+        const { data, error } = await sb
+          .from('submissions')
+          .select('summary, payload, created_at')
+          .eq('user_id', userId)
+          .eq('type', 'qualif')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (!error && data && data.length){
+          const payload = data[0].payload || {};
+          submission = { summary: data[0].summary, date: data[0].created_at, res: payload._data || payload.data || null };
+        }
+      }
+      if (!submission){
+        const list = loadSubmissions().filter(s => s.type === 'qualif' && s.email === currentUser.email);
+        if (list.length){
+          const last = list[list.length - 1];
+          submission = { summary: last.summary, date: last.date, res: last.data || null };
+        }
+      }
+    }
+
+    if (submission && submission.res){
+      content.innerHTML = buildQualifReportHTML(submission.res, {
+        nom: `${currentUser.prenom} ${currentUser.nom}`.trim(),
+        email: currentUser.email,
+        date: submission.date,
+      });
+    } else {
+      content.innerHTML = `<p class="text-neutral-600 text-[14px]">Aucun test de qualification trouvé pour ce compte. <button onclick="closeQualifReport(); openQualif();" class="rapport-noprint font-semibold" style="color:var(--brand)">Passer le test</button></p>`;
+    }
+  }
+
+  // Vérifie au chargement si l'URL demande l'affichage direct du rapport
+  // (utilisé lorsque le rapport est ouvert dans un nouvel onglet).
+  function checkQualifReportRoute(){
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('rapport') === 'qualification'){
+      showQualifReportPage();
     }
   }
 
@@ -2706,6 +2978,7 @@ animate();
   window.logout = logout;
   const sessionReady = restoreSession();
   updateAuthUI();
+  sessionReady.then(checkQualifReportRoute).catch(checkQualifReportRoute);
 
   // ---------- LEGAL MODAL ----------
   const LEGAL_CONTENT = {
