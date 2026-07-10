@@ -483,6 +483,16 @@
           Gérer mon abonnement
         </button>
       </div>
+
+      <div class="mt-6 rounded-2xl border border-neutral-200 p-6">
+        <div class="flex items-center justify-between gap-4">
+          <p class="text-sm text-neutral-500">Test de qualification</p>
+          <button onclick="openQualif()" class="text-[13px] font-semibold" style="color:var(--brand)">Refaire le test</button>
+        </div>
+        <div id="espace-qualif" class="mt-3">
+          <p class="text-neutral-500 text-[14px]">Chargement…</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -2483,6 +2493,54 @@ animate();
       // pas de bouton "gérer" : ce n'est pas un abonnement récurrent
     } else {
       statutEl.textContent = 'Aucun abonnement actif — offre Gratuite';
+    }
+
+    await loadEspaceQualif(userId);
+  }
+
+  // Récupère et affiche le dernier test de qualification de l'utilisateur
+  // connecté : d'abord dans Supabase (table `submissions`), avec repli sur
+  // localStorage si Supabase est indisponible ou si la ligne n'a pas encore
+  // été synchronisée (cas d'un envoi fait avant configuration de la table).
+  async function loadEspaceQualif(userId){
+    const box = document.getElementById('espace-qualif');
+    box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+
+    const sb = window.__supabase;
+    let submission = null;
+
+    if (sb && userId){
+      const { data, error } = await sb
+        .from('submissions')
+        .select('summary, payload, created_at')
+        .eq('user_id', userId)
+        .eq('type', 'qualif')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (error){
+        console.warn('Erreur chargement du test de qualification :', error);
+      } else if (data && data.length){
+        submission = { summary: data[0].summary, date: data[0].created_at };
+      }
+    }
+
+    // Repli localStorage si rien trouvé côté Supabase
+    if (!submission){
+      const list = loadSubmissions().filter(s => s.type === 'qualif' && currentUser && s.email === currentUser.email);
+      if (list.length){
+        const last = list[list.length - 1];
+        submission = { summary: last.summary, date: last.date };
+      }
+    }
+
+    if (submission){
+      const d = new Date(submission.date);
+      box.innerHTML = `
+        <p class="font-medium">${submission.summary}</p>
+        <p class="mt-1 text-[13px] text-neutral-500">Réalisé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+      `;
+    } else {
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore réalisé le test de qualification.</p>`;
     }
   }
 
