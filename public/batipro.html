@@ -43,8 +43,9 @@
 </script>
 <style>
   :root { --brand: #0084FF; --brand-2: #60B1FF; --accent: #FF801E; }
-  html { scroll-behavior: smooth; }
-  body { font-family: 'Inter', sans-serif; background: #fff; color: #0a0a0a; }
+  html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
+  body { font-family: 'Inter', sans-serif; background: #fff; color: #0a0a0a; overflow-x: hidden; width: 100%; position: relative; max-width: 100vw; }
+  img, svg, video { max-width: 100%; height: auto; }
   h1, h2, h3, .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -0.02em; }
 
   @keyframes floaty { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-24px) rotate(2deg)} }
@@ -750,7 +751,12 @@
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
-        <input type="password" id="signup-password" required minlength="8" placeholder="8 caractères minimum" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <div class="relative mt-2">
+          <input type="password" id="signup-password" required minlength="8" placeholder="8 caractères minimum" class="w-full rounded-xl border border-black/10 px-3 py-2 pr-10 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <button type="button" onclick="togglePasswordVisibility('signup-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800" aria-label="Afficher le mot de passe" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
       </div>
       <label class="flex items-start gap-2 text-[13px] text-neutral-600">
         <input type="checkbox" id="signup-cgu" required class="mt-0.5" style="accent-color:var(--brand)">
@@ -769,7 +775,12 @@
       </div>
       <div>
         <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
-        <input type="password" id="login-password" required class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        <div class="relative mt-2">
+          <input type="password" id="login-password" required class="w-full rounded-xl border border-black/10 px-3 py-2 pr-10 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800" aria-label="Afficher le mot de passe" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
       </div>
       <div class="flex justify-end">
         <button type="button" onclick="setAuthMode('forgot')" class="text-[13px] font-semibold" style="color:var(--brand)">Mot de passe oublié ?</button>
@@ -1725,7 +1736,6 @@ animate();
     { icon:"shield", title:"Test de qualification", desc:"Vérification factuelle et automatique de vos diplômes et de votre expérience selon la loi française.", tag:"100% automatisé" },
     { icon:"scale", title:"Simulateur de statut", desc:"Pré-orientation vers Micro, EI ou SASU avec niveau de confiance affiché et alerte si validation experte requise.", tag:"Pré-orientation" },
     { icon:"file-check", title:"Générateur de dossier", desc:"Saisie unique, dossier complet et pièces prêtes à téléverser sur le Guichet Unique INPI.", tag:"Conforme INPI" },
-    { icon:"handshake", title:"Passerelle partenaires", desc:"Redirection immédiate vers Dougs, Indy, LegalPlace via liens d'affiliation trackés — sans intermédiaire.", tag:"Sans friction" },
     { icon:"umbrella", title:"Assurance décennale & RC Pro", desc:"Seuils de garantie de référence par métier pour éviter la sous-couverture, puis comparateur assurance.", tag:"Garde-fou intégré" },
     { icon:"file-text", title:"Éditeur de devis conforme", desc:"Mentions légales BTP, décennale, TVA par type de travaux : votre premier devis prêt à envoyer.", tag:"Conforme BTP" },
   ];
@@ -1947,7 +1957,7 @@ animate();
     // Supabase "create-checkout", qui doit savoir faire correspondre chaque
     // identifiant à son Price ID Stripe (le site ne connaît pas les Price IDs).
     { name:"Gratuit", price:"0 €", sub:"pour toujours", features:["Test de qualification complet","Simulateur de statut","Alertes de risque","Support par email"], cta:"Commencer", highlight:false, plan:null },
-    { name:"Lancement", price:"89 €", sub:"paiement unique", features:["Tout Gratuit +","Générateur de dossier INPI","Pièces justificatives incluses","Redirection partenaires trackée"], cta:"Créer ma boîte", highlight:true, plan:"dossier" },
+    { name:"Lancement", price:"89 €", sub:"paiement unique", features:["Tout Gratuit +","Générateur de dossier INPI","Pièces justificatives incluses"], cta:"Créer ma boîte", highlight:true, plan:"dossier" },
     { name:"Pro", price:"19 €", sub:"/ mois", features:["Tout Lancement +","Éditeur de devis conforme","Mises à jour TVA & décennale","Archivage horodaté"], cta:"Passer Pro", highlight:false, plan:"pro" },
   ];
 
@@ -2595,6 +2605,17 @@ animate();
     updateAuthUI();
     closeAuth();
     if (pendingAfterAuth) { const fn = pendingAfterAuth; pendingAfterAuth = null; fn(); }
+  }
+
+  function togglePasswordVisibility(inputId, btn){
+    const input = document.getElementById(inputId);
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    btn.setAttribute('aria-label', isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    const svg = btn.querySelector('svg');
+    svg.innerHTML = isHidden
+      ? '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.53M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle>';
   }
 
   async function handleLogin(){
