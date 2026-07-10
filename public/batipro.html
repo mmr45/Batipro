@@ -614,10 +614,11 @@
           <div>
             <label class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Mot de passe</label>
             <input id="settings-password-old" type="password" placeholder="Mot de passe actuel" autocomplete="current-password" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
-            <input id="settings-password" type="password" placeholder="Nouveau mot de passe (8 car. min.)" autocomplete="new-password" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
-            <button onclick="updateAccountPassword()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Mettre à jour</button>
+            <button onclick="updateAccountPassword()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Recevoir le lien de changement</button>
+            <p class="mt-1.5 text-[11px] text-neutral-400">Un email de vérification vous permettra de choisir le nouveau mot de passe.</p>
             <p id="settings-password-msg" class="mt-1.5 min-h-[16px] text-[12px]"></p>
           </div>
+
 
           <!-- Téléphone -->
           <div>
@@ -2609,8 +2610,13 @@ animate();
 
   // ---------- Espace client ----------
   function goToEspaceClient(){
-    document.getElementById('espace-client').scrollIntoView({ behavior: 'smooth' });
     loadEspaceClient();
+    // On laisse le temps au navigateur de calculer la mise en page de la
+    // section (qui vient d'être démasquée) avant de défiler jusqu'à elle,
+    // sinon le premier clic ne scrolle pas (l'élément était encore caché).
+    requestAnimationFrame(() => {
+      document.getElementById('espace-client').scrollIntoView({ behavior: 'smooth' });
+    });
   }
 
   async function loadEspaceClient(){
@@ -3055,20 +3061,10 @@ animate();
 
   async function updateAccountPassword(){
     const oldInput = document.getElementById('settings-password-old');
-    const input = document.getElementById('settings-password');
     const oldPassword = oldInput.value || '';
-    const password = input.value || '';
 
     if (!oldPassword){
       setSettingsMsg('settings-password-msg', 'Merci de saisir votre mot de passe actuel.', false);
-      return;
-    }
-    if (password.length < 8){
-      setSettingsMsg('settings-password-msg', 'Le nouveau mot de passe doit contenir au moins 8 caractères.', false);
-      return;
-    }
-    if (password === oldPassword){
-      setSettingsMsg('settings-password-msg', "Le nouveau mot de passe doit être différent de l'ancien.", false);
       return;
     }
     const sb = window.__supabase;
@@ -3079,7 +3075,7 @@ animate();
 
     setSettingsMsg('settings-password-msg', 'Vérification…', true);
 
-    // On revérifie l'ancien mot de passe avant toute modification, pour
+    // On revérifie l'ancien mot de passe avant d'envoyer le lien, pour
     // s'assurer que c'est bien le titulaire du compte qui agit.
     const { error: signInError } = await sb.auth.signInWithPassword({
       email: currentUser.email,
@@ -3090,18 +3086,18 @@ animate();
       return;
     }
 
-    setSettingsMsg('settings-password-msg', 'Mise à jour…', true);
-    const { error } = await sb.auth.updateUser({ password });
+    // Envoi du lien de vérification par email : l'utilisateur choisira son
+    // nouveau mot de passe en cliquant dessus (même mécanisme que "mot de
+    // passe oublié" — voir handleForgotPassword / événement PASSWORD_RECOVERY).
+    const { error } = await sb.auth.resetPasswordForEmail(currentUser.email, {
+      redirectTo: window.location.origin + window.location.pathname,
+    });
     if (error){
-      const msg = /different from the old|same as the old/i.test(error.message)
-        ? "Le nouveau mot de passe doit être différent de l'ancien."
-        : 'Erreur : ' + error.message;
-      setSettingsMsg('settings-password-msg', msg, false);
+      setSettingsMsg('settings-password-msg', 'Erreur : ' + error.message, false);
       return;
     }
     oldInput.value = '';
-    input.value = '';
-    setSettingsMsg('settings-password-msg', 'Mot de passe mis à jour.', true);
+    setSettingsMsg('settings-password-msg', 'Email envoyé ! Cliquez sur le lien reçu pour choisir votre nouveau mot de passe.', true);
   }
   window.updateAccountPassword = updateAccountPassword;
 
