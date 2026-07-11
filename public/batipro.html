@@ -781,7 +781,7 @@
               Télécharger mon dossier
               <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
             </button>
-            <button id="espace-inpi-creer-btn" onclick="openInpi()" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+            <button id="espace-inpi-creer-btn" onclick="openInpiFromEspace()" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
               Créer mon dossier INPI
             </button>
             <button id="espace-inpi-acheter-btn" onclick="handlePricingClick('dossier')" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
@@ -4927,6 +4927,44 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     }
     return true;
   }
+
+  // Sécurité : re-vérifie l'accès (Pack Lancement "dossier" ou abonnement "pro")
+  // AVANT d'ouvrir le générateur de dossier INPI depuis "Mon espace", quelle
+  // que soit la raison pour laquelle le bouton "Créer mon dossier INPI" a pu
+  // s'afficher côté client. Empêche toute création de dossier par un compte
+  // qui n'a pas payé le pack.
+  async function openInpiFromEspace(){
+    if (!currentUser){ requireAuth(openInpiFromEspace); return; }
+    const sb = window.__supabase;
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    const btn = document.getElementById('espace-inpi-creer-btn');
+    if (btn) btn.disabled = true;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (btn) btn.disabled = false;
+    if (error){
+      console.error('Erreur vérification entitlements :', error);
+      showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
+      return;
+    }
+    const hasAccess = (data || []).some(e => e.product_key === 'dossier' || e.product_key === 'pro');
+    if (hasAccess){
+      openInpi();
+    } else {
+      // Remet l'affichage de la carte en cohérence avec la réalité de l'accès
+      // (au cas où le bouton "Créer" était affiché à tort) et propose l'achat.
+      const creerBtn = document.getElementById('espace-inpi-creer-btn');
+      const acheterBtn = document.getElementById('espace-inpi-acheter-btn');
+      if (creerBtn) creerBtn.classList.add('hidden');
+      if (acheterBtn) acheterBtn.classList.remove('hidden');
+      showInlineError("La création du dossier INPI est incluse dans le Pack Lancement (89 €). Achetez le pack pour continuer.");
+    }
+  }
+  window.openInpiFromEspace = openInpiFromEspace;
 
   function openInpi(){
     const m = document.getElementById('inpi-modal');
