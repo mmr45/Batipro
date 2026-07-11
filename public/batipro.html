@@ -457,8 +457,8 @@
         <h1 class="font-display font-bold text-neutral-950" style="font-size:clamp(44px,6vw,75px);line-height:1.05">Lancez votre boîte du bâtiment, sans friction.</h1>
         <p class="mt-6 max-w-xl text-neutral-600" style="font-size:18px;line-height:1.5">De la vérification de qualification au premier devis conforme : un parcours guidé, automatisé et 100% en ligne pour créer votre entreprise d'artisan en toute sérénité.</p>
         <div class="mt-8 flex flex-wrap items-center gap-4">
-          <button onclick="openQualif()" class="btn-primary group inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.03]">
-            <span class="text-[16px] font-semibold">Tester ma qualification</span>
+          <button onclick="ctaTesterOuOrientation()" class="btn-primary group inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.03]">
+            <span id="cta-hero-label" class="text-[16px] font-semibold">Tester ma qualification</span>
             <span class="grid h-9 w-9 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45 text-brand">
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </span>
@@ -3146,9 +3146,10 @@ animate();
     return list.length > 0;
   }
 
-  // CTA du bandeau du bas de page : si l'utilisateur est déjà connecté et a
-  // déjà réalisé le test, on l'envoie directement voir son orientation dans
-  // "Mon espace" ; sinon on ouvre le test de qualification comme avant.
+  // CTA "Tester ma qualification" (bandeau du haut ET du bas) : si
+  // l'utilisateur est déjà connecté et a déjà réalisé le test, on l'envoie
+  // directement voir son orientation dans "Mon espace" ; sinon on ouvre le
+  // test de qualification comme avant.
   async function ctaTesterOuOrientation(){
     if (currentUser && await hasQualifSubmission()){
       goToEspaceClient();
@@ -3158,17 +3159,16 @@ animate();
   }
   window.ctaTesterOuOrientation = ctaTesterOuOrientation;
 
-  // Met à jour le libellé du bouton du bandeau CTA du bas selon la
-  // situation : "Voir mon orientation" si déjà connecté avec un test fait,
-  // sinon "Tester ma qualification".
+  // Met à jour le libellé des boutons CTA (bandeau du haut ET du bas) selon
+  // la situation : "Voir mon orientation" si déjà connecté avec un test
+  // fait, sinon "Tester ma qualification".
   async function updateCtaBottomButton(){
     const label = document.getElementById('cta-bottom-label');
-    if (!label) return;
-    if (currentUser && await hasQualifSubmission()){
-      label.textContent = 'Voir mon orientation';
-    } else {
-      label.textContent = 'Tester ma qualification';
-    }
+    const heroLabel = document.getElementById('cta-hero-label');
+    const done = currentUser && await hasQualifSubmission();
+    const text = done ? 'Voir mon orientation' : 'Tester ma qualification';
+    if (label) label.textContent = text;
+    if (heroLabel) heroLabel.textContent = text;
   }
   window.updateCtaBottomButton = updateCtaBottomButton;
 
