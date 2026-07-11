@@ -483,7 +483,7 @@
 
     <!-- Marquee -->
     <div class="mt-24 pb-4" data-reveal>
-      <p class="text-center text-[13px] font-medium uppercase tracking-[0.15em] text-neutral-400">Ils accompagnent les artisans en France</p>
+      <p class="text-center text-[13px] font-medium uppercase tracking-[0.15em] text-neutral-400">Les démarches et organismes couverts par notre parcours</p>
       <div class="mt-8 overflow-hidden">
         <div class="anim-marquee flex w-max gap-[100px] whitespace-nowrap opacity-60 grayscale" id="marquee"></div>
       </div>
@@ -3995,6 +3995,19 @@ animate();
   const LS_SUBMISSIONS_KEY = 'batipro_submissions';
   const LS_ADMIN_SESSION_KEY = 'batipro_admin_session'; // sessionStorage : expire à la fermeture de l'onglet
 
+  // Échappe une chaîne avant insertion dans du HTML via innerHTML, pour
+  // empêcher toute injection (XSS) à partir d'un champ texte libre saisi
+  // par un utilisateur (nom, prénom, nom de client sur un devis, nom de
+  // fichier uploadé...). À utiliser systématiquement dès qu'une valeur
+  // provenant de l'utilisateur (même indirectement, via Supabase) est
+  // injectée dans un template `innerHTML = \`...\``.
+  function escapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+  window.escapeHtml = escapeHtml;
+
   function loadSubmissions(){
     try {
       const raw = localStorage.getItem(LS_SUBMISSIONS_KEY);
@@ -4193,17 +4206,22 @@ if (sb) {
 
     const typeLabel = { qualif:'Test de qualification', statut:'Simulateur de statut', inpi:'Dossier INPI', assurance:'Assurance décennale' };
     const typeTint = { qualif:'#0E9F6E', statut:'#1D5FA3', inpi:'#7C3AED', assurance:'#FF6A13' };
+    // s.nom et s.summary contiennent du texte saisi librement par les
+    // utilisateurs (prénom/nom d'inscription, nom du client sur un devis...).
+    // On échappe systématiquement avant injection dans le DOM admin pour
+    // empêcher un XSS stocké (ex: nom de client "<img src=x onerror=...>")
+    // qui s'exécuterait dans la session de l'administrateur.
     document.getElementById('admin-submissions-body').innerHTML = submissions.length ? submissions.map(s=>`
       <tr class="transition hover:bg-neutral-50">
-        <td class="whitespace-nowrap px-4 py-3 text-neutral-500">${new Date(s.date).toLocaleString('fr-FR')}</td>
-        <td class="px-4 py-3 font-medium text-neutral-900">${s.nom}</td>
+        <td class="whitespace-nowrap px-4 py-3 text-neutral-500">${escapeHtml(new Date(s.date).toLocaleString('fr-FR'))}</td>
+        <td class="px-4 py-3 font-medium text-neutral-900">${escapeHtml(s.nom)}</td>
         <td class="px-4 py-3">
           <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold" style="background:${(typeTint[s.type]||'#525252')}1a;color:${typeTint[s.type]||'#525252'}">
             <span class="h-1.5 w-1.5 rounded-full" style="background:${typeTint[s.type]||'#525252'}"></span>
-            ${typeLabel[s.type] || s.type}
+            ${escapeHtml(typeLabel[s.type] || s.type)}
           </span>
         </td>
-        <td class="px-4 py-3 text-neutral-600">${s.summary}</td>
+        <td class="px-4 py-3 text-neutral-600">${escapeHtml(s.summary)}</td>
       </tr>
     `).join('') : `<tr><td class="px-4 py-4 text-neutral-400" colspan="4">Aucune soumission pour l'instant.</td></tr>`;
   }
@@ -4776,10 +4794,10 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     preview.innerHTML = `
       <div class="flex items-center gap-3 rounded-lg border border-black/10 bg-neutral-50 p-2">
         ${data.dataUrl
-          ? `<img src="${data.dataUrl}" class="h-12 w-12 shrink-0 rounded-md border border-black/10 object-cover" alt="Aperçu ${data.name}">`
+          ? `<img src="${data.dataUrl}" class="h-12 w-12 shrink-0 rounded-md border border-black/10 object-cover" alt="Aperçu ${escapeHtml(data.name)}">`
           : `<div class="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-neutral-200 text-[10px] font-bold text-neutral-500">PDF</div>`}
         <div class="min-w-0 flex-1">
-          <p class="truncate text-[13px] font-medium text-neutral-800">${data.name}</p>
+          <p class="truncate text-[13px] font-medium text-neutral-800">${escapeHtml(data.name)}</p>
           <p class="text-[12px] text-neutral-500">${humanSize(data.size)}</p>
         </div>
         <button type="button" onclick="removeDoc('${key}')" class="shrink-0 rounded-full p-1.5 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-700" aria-label="Supprimer le fichier">
