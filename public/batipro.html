@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -278,6 +279,55 @@
   .dash-glow-btn:hover { box-shadow: 0 10px 26px -6px rgba(29,95,163,.7); }
   .dash-stat-icon {
     display:grid; place-items:center; height:44px; width:44px; border-radius:14px;
+    transition: transform .35s cubic-bezier(.2,.8,.3,1.4);
+  }
+  .dash-card:hover .dash-stat-icon { transform: scale(1.08) rotate(-4deg); }
+
+  /* Éyebrows façon annotation de plan technique, cohérent avec le reste du site */
+  .dash-eyebrow { font-family:'IBM Plex Mono', monospace; font-size:10.5px; font-weight:600; letter-spacing:.12em; }
+
+  /* Liseré de couleur par catégorie de dossier (reprend les teintes déjà
+     utilisées ailleurs pour ces mêmes modules : qualif=vert, inpi=violet,
+     assurance=orange, abonnement=bleu de marque) */
+  .dash-card[data-tone] { border-top: 3px solid transparent; }
+  .dash-card[data-tone="blue"]   { border-top-color: var(--brand); }
+  .dash-card[data-tone="green"]  { border-top-color: #0E9F6E; }
+  .dash-card[data-tone="violet"] { border-top-color: #7C3AED; }
+  .dash-card[data-tone="orange"] { border-top-color: #FF6A13; }
+
+  /* Cascade d'apparition des cartes du dashboard */
+  .dash-grid > [data-reveal]:nth-child(1) { transition-delay: .05s; }
+  .dash-grid > [data-reveal]:nth-child(2) { transition-delay: .12s; }
+  .dash-grid > [data-reveal]:nth-child(3) { transition-delay: .19s; }
+  .dash-grid > [data-reveal]:nth-child(4) { transition-delay: .26s; }
+
+  /* Avatar : halo pulsé discret, comme un signal "connecté" */
+  .dash-avatar { position: relative; }
+  .dash-avatar::after {
+    content: ""; position: absolute; inset: -5px; border-radius: 24px;
+    border: 1px solid rgba(255,255,255,.28);
+    animation: dashAvatarPulse 2.8s ease-in-out infinite;
+  }
+  @keyframes dashAvatarPulse {
+    0%   { transform: scale(1); opacity: .65; }
+    70%  { transform: scale(1.14); opacity: 0; }
+    100% { transform: scale(1.14); opacity: 0; }
+  }
+
+  /* Ligne de cotation animée (signature "plan technique") sous le header du dashboard */
+  .dash-dim { display:block; width:100%; height:22px; overflow:visible; }
+  .dash-dim path, .dash-dim line { stroke-dasharray: 600; stroke-dashoffset: 600; transition: stroke-dashoffset 1.1s cubic-bezier(.2,.7,.2,1) .25s; }
+  .dash-hero.is-visible .dash-dim path,
+  .dash-hero.is-visible .dash-dim line { stroke-dashoffset: 0; }
+
+  /* Lignes "Mes devis" : léger glissement au survol */
+  .dash-devis-row { transition: transform .2s ease, border-color .2s ease, background-color .2s ease; }
+  .dash-devis-row:hover { transform: translateX(3px); background: rgba(29,95,163,.045); border-color: rgba(29,95,163,.18); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dash-avatar::after { animation: none; opacity: .35; }
+    .dash-dim path, .dash-dim line { transition: none; stroke-dashoffset: 0; }
+    .dash-card:hover .dash-stat-icon { transform: none; }
   }
 
   /* ---------- Page de rapport imprimable (qualification) ---------- */
@@ -649,8 +699,8 @@
           <div class="flex items-center gap-4">
             <div id="espace-avatar" class="dash-avatar">--</div>
             <div>
-              <p class="text-[13px] font-medium uppercase tracking-[0.15em] text-white/50">Mon espace</p>
-              <h2 id="espace-nom" class="font-display text-2xl font-bold md:text-3xl">—</h2>
+              <p class="dash-eyebrow text-white/50">Mon espace</p>
+              <h2 id="espace-nom" class="mt-1 font-display text-2xl font-bold md:text-3xl">—</h2>
               <p id="espace-email" class="mt-0.5 text-[13px] text-white/60">—</p>
             </div>
           </div>
@@ -658,18 +708,24 @@
             Se déconnecter
           </button>
         </div>
+        <svg class="dash-dim relative mt-7" viewBox="0 0 600 22" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" y1="4" x2="600" y2="4" stroke="rgba(255,255,255,.22)" stroke-width="1"/>
+          <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+          <line x1="600" y1="0" x2="600" y2="10" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+          <path d="M0 4 L600 4" stroke="var(--brand-2)" stroke-width="1.5" fill="none"/>
+        </svg>
       </div>
 
       <!-- Cartes -->
-      <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div class="dash-grid mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 
         <!-- Abonnement -->
-        <div class="dash-card p-6" data-reveal>
+        <div class="dash-card p-6" data-tone="blue" data-reveal>
           <div class="flex items-start justify-between gap-3">
             <div class="dash-stat-icon bg-brand-tint">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
             </div>
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Abonnement</span>
+            <span class="dash-eyebrow text-neutral-400">Abonnement</span>
           </div>
           <p id="espace-statut" class="mt-4 text-[15px] font-semibold text-neutral-900">Chargement…</p>
           <button
@@ -683,12 +739,12 @@
         </div>
 
         <!-- Qualification -->
-        <div class="dash-card p-6" data-reveal>
+        <div class="dash-card p-6" data-tone="green" data-reveal>
           <div class="flex items-start justify-between gap-3">
             <div id="espace-qualif-icon" class="dash-stat-icon bg-brand-tint">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
             </div>
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Test de qualification</span>
+            <span class="dash-eyebrow text-neutral-400">Test de qualification</span>
           </div>
           <div id="espace-qualif" class="mt-4">
             <p class="text-neutral-500 text-[14px]">Chargement…</p>
@@ -705,12 +761,12 @@
         </div>
 
         <!-- Dossier INPI -->
-        <div class="dash-card p-6" data-reveal>
+        <div class="dash-card p-6" data-tone="violet" data-reveal>
           <div class="flex items-start justify-between gap-3">
             <div id="espace-inpi-icon" class="dash-stat-icon bg-brand-tint">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
             </div>
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Dossier INPI</span>
+            <span class="dash-eyebrow text-neutral-400">Dossier INPI</span>
           </div>
           <div id="espace-inpi" class="mt-4">
             <p class="text-neutral-500 text-[14px]">Chargement…</p>
@@ -730,12 +786,12 @@
         </div>
 
         <!-- Assurance décennale -->
-        <div class="dash-card p-6" data-reveal>
+        <div class="dash-card p-6" data-tone="orange" data-reveal>
           <div class="flex items-start justify-between gap-3">
             <div id="espace-assur-icon" class="dash-stat-icon bg-brand-tint">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5z"/></svg>
             </div>
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Assurance décennale</span>
+            <span class="dash-eyebrow text-neutral-400">Assurance décennale</span>
           </div>
           <div id="espace-assur" class="mt-4">
             <p class="text-neutral-500 text-[14px]">Chargement…</p>
@@ -756,7 +812,7 @@
       </div>
 
       <!-- Mes devis -->
-      <div class="dash-card mt-5 p-6" data-reveal>
+      <div class="dash-card mt-5 p-6" data-tone="blue" data-reveal>
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <div class="dash-stat-icon bg-brand-tint">
@@ -3454,7 +3510,7 @@ animate();
     box.innerHTML = list.map((s, i) => {
       const d = new Date(s.date);
       return `
-        <div class="flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-neutral-50 px-4 py-3 ${i>0?'mt-2':''}">
+        <div class="dash-devis-row flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-neutral-50 px-4 py-3 ${i>0?'mt-2':''}">
           <div class="min-w-0">
             <p class="truncate text-[13.5px] font-medium text-neutral-900">${escapeHtml(s.summary)}</p>
             <p class="mt-0.5 text-[12px] text-neutral-500">${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
