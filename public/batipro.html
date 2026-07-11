@@ -601,7 +601,7 @@
       </div>
 
       <!-- Cartes -->
-      <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+      <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 
         <!-- Abonnement -->
         <div class="dash-card p-6" data-reveal>
@@ -640,6 +640,31 @@
             </button>
             <button onclick="openQualif()" class="inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
               Refaire le test
+            </button>
+          </div>
+        </div>
+
+        <!-- Dossier INPI -->
+        <div class="dash-card p-6" data-reveal>
+          <div class="flex items-start justify-between gap-3">
+            <div id="espace-inpi-icon" class="dash-stat-icon bg-brand-tint">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+            </div>
+            <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Dossier INPI</span>
+          </div>
+          <div id="espace-inpi" class="mt-4">
+            <p class="text-neutral-500 text-[14px]">Chargement…</p>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <button id="espace-inpi-voir-btn" onclick="downloadInpiPdf()" class="hidden inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] bg-brand">
+              Télécharger mon dossier
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            </button>
+            <button id="espace-inpi-creer-btn" onclick="openInpi()" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              Créer mon dossier INPI
+            </button>
+            <button id="espace-inpi-acheter-btn" onclick="handlePricingClick('dossier')" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              Acheter le pack — 89 €
             </button>
           </div>
         </div>
@@ -2770,6 +2795,7 @@ animate();
     }
 
     await loadEspaceQualif(userId);
+    await loadEspaceInpi(userId, hasDossier || hasPro);
   }
 
   // Récupère et affiche le dernier test de qualification de l'utilisateur
@@ -2882,6 +2908,72 @@ animate();
       }
     } else {
       box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore réalisé le test de qualification.</p>`;
+    }
+  }
+
+  // Récupère et affiche le dernier dossier INPI généré par l'utilisateur
+  // connecté (module payant du Pack Lancement à 89 €), afin qu'il puisse le
+  // retrouver et le retélécharger depuis "Mon espace" sans avoir à tout
+  // ressaisir. Même logique que loadEspaceQualif : Supabase (table
+  // `submissions`, type 'inpi') avec repli sur localStorage.
+  // `hasAccess` indique si le compte a bien acheté le Pack Lancement / Pro
+  // (utilisé pour proposer soit "Créer mon dossier", soit "Acheter le pack").
+  async function loadEspaceInpi(userId, hasAccess){
+    const box = document.getElementById('espace-inpi');
+    const voirBtn = document.getElementById('espace-inpi-voir-btn');
+    const creerBtn = document.getElementById('espace-inpi-creer-btn');
+    const acheterBtn = document.getElementById('espace-inpi-acheter-btn');
+    box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+    [voirBtn, creerBtn, acheterBtn].forEach(b => b && b.classList.add('hidden'));
+
+    const sb = window.__supabase;
+    let submission = null;
+
+    if (sb && userId){
+      const { data, error } = await sb
+        .from('submissions')
+        .select('summary, payload, created_at')
+        .eq('user_id', userId)
+        .eq('type', 'inpi')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (error){
+        console.warn('Erreur chargement du dossier INPI :', error);
+      } else if (data && data.length){
+        const payload = data[0].payload || {};
+        submission = { summary: data[0].summary, date: data[0].created_at, data: payload._data || payload.data || null };
+      }
+    }
+
+    // Repli localStorage si rien trouvé côté Supabase
+    if (!submission){
+      const list = loadSubmissions().filter(s => s.type === 'inpi' && currentUser && s.email === currentUser.email);
+      if (list.length){
+        const last = list[list.length - 1];
+        submission = { summary: last.summary, date: last.date, data: last.data || null };
+      }
+    }
+
+    if (submission){
+      const d = new Date(submission.date);
+      box.innerHTML = `
+        <p class="font-medium">${submission.summary}</p>
+        <p class="mt-1 text-[13px] text-neutral-500">Généré le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+      `;
+      if (submission.data){
+        // Réalimente les variables utilisées par downloadInpiPdf() pour que
+        // le bouton "Télécharger mon dossier" régénère le même PDF sans
+        // repasser par le formulaire.
+        window.__inpiData = submission.data;
+        window.__inpiRef = submission.data.ref || '—';
+        if (voirBtn) voirBtn.classList.remove('hidden');
+      }
+    } else if (hasAccess){
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore créé votre dossier INPI.</p>`;
+      if (creerBtn) creerBtn.classList.remove('hidden');
+    } else {
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Inclus dans le Pack Lancement (89 €).</p>`;
+      if (acheterBtn) acheterBtn.classList.remove('hidden');
     }
   }
 
