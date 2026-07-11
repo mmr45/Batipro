@@ -7,29 +7,10 @@
 <title>Bâtipro — Lancez votre boîte du bâtiment, sans friction</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='64' height='64'%3E%3Crect width='24' height='24' rx='6' fill='%230084FF'/%3E%3Cpath d='M3 11L12 4L21 11' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M5 9.5V20H19V9.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Crect x='10' y='13' width='4' height='7' fill='white'/%3E%3C/svg%3E" />
 <meta name="description" content="Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." />
-<link rel="canonical" href="https://batipro-ten.vercel.app/" />
-
-<!-- Open Graph (Facebook, LinkedIn, WhatsApp, etc.) -->
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="Bâtipro" />
-<meta property="og:title" content="Bâtipro — Lancez votre boîte du bâtiment, sans friction" />
-<meta property="og:description" content="Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." />
-<meta property="og:url" content="https://batipro-ten.vercel.app/" />
-<meta property="og:image" content="https://batipro-ten.vercel.app/og-image.png" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:locale" content="fr_FR" />
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Bâtipro — Lancez votre boîte du bâtiment, sans friction" />
-<meta name="twitter:description" content="Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." />
-<meta name="twitter:image" content="https://batipro-ten.vercel.app/og-image.png" />
-
 <meta name="google-site-verification" content="oOxKuEScJ97Fa9OoO57ncdJkPIetpabSj1WQEty-GJQ" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -61,11 +42,23 @@
   };
 </script>
 <style>
-  :root { --brand: #0084FF; --brand-2: #60B1FF; --accent: #FF801E; }
+  :root { --brand: #1D5FA3; --brand-2: #4A86C4; --accent: #FF6A13; }
   html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
   body { font-family: 'Inter', sans-serif; background: #fff; color: #0a0a0a; overflow-x: hidden; width: 100%; position: relative; max-width: 100vw; }
   img, svg, video { max-width: 100%; height: auto; }
-  h1, h2, h3, .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -0.02em; }
+  h1, h2, h3, .font-display { font-family: 'Big Shoulders Display', 'Inter', sans-serif; font-weight: 700; letter-spacing: -0.01em; }
+
+  /* Eyebrows de section façon annotation de plan technique */
+  .text-sm.font-medium.uppercase.tracking-\[0\.15em\] { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; }
+
+  /* Repères d'angle "plan technique" — signature visuelle des cartes clés */
+  .blueprint-corners { position: relative; }
+  .blueprint-corners::before, .blueprint-corners::after {
+    content: ""; position: absolute; width: 14px; height: 14px; pointer-events: none; opacity: .55;
+    border-color: var(--accent);
+  }
+  .blueprint-corners::before { top: 10px; left: 10px; border-top: 2px solid; border-left: 2px solid; }
+  .blueprint-corners::after { bottom: 10px; right: 10px; border-bottom: 2px solid; border-right: 2px solid; }
 
   @keyframes floaty { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-24px) rotate(2deg)} }
   @keyframes blobA { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(60px,40px) scale(1.1)} }
@@ -86,19 +79,19 @@
   [data-reveal="right"].is-visible{transform:none}
 
   .btn-primary {
-    background: rgba(0,132,255,0.9);
-    box-shadow: inset 0px 4px 4px 0px rgba(255,255,255,0.35), 0 20px 40px -12px rgba(0,132,255,0.4);
+    background: rgba(29,95,163,0.9);
+    box-shadow: inset 0px 4px 4px 0px rgba(255,255,255,0.35), 0 20px 40px -12px rgba(29,95,163,0.4);
     backdrop-filter: blur(2px);
   }
   .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-  .radio-card:has(input:checked) { border-color: var(--brand); background: rgba(0,132,255,0.06); }
+  .radio-card:has(input:checked) { border-color: var(--brand); background: rgba(29,95,163,0.06); }
 
   /* Modal */
   .modal-backdrop { animation: fadeInScale .3s ease-out; }
   .modal-panel { animation: fadeInScale .35s cubic-bezier(.2,.9,.3,1.2); }
 
   /* Range */
-  input[type=range]::-webkit-slider-thumb { appearance: none; height: 22px; width: 22px; border-radius: 999px; background: var(--brand); cursor:pointer; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,132,255,.4); }
+  input[type=range]::-webkit-slider-thumb { appearance: none; height: 22px; width: 22px; border-radius: 999px; background: var(--brand); cursor:pointer; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(29,95,163,.4); }
   input[type=range] { -webkit-appearance:none; height: 6px; background: linear-gradient(to right, var(--brand) var(--val,0%), #e5e7eb var(--val,0%)); border-radius:999px; outline:none; }
 
   /* 3D canvas */
@@ -160,7 +153,7 @@
   .devis-tab:hover { background: #fafafa; }
   .devis-tab.devis-tab-active {
     border-color: var(--brand);
-    background: rgba(0,132,255,.08);
+    background: rgba(29,95,163,.08);
     color: var(--brand);
   }
 
@@ -177,7 +170,7 @@
     content: "";
     position: absolute; inset: 0;
     background:
-      radial-gradient(340px 340px at 88% -10%, rgba(0,132,255,.45), transparent 60%),
+      radial-gradient(340px 340px at 88% -10%, rgba(29,95,163,.45), transparent 60%),
       radial-gradient(280px 280px at 100% 100%, rgba(255,128,30,.28), transparent 60%);
     pointer-events: none;
   }
@@ -195,7 +188,7 @@
     height: 64px; width: 64px; border-radius: 20px;
     font-weight: 700; font-size: 22px; letter-spacing: .02em;
     background: linear-gradient(135deg, var(--brand), var(--brand-2));
-    box-shadow: 0 10px 30px rgba(0,132,255,.45);
+    box-shadow: 0 10px 30px rgba(29,95,163,.45);
     color: #fff;
   }
   .dash-card {
@@ -207,16 +200,22 @@
     box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 12px 28px -12px rgba(16,24,40,.10);
     transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
   }
+  .dash-card::before, .dash-card::after {
+    content: ""; position: absolute; width: 12px; height: 12px; pointer-events: none; opacity: .5;
+    border-color: var(--accent);
+  }
+  .dash-card::before { top: 8px; left: 8px; border-top: 2px solid; border-left: 2px solid; }
+  .dash-card::after { bottom: 8px; right: 8px; border-bottom: 2px solid; border-right: 2px solid; }
   .dash-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 20px 40px -14px rgba(16,24,40,.16);
-    border-color: rgba(0,132,255,.25);
+    border-color: rgba(29,95,163,.25);
   }
   .dash-glow-btn {
     background: linear-gradient(135deg, var(--brand), var(--brand-2));
-    box-shadow: 0 8px 20px -6px rgba(0,132,255,.55);
+    box-shadow: 0 8px 20px -6px rgba(29,95,163,.55);
   }
-  .dash-glow-btn:hover { box-shadow: 0 10px 26px -6px rgba(0,132,255,.7); }
+  .dash-glow-btn:hover { box-shadow: 0 10px 26px -6px rgba(29,95,163,.7); }
   .dash-stat-icon {
     display:grid; place-items:center; height:44px; width:44px; border-radius:14px;
   }
@@ -244,16 +243,54 @@
     content:""; position:absolute; inset:0; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/></svg>");
   }
+
+/* --- Classes utilitaires (remplacent les styles inline répétés) --- */
+.text-brand{ color:var(--brand); }
+.accent-brand{ accent-color:var(--brand); }
+.bg-brand-tint{ background:rgba(29,95,163,.08); color:var(--brand); }
+.bg-brand{ background:var(--brand); }
+.text-warning{ color:#b45309; }
+.bg-brand-tint-2{ background:rgba(29,95,163,.1); color:var(--brand); }
+.bg-orange{ background:#FF801E; }
+.text-danger{ color:#b91c1c; }
+
+#toast-container{
+  position:fixed; top:16px; left:50%; transform:translateX(-50%);
+  z-index:99999; display:flex; flex-direction:column; gap:8px;
+  width:min(92vw,420px); pointer-events:none;
+}
+.toast{
+  pointer-events:auto;
+  background:#1f2937; color:#fff; border-radius:10px;
+  padding:12px 16px; font-size:14px; line-height:1.4;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  display:flex; align-items:flex-start; gap:10px;
+  opacity:0; transform:translateY(-12px);
+  transition:opacity .25s ease, transform .25s ease;
+  border-left:4px solid #6b7280;
+}
+.toast.toast-show{ opacity:1; transform:translateY(0); }
+.toast.toast-error{ border-left-color:#ef4444; }
+.toast.toast-warning{ border-left-color:#f59e0b; }
+.toast.toast-success{ border-left-color:#22c55e; }
+.toast .toast-icon{ flex:0 0 auto; font-size:16px; line-height:1; margin-top:1px; }
+.toast .toast-msg{ flex:1 1 auto; white-space:pre-line; }
+.toast .toast-close{
+  flex:0 0 auto; cursor:pointer; opacity:.6; font-size:16px; line-height:1;
+  background:none; border:none; color:inherit; padding:0 0 0 4px;
+}
+.toast .toast-close:hover{ opacity:1; }
 </style>
 </head>
 <body class="relative overflow-x-hidden">
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Ambient blobs -->
 <div class="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
   <div class="anim-blob-a absolute -left-40 -top-40 h-[600px] w-[600px] rounded-full opacity-60 blur-[120px]" style="background:#60B1FF"></div>
   <div class="anim-blob-b absolute left-40 -top-20 h-[500px] w-[500px] rounded-full opacity-50 blur-[140px]" style="background:#319AFF"></div>
   <div class="anim-blob-a absolute right-[-200px] top-[600px] h-[500px] w-[500px] rounded-full opacity-30 blur-[160px]" style="background:#60B1FF"></div>
-  <div class="anim-blob-b absolute left-1/2 top-[1600px] h-[500px] w-[500px] rounded-full opacity-25 blur-[160px]" style="background:#FF801E"></div>
+  <div class="anim-blob-b absolute left-1/2 top-[1600px] h-[500px] w-[500px] rounded-full opacity-25 blur-[160px] bg-orange"></div>
 </div>
 
 <!-- NAV -->
@@ -348,7 +385,7 @@
         <div class="mt-8 flex flex-wrap items-center gap-4">
           <button onclick="openQualif()" class="btn-primary group inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.03]">
             <span class="text-[16px] font-semibold">Tester ma qualification</span>
-            <span class="grid h-9 w-9 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45" style="color:var(--brand)">
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45 text-brand">
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </span>
           </button>
@@ -382,7 +419,7 @@
   <!-- FONCTIONNALITES -->
   <section id="fonctionnalites" class="scroll-mt-28 py-28">
     <div class="max-w-2xl" data-reveal>
-      <p class="text-sm font-medium uppercase tracking-[0.15em]" style="color:var(--brand)">Fonctionnalités</p>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Fonctionnalités</p>
       <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Un parcours complet, du diplôme au premier devis.</h2>
       <p class="mt-4 text-neutral-600">Six modules pensés pour les artisans du BTP. Automatisés là où c'est fiable, ils vous orientent vers un pro dès qu'une décision engage votre responsabilité.</p>
     </div>
@@ -392,7 +429,7 @@
   <!-- HOW -->
   <section id="how" class="scroll-mt-28 py-28">
     <div class="max-w-2xl" data-reveal>
-      <p class="text-sm font-medium uppercase tracking-[0.15em]" style="color:var(--brand)">Comment ça marche</p>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Comment ça marche</p>
       <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Quatre étapes, zéro coup de fil.</h2>
       <p class="mt-4 text-neutral-600">Le fondateur n'intervient jamais par téléphone. Vous avancez à votre rythme, en ligne, avec des relais vers des pros lorsque c'est nécessaire.</p>
     </div>
@@ -403,13 +440,13 @@
   <section id="apropos" class="scroll-mt-28 py-28">
     <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
       <div data-reveal="left">
-        <p class="text-sm font-medium uppercase tracking-[0.15em]" style="color:var(--brand)">À propos</p>
+        <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">À propos</p>
         <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Un outil honnête, pensé pour le terrain.</h2>
         <p class="mt-5 text-neutral-600">Bâtipro ne prétend pas remplacer un expert. Il rend les démarches accessibles, guidées, et vous redirige vers un professionnel externe uniquement quand la décision l'exige — patrimoine, seuils de CA, conjoint collaborateur, activité mixte.</p>
         <ul class="mt-8 space-y-4" id="about-list"></ul>
       </div>
       <div class="relative" data-reveal="right">
-        <div class="relative overflow-hidden rounded-3xl border border-black/5 p-10 glass" style="background:linear-gradient(135deg, rgba(0,132,255,.08), rgba(255,255,255,.7), rgba(255,128,30,.08))">
+        <div class="relative overflow-hidden rounded-3xl border border-black/5 p-10 glass" style="background:linear-gradient(135deg, rgba(29,95,163,.08), rgba(255,255,255,.7), rgba(255,128,30,.08))">
           <div class="grid grid-cols-2 gap-6" id="stats"></div>
         </div>
       </div>
@@ -419,7 +456,7 @@
   <!-- EXEMPLE CONCRET -->
   <section id="exemple" class="scroll-mt-28 py-28">
     <div class="max-w-2xl" data-reveal>
-      <p class="text-sm font-medium uppercase tracking-[0.15em]" style="color:var(--brand)">Exemple concret</p>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Exemple concret</p>
       <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Voici ce que vous obtenez, en vrai.</h2>
       <p class="mt-4 text-neutral-600">Pas de promesse abstraite : un aperçu réel du devis généré par l'outil, avec les mentions légales BTP intégrées automatiquement.</p>
     </div>
@@ -431,7 +468,7 @@
           <!-- Cartes empilées en arrière-plan pour montrer plusieurs rendus -->
           <div class="absolute inset-0 -z-10 translate-x-4 translate-y-6 rotate-[2deg] rounded-3xl border border-black/5 bg-white/70 shadow-xl"></div>
           <div class="absolute inset-0 -z-20 translate-x-8 translate-y-12 rotate-[4deg] rounded-3xl border border-black/5 bg-white/40"></div>
-          <span class="absolute -top-3 right-6 z-10 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold text-white shadow-lg" style="background:var(--brand)">
+          <span class="absolute -top-3 right-6 z-10 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold text-white shadow-lg bg-brand">
             <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
             Rendu réel exporté
           </span>
@@ -457,24 +494,24 @@
       <div class="lg:col-span-2" data-reveal="right">
         <ul class="space-y-5">
           <li class="flex gap-3">
-            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full" style="background:rgba(0,132,255,.1); color:var(--brand)"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-tint-2"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
             <span class="text-[14px] text-neutral-700"><b>Mentions légales BTP automatiques</b> — décennale, RC Pro, pénalités de retard, médiation : rien à rédiger vous-même.</span>
           </li>
           <li class="flex gap-3">
-            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full" style="background:rgba(0,132,255,.1); color:var(--brand)"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-tint-2"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
             <span class="text-[14px] text-neutral-700"><b>TVA calculée automatiquement</b> selon la nature des travaux (5,5% / 10% / 20%).</span>
           </li>
           <li class="flex gap-3">
-            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full" style="background:rgba(0,132,255,.1); color:var(--brand)"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-tint-2"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
             <span class="text-[14px] text-neutral-700"><b>Export PDF prêt à envoyer</b> à votre client, en moins de 3 minutes.</span>
           </li>
         </ul>
 
         <!-- Pack Lancement 89€ -->
-        <div class="mt-8 rounded-3xl border p-6" style="border-color:rgba(0,132,255,.25); background:linear-gradient(135deg, rgba(0,132,255,.08), rgba(255,255,255,.9))">
+        <div class="mt-8 rounded-3xl border p-6" style="border-color:rgba(29,95,163,.25); background:linear-gradient(135deg, rgba(29,95,163,.08), rgba(255,255,255,.9))">
           <div class="flex items-center justify-between">
-            <span class="text-[12px] font-semibold uppercase tracking-wide" style="color:var(--brand)">Pack Lancement</span>
-            <span class="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white" style="background:var(--brand)">Paiement unique</span>
+            <span class="text-[12px] font-semibold uppercase tracking-wide text-brand">Pack Lancement</span>
+            <span class="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white bg-brand">Paiement unique</span>
           </div>
           <div class="mt-2 flex items-baseline gap-1.5">
             <span class="font-display text-4xl font-bold">89 €</span>
@@ -483,7 +520,7 @@
           <p class="mt-2 text-[13px] text-neutral-600">Générateur de dossier INPI, pièces justificatives incluses.</p>
           <button onclick="handlePricingClick('dossier')" class="btn-primary group mt-5 inline-flex w-full items-center justify-center gap-3 rounded-[14px] py-3.5 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.02]">
             <span class="text-[15px] font-semibold">Acheter le pack — 89 €</span>
-            <span class="grid h-8 w-8 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45" style="color:var(--brand)">
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45 text-brand">
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </span>
           </button>
@@ -491,7 +528,7 @@
 
         <!-- Éditeur de devis (offre Pro) -->
         <div class="relative mt-4 overflow-hidden rounded-3xl border p-6" style="border-color:rgba(255,128,30,.25); background:linear-gradient(135deg, rgba(255,128,30,.07), rgba(255,255,255,.97))">
-          <div class="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-40 blur-[50px]" style="background:#FF801E"></div>
+          <div class="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-40 blur-[50px] bg-orange"></div>
           <div class="relative">
             <div class="flex items-center justify-between">
               <span class="inline-flex items-center gap-2">
@@ -535,7 +572,7 @@
   <!-- TARIFS -->
   <section id="tarifs" class="scroll-mt-28 py-28">
     <div class="max-w-2xl" data-reveal>
-      <p class="text-sm font-medium uppercase tracking-[0.15em]" style="color:var(--brand)">Tarifs</p>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Tarifs</p>
       <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Commencez gratuitement.</h2>
       <p class="mt-4 text-neutral-600">Le test de qualification est offert. Vous ne payez qu'au moment de générer votre dossier.</p>
     </div>
@@ -569,7 +606,7 @@
         <!-- Abonnement -->
         <div class="dash-card p-6" data-reveal>
           <div class="flex items-start justify-between gap-3">
-            <div class="dash-stat-icon" style="background:rgba(0,132,255,.08);color:var(--brand)">
+            <div class="dash-stat-icon bg-brand-tint">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
             </div>
             <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Abonnement</span>
@@ -588,7 +625,7 @@
         <!-- Qualification -->
         <div class="dash-card p-6" data-reveal>
           <div class="flex items-start justify-between gap-3">
-            <div id="espace-qualif-icon" class="dash-stat-icon" style="background:rgba(0,132,255,.08);color:var(--brand)">
+            <div id="espace-qualif-icon" class="dash-stat-icon bg-brand-tint">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
             </div>
             <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Test de qualification</span>
@@ -597,7 +634,7 @@
             <p class="text-neutral-500 text-[14px]">Chargement…</p>
           </div>
           <div class="mt-5 flex flex-wrap gap-2">
-            <button id="espace-qualif-voir-btn" onclick="openQualifReport()" class="hidden inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02]" style="background:var(--brand)">
+            <button id="espace-qualif-voir-btn" onclick="openQualifReport()" class="hidden inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] bg-brand">
               Voir le rapport
               <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </button>
@@ -611,7 +648,7 @@
       <!-- Paramètres du compte -->
       <div class="dash-card mt-5 p-6" data-reveal>
         <div class="flex items-center gap-3">
-          <div class="dash-stat-icon" style="background:rgba(0,132,255,.08);color:var(--brand)">
+          <div class="dash-stat-icon bg-brand-tint">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </div>
           <div>
@@ -659,7 +696,7 @@
     <div class="rapport-shell">
       <div class="rapport-noprint mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-6">
         <div class="flex items-center gap-2">
-          <div class="flex h-8 w-8 items-center justify-center rounded-[9px] text-white" style="background:var(--brand)">
+          <div class="flex h-8 w-8 items-center justify-center rounded-[9px] text-white bg-brand">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M3 11L12 4L21 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M5 9.5V20H19V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -684,7 +721,7 @@
   <section id="inscription" class="scroll-mt-28 pb-28">
     <div data-reveal class="relative overflow-hidden rounded-[32px] border border-black/5 bg-neutral-950 p-10 text-white md:p-16">
       <div class="anim-blob-a absolute -right-20 -top-20 h-[400px] w-[400px] rounded-full opacity-40 blur-[120px]" style="background:#0084FF"></div>
-      <div class="anim-blob-b absolute -left-20 -bottom-20 h-[300px] w-[300px] rounded-full opacity-30 blur-[120px]" style="background:#FF801E"></div>
+      <div class="anim-blob-b absolute -left-20 -bottom-20 h-[300px] w-[300px] rounded-full opacity-30 blur-[120px] bg-orange"></div>
       <div class="relative grid grid-cols-1 items-center gap-10 md:grid-cols-2">
         <div>
           <h2 class="font-display text-4xl font-bold leading-tight md:text-5xl">Prêt à lancer votre boîte du bâtiment ?</h2>
@@ -693,7 +730,7 @@
         <div class="flex md:justify-end">
           <button onclick="ctaTesterOuOrientation()" class="btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-8 py-4 text-[15px] font-semibold text-white transition-transform hover:scale-[1.03]">
             <span id="cta-bottom-label">Tester ma qualification</span>
-            <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
           </button>
         </div>
       </div>
@@ -704,7 +741,7 @@
     <div class="grid grid-cols-2 gap-10 sm:grid-cols-4 lg:grid-cols-5">
       <div class="col-span-2 sm:col-span-1">
         <div class="flex items-center gap-2">
-          <div class="flex h-9 w-9 items-center justify-center rounded-[10px] text-white" style="background:var(--brand)">
+          <div class="flex h-9 w-9 items-center justify-center rounded-[10px] text-white bg-brand">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M3 11L12 4L21 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M5 9.5V20H19V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -795,14 +832,14 @@
         <input type="password" id="admin-password" placeholder="Mot de passe admin" class="flex-1 rounded-xl border border-black/10 px-4 py-3 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
         <button type="submit" class="btn-primary rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Entrer</button>
       </form>
-      <p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium" style="color:#b91c1c">Mot de passe incorrect.</p>
+      <p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium text-danger">Mot de passe incorrect.</p>
     </div>
 
     <!-- Dashboard -->
     <div id="admin-dashboard" class="hidden">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(0,132,255,.08);color:var(--brand)">Dashboard créateur</span>
+          <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Dashboard créateur</span>
           <h3 class="mt-3 font-display text-3xl font-bold md:text-4xl">Vue d'ensemble</h3>
         </div>
         <div class="flex gap-2">
@@ -857,7 +894,7 @@
     <button onclick="closeLegal()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200" aria-label="Fermer">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>
-    <p class="text-sm font-medium uppercase tracking-[0.15em]" style="color:var(--brand)">Légal</p>
+    <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Légal</p>
     <h3 id="legal-title" class="mt-2 font-display text-3xl font-bold md:text-4xl"></h3>
     <p id="legal-updated" class="mt-2 text-[13px] text-neutral-500"></p>
     <div id="legal-body" class="prose-legal mt-6 space-y-4 text-[14px] leading-relaxed text-neutral-700"></div>
@@ -875,10 +912,10 @@
     <!-- Volet visuel de marque -->
     <div class="relative hidden overflow-hidden p-10 text-white md:flex md:flex-col md:justify-end" style="background:linear-gradient(160deg, #04070d 0%, #0a1a33 45%, var(--brand) 130%)">
       <div class="anim-blob-a absolute -right-16 -top-16 h-[280px] w-[280px] rounded-full opacity-40 blur-[100px]" style="background:#0084FF"></div>
-      <div class="anim-blob-b absolute -left-10 bottom-10 h-[220px] w-[220px] rounded-full opacity-30 blur-[100px]" style="background:#FF801E"></div>
+      <div class="anim-blob-b absolute -left-10 bottom-10 h-[220px] w-[220px] rounded-full opacity-30 blur-[100px] bg-orange"></div>
       <div class="relative z-10">
         <div class="relative inline-block" style="perspective:600px;">
-          <div class="absolute inset-0 -z-10 rounded-full blur-xl" style="background:radial-gradient(circle, rgba(0,132,255,.55), transparent 70%)"></div>
+          <div class="absolute inset-0 -z-10 rounded-full blur-xl" style="background:radial-gradient(circle, rgba(29,95,163,.55), transparent 70%)"></div>
           <span id="brand-logo-3d-modal" class="brand-logo-3d font-display text-3xl font-bold tracking-tight" aria-label="Bâtipro" style="display:inline-block; padding:6px 2px;"></span>
         </div>
         <h3 class="mt-4 font-display text-3xl font-bold leading-tight">Lancez votre boîte du bâtiment, sans friction.</h3>
@@ -886,7 +923,7 @@
       </div>
       <div class="relative z-10 mt-8 space-y-2.5" id="auth-feature-list">
         <div class="auth-feature-row flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur" style="animation-delay:.05s">
-          <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style="background:rgba(0,132,255,.18)">
+          <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style="background:rgba(29,95,163,.18)">
             <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="#60B1FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </div>
           <div>
@@ -923,7 +960,7 @@
     </div>
 
     <p id="auth-context" class="mb-4 hidden rounded-xl border border-black/10 bg-neutral-50 px-3 py-2 text-[13px] text-neutral-600">Créez votre compte pour tester votre qualification et suivre votre dossier.</p>
-    <p id="auth-error" class="mb-4 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium" style="color:#b91c1c"></p>
+    <p id="auth-error" class="mb-4 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium text-danger"></p>
 
     <!-- Signup form -->
     <form id="signup-form" class="space-y-4" onsubmit="event.preventDefault(); handleSignup();">
@@ -952,12 +989,12 @@
           </button>
         </div>
       </div>
-      <label class="flex items-start gap-2 text-[13px] text-neutral-600">
-        <input type="checkbox" id="signup-cgu" required class="mt-0.5" style="accent-color:var(--brand)">
+      <label class="flex items-start gap-2 text-[13px] text-neutral-600" for="signup-cgu">
+        <input type="checkbox" id="signup-cgu" required class="mt-0.5 accent-brand">
         <span>J'accepte les conditions générales d'utilisation et la politique de confidentialité.</span>
       </label>
       <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Créer mon compte</button>
-      <p class="text-center text-[13px] text-neutral-500">Déjà un compte ? <button type="button" onclick="setAuthMode('login')" class="font-semibold" style="color:var(--brand)">Se connecter</button></p>
+      <p class="text-center text-[13px] text-neutral-500">Déjà un compte ? <button type="button" onclick="setAuthMode('login')" class="font-semibold text-brand">Se connecter</button></p>
     </form>
 
     <!-- Login form -->
@@ -977,10 +1014,10 @@
         </div>
       </div>
       <div class="flex justify-end">
-        <button type="button" onclick="setAuthMode('forgot')" class="text-[13px] font-semibold" style="color:var(--brand)">Mot de passe oublié ?</button>
+        <button type="button" onclick="setAuthMode('forgot')" class="text-[13px] font-semibold text-brand">Mot de passe oublié ?</button>
       </div>
       <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Se connecter</button>
-      <p class="text-center text-[13px] text-neutral-500">Pas encore de compte ? <button type="button" onclick="setAuthMode('signup')" class="font-semibold" style="color:var(--brand)">Créer un compte</button></p>
+      <p class="text-center text-[13px] text-neutral-500">Pas encore de compte ? <button type="button" onclick="setAuthMode('signup')" class="font-semibold text-brand">Créer un compte</button></p>
     </form>
 
     <!-- Forgot password form -->
@@ -992,7 +1029,7 @@
         <input type="email" id="forgot-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
       </div>
       <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Envoyer le lien</button>
-      <p class="text-center text-[13px] text-neutral-500"><button type="button" onclick="setAuthMode('login')" class="font-semibold" style="color:var(--brand)">← Retour à la connexion</button></p>
+      <p class="text-center text-[13px] text-neutral-500"><button type="button" onclick="setAuthMode('login')" class="font-semibold text-brand">← Retour à la connexion</button></p>
     </form>
 
     <!-- Reset password form (affiché automatiquement après clic sur le lien reçu par email) -->
@@ -1024,7 +1061,7 @@
     </button>
 
     <div id="qualif-form-wrap">
-      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(0,132,255,.08);color:var(--brand)">Module 1/5 — Test de qualification</span>
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 1/5 — Test de qualification</span>
       <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Ai-je le droit d'ouvrir mon entreprise&nbsp;?</h3>
       <p class="mt-3 text-[14px] text-neutral-600">Vérification factuelle et instantanée de vos critères légaux selon la loi Raffarin (loi n°96-603 du 5 juillet 1996). Aucun conseil personnalisé, uniquement les faits.</p>
 
@@ -1050,13 +1087,13 @@
         </div>
 
         <div>
-          <label for="experience" class="block text-[14px] font-semibold text-neutral-900">Années d'expérience effective dans le métier : <span id="exp-val" class="font-bold" style="color:var(--brand)">0</span> an(s)</label>
+          <label for="experience" class="block text-[14px] font-semibold text-neutral-900">Années d'expérience effective dans le métier : <span id="exp-val" class="font-bold text-brand">0</span> an(s)</label>
           <p class="mt-1 text-[13px] text-neutral-500">Cumul des périodes en tant que salarié, non-salarié ou dirigeant dans le métier visé.</p>
           <input id="experience" type="range" min="0" max="30" step="1" value="0" class="mt-4 w-full" oninput="onExpChange(this); saveQualifDraft();" />
         </div>
 
-        <label class="flex cursor-pointer items-start gap-3 rounded-[12px] border border-black/10 bg-white px-4 py-3">
-          <input id="ueDiploma" type="checkbox" class="mt-1 h-4 w-4" style="accent-color:var(--brand)" onchange="saveQualifDraft()" />
+        <label class="flex cursor-pointer items-start gap-3 rounded-[12px] border border-black/10 bg-white px-4 py-3" for="ueDiploma">
+          <input id="ueDiploma" type="checkbox" class="mt-1 h-4 w-4 accent-brand" onchange="saveQualifDraft()" />
           <span class="text-[14px] text-neutral-800">Je détiens un diplôme équivalent obtenu dans un autre État membre de l'UE / EEE
             <span class="mt-0.5 block text-[12px] text-neutral-500">Article R.123-30 du Code de commerce.</span>
           </span>
@@ -1069,7 +1106,7 @@
 
         <button type="submit" class="btn-primary group mt-2 inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.02]">
           <span class="text-[16px] font-semibold">Vérifier ma qualification</span>
-          <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
           </span>
         </button>
@@ -1089,7 +1126,7 @@
     </button>
 
     <div id="statut-form-wrap">
-      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(0,132,255,.08);color:var(--brand)">Module 2/5 — Simulateur de statut</span>
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 2/5 — Simulateur de statut</span>
       <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Quel statut juridique pour votre activité ?</h3>
       <p class="mt-2 text-[14px] text-neutral-600">Répondez à 5 questions. L'algorithme vous pré-oriente vers Micro-entreprise, EI ou SASU, avec un niveau de confiance.</p>
 
@@ -1097,18 +1134,18 @@
         <div>
           <label class="block text-[14px] font-semibold text-neutral-900">Chiffre d'affaires prévisionnel la 1re année</label>
           <div class="mt-3 grid gap-2">
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="ca" value="lt40" class="mt-1" style="accent-color:var(--brand)" checked><span><b>Moins de 40 000 €</b><span class="block text-[13px] text-neutral-500">Démarrage progressif, chantiers ponctuels</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="ca" value="40to77" class="mt-1" style="accent-color:var(--brand)"><span><b>40 000 € – 77 700 €</b><span class="block text-[13px] text-neutral-500">Sous le seuil micro BIC prestations</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="ca" value="77to188" class="mt-1" style="accent-color:var(--brand)"><span><b>77 700 € – 188 700 €</b><span class="block text-[13px] text-neutral-500">Dépassement probable du plafond services</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="ca" value="gt188" class="mt-1" style="accent-color:var(--brand)"><span><b>Plus de 188 700 €</b><span class="block text-[13px] text-neutral-500">Activité soutenue, achats/reventes de matériaux</span></span></label>
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-lt40"><input type="radio" name="ca" value="lt40" class="mt-1 accent-brand" checked id="r-ca-lt40"><span><b>Moins de 40 000 €</b><span class="block text-[13px] text-neutral-500">Démarrage progressif, chantiers ponctuels</span></span></label>
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-40to77"><input type="radio" name="ca" value="40to77" class="mt-1 accent-brand" id="r-ca-40to77"><span><b>40 000 € – 77 700 €</b><span class="block text-[13px] text-neutral-500">Sous le seuil micro BIC prestations</span></span></label>
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-77to188"><input type="radio" name="ca" value="77to188" class="mt-1 accent-brand" id="r-ca-77to188"><span><b>77 700 € – 188 700 €</b><span class="block text-[13px] text-neutral-500">Dépassement probable du plafond services</span></span></label>
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-gt188"><input type="radio" name="ca" value="gt188" class="mt-1 accent-brand" id="r-ca-gt188"><span><b>Plus de 188 700 €</b><span class="block text-[13px] text-neutral-500">Activité soutenue, achats/reventes de matériaux</span></span></label>
           </div>
         </div>
 
         <div>
           <label class="block text-[14px] font-semibold text-neutral-900">Souhaitez-vous vous associer ?</label>
           <div class="mt-3 grid gap-2 sm:grid-cols-2">
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="associes" value="non" style="accent-color:var(--brand)" checked><span><b>Seul(e)</b></span></label>
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="associes" value="oui" style="accent-color:var(--brand)"><span><b>Avec un ou plusieurs associés</b></span></label>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-associes-non"><input class="accent-brand" type="radio" name="associes" value="non" checked id="r-associes-non"><span><b>Seul(e)</b></span></label>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-associes-oui"><input class="accent-brand" type="radio" name="associes" value="oui" id="r-associes-oui"><span><b>Avec un ou plusieurs associés</b></span></label>
           </div>
         </div>
 
@@ -1116,17 +1153,17 @@
           <label class="block text-[14px] font-semibold text-neutral-900">Protection du patrimoine personnel</label>
           <p class="mt-1 text-[13px] text-neutral-500">En EI (depuis 2022) et en SASU, votre patrimoine personnel est séparé de celui de l'entreprise.</p>
           <div class="mt-3 grid gap-2 sm:grid-cols-2">
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="patrimoine" value="oui" style="accent-color:var(--brand)" checked><span><b>Oui, priorité forte</b></span></label>
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="patrimoine" value="non" style="accent-color:var(--brand)"><span><b>Peu important</b></span></label>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-patrimoine-oui"><input class="accent-brand" type="radio" name="patrimoine" value="oui" checked id="r-patrimoine-oui"><span><b>Oui, priorité forte</b></span></label>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-patrimoine-non"><input class="accent-brand" type="radio" name="patrimoine" value="non" id="r-patrimoine-non"><span><b>Peu important</b></span></label>
           </div>
         </div>
 
         <div>
           <label class="block text-[14px] font-semibold text-neutral-900">Régime social souhaité</label>
           <div class="mt-3 grid gap-2">
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="social" value="tns" class="mt-1" style="accent-color:var(--brand)" checked><span><b>Travailleur non-salarié (TNS)</b><span class="block text-[13px] text-neutral-500">Cotisations plus faibles, protection sociale de base</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="social" value="assimile" class="mt-1" style="accent-color:var(--brand)"><span><b>Assimilé-salarié</b><span class="block text-[13px] text-neutral-500">Meilleure couverture, cotisations plus élevées</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="social" value="indiff" class="mt-1" style="accent-color:var(--brand)"><span><b>Indifférent</b></span></label>
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-tns"><input type="radio" name="social" value="tns" class="mt-1 accent-brand" checked id="r-social-tns"><span><b>Travailleur non-salarié (TNS)</b><span class="block text-[13px] text-neutral-500">Cotisations plus faibles, protection sociale de base</span></span></label>
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-assimile"><input type="radio" name="social" value="assimile" class="mt-1 accent-brand" id="r-social-assimile"><span><b>Assimilé-salarié</b><span class="block text-[13px] text-neutral-500">Meilleure couverture, cotisations plus élevées</span></span></label>
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-indiff"><input type="radio" name="social" value="indiff" class="mt-1 accent-brand" id="r-social-indiff"><span><b>Indifférent</b></span></label>
           </div>
         </div>
 
@@ -1134,14 +1171,14 @@
           <label class="block text-[14px] font-semibold text-neutral-900">Besoin de récupérer la TVA sur vos achats ?</label>
           <p class="mt-1 text-[13px] text-neutral-500">La micro-entreprise ne facture ni ne récupère la TVA sous le seuil de franchise.</p>
           <div class="mt-3 grid gap-2 sm:grid-cols-2">
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="tva" value="oui" style="accent-color:var(--brand)"><span><b>Oui, achats importants</b></span></label>
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50"><input type="radio" name="tva" value="non" style="accent-color:var(--brand)" checked><span><b>Non, peu d'achats</b></span></label>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-tva-oui"><input class="accent-brand" type="radio" name="tva" value="oui" id="r-tva-oui"><span><b>Oui, achats importants</b></span></label>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-tva-non"><input class="accent-brand" type="radio" name="tva" value="non" checked id="r-tva-non"><span><b>Non, peu d'achats</b></span></label>
           </div>
         </div>
 
         <button type="submit" class="btn-primary group inline-flex w-full items-center justify-center gap-3 rounded-[16px] py-4 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[16px] font-semibold">Obtenir ma pré-orientation</span>
-          <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
           </span>
         </button>
@@ -1161,7 +1198,7 @@
     </button>
 
     <div id="inpi-form-wrap">
-      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(0,132,255,.08);color:var(--brand)">Module 3/5 — Dossier INPI</span>
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 3/5 — Dossier INPI</span>
       <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Constituez votre dossier d'immatriculation</h3>
       <p class="mt-2 text-[14px] text-neutral-600">Ces informations alimentent le formulaire du <b>Guichet unique INPI</b>. Vous pourrez relire et signer avant transmission.</p>
 
@@ -1183,8 +1220,8 @@
             <div>
               <label class="block text-[13px] font-semibold text-neutral-900">Civilité</label>
               <div class="mt-2 grid grid-cols-2 gap-2">
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50"><input type="radio" name="civ" value="M" style="accent-color:var(--brand)" checked><span>M.</span></label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50"><input type="radio" name="civ" value="Mme" style="accent-color:var(--brand)"><span>Mme</span></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-civ-M"><input class="accent-brand" type="radio" name="civ" value="M" checked id="r-civ-M"><span>M.</span></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-civ-Mme"><input class="accent-brand" type="radio" name="civ" value="Mme" id="r-civ-Mme"><span>Mme</span></label>
               </div>
             </div>
             <div>
@@ -1284,9 +1321,9 @@
             <div class="sm:col-span-2">
               <label class="block text-[13px] font-semibold text-neutral-900">Type de local</label>
               <div class="mt-2 grid gap-2 sm:grid-cols-3">
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50"><input type="radio" name="local" value="domicile" style="accent-color:var(--brand)" checked><span>Domicile</span></label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50"><input type="radio" name="local" value="pro" style="accent-color:var(--brand)"><span>Local professionnel</span></label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50"><input type="radio" name="local" value="domiciliation" style="accent-color:var(--brand)"><span>Société de domiciliation</span></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-local-domicile"><input class="accent-brand" type="radio" name="local" value="domicile" checked id="r-local-domicile"><span>Domicile</span></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-local-pro"><input class="accent-brand" type="radio" name="local" value="pro" id="r-local-pro"><span>Local professionnel</span></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-local-domiciliation"><input class="accent-brand" type="radio" name="local" value="domiciliation" id="r-local-domiciliation"><span>Société de domiciliation</span></label>
               </div>
             </div>
           </div>
@@ -1304,7 +1341,7 @@
                   <span class="flex-1">
                     <b>Pièce d'identité <span class="text-red-500">*</span></b>
                     <span class="block text-[13px] text-neutral-500">CNI, passeport ou titre de séjour en cours de validité</span>
-                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold" id="doc-cni-status" style="color:var(--brand)">Ajouter un fichier →</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-cni-status">Ajouter un fichier →</span>
                   </span>
                   <input type="file" name="doc-cni" id="doc-cni-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'cni')">
                 </label>
@@ -1316,7 +1353,7 @@
                   <span class="flex-1">
                     <b>Justificatif de domicile <span class="text-red-500">*</span></b>
                     <span class="block text-[13px] text-neutral-500">Facture &lt; 3 mois ou bail au nom du déclarant</span>
-                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold" id="doc-domicile-status" style="color:var(--brand)">Ajouter un fichier →</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-domicile-status">Ajouter un fichier →</span>
                   </span>
                   <input type="file" name="doc-domicile" id="doc-domicile-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'domicile')">
                 </label>
@@ -1328,7 +1365,7 @@
                   <span class="flex-1">
                     <b>Justificatif de qualification <span class="text-red-500">*</span></b>
                     <span class="block text-[13px] text-neutral-500">Diplôme (CAP/BEP…) ou attestation d'expérience 3 ans</span>
-                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold" id="doc-qualif-status" style="color:var(--brand)">Ajouter un fichier →</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-qualif-status">Ajouter un fichier →</span>
                   </span>
                   <input type="file" name="doc-qualif" id="doc-qualif-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'qualif')">
                 </label>
@@ -1350,7 +1387,7 @@
                   <span class="flex-1">
                     <b>Attestation d'information du conjoint <span class="text-[11px] font-normal text-neutral-400">(si concerné)</span></b>
                     <span class="block text-[13px] text-neutral-500">Obligatoire si marié sous régime de communauté</span>
-                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold" id="doc-conjoint-status" style="color:var(--brand)">Ajouter un fichier →</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-conjoint-status">Ajouter un fichier →</span>
                   </span>
                   <input type="file" name="doc-conjoint" id="doc-conjoint-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'conjoint')">
                 </label>
@@ -1358,19 +1395,19 @@
               </div>
 
             </div>
-            <p id="inpi-docs-error" class="mt-3 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium" style="color:#b91c1c">Merci de joindre les pièces obligatoires marquées d'un * avant de générer votre dossier.</p>
+            <p id="inpi-docs-error" class="mt-3 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium text-danger">Merci de joindre les pièces obligatoires marquées d'un * avant de générer votre dossier.</p>
           </div>
 
           <div class="rounded-2xl border border-black/10 p-4">
             <label class="flex cursor-pointer items-start gap-3">
-              <input type="checkbox" name="acre" class="mt-1" style="accent-color:var(--brand)" checked>
+              <input type="checkbox" name="acre" class="mt-1 accent-brand" checked>
               <span><b>Demander l'ACRE</b><span class="block text-[13px] text-neutral-500">Exonération partielle de cotisations sociales la 1re année (sous conditions).</span></span>
             </label>
           </div>
 
           <div class="rounded-2xl border border-black/10 p-4">
             <label class="flex cursor-pointer items-start gap-3">
-              <input type="checkbox" name="honneur" required class="mt-1" style="accent-color:var(--brand)">
+              <input type="checkbox" name="honneur" required class="mt-1 accent-brand">
               <span><b>Je certifie sur l'honneur</b> l'exactitude des informations et l'absence de condamnation empêchant l'exercice.</span>
             </label>
           </div>
@@ -1381,13 +1418,13 @@
           <div class="ml-auto flex gap-3">
             <button type="button" id="inpi-next" onclick="inpiNext()" class="btn-primary inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-3 text-white transition-transform hover:scale-[1.02]">
               <span class="text-[15px] font-semibold">Continuer</span>
-              <span class="grid h-8 w-8 place-items-center rounded-full bg-white" style="color:var(--brand)">
+              <span class="grid h-8 w-8 place-items-center rounded-full bg-white text-brand">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
               </span>
             </button>
             <button type="submit" id="inpi-submit" class="btn-primary hidden inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-3 text-white transition-transform hover:scale-[1.02]">
               <span class="text-[15px] font-semibold">Générer mon dossier</span>
-              <span class="grid h-8 w-8 place-items-center rounded-full bg-white" style="color:var(--brand)">
+              <span class="grid h-8 w-8 place-items-center rounded-full bg-white text-brand">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
               </span>
             </button>
@@ -1409,7 +1446,7 @@
     </button>
 
     <div id="assur-form-wrap">
-      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(0,132,255,.08);color:var(--brand)">Module 4/5 — Assurance décennale & RC Pro</span>
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 4/5 — Assurance décennale & RC Pro</span>
       <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Dimensionnez vos garanties obligatoires</h3>
       <p class="mt-2 text-[14px] text-neutral-600">Loi Spinetta (art. L.241-1 C. assur.) : la <b>garantie décennale</b> est obligatoire dès l'ouverture du chantier. Nous calculons vos <b>seuils de référence</b> pour éviter la sous-couverture.</p>
 
@@ -1423,10 +1460,10 @@
         <div>
           <label class="text-[13px] font-semibold text-neutral-800">Chiffre d'affaires prévisionnel (12 mois)</label>
           <div class="mt-2 grid gap-2 sm:grid-cols-2">
-            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50"><input type="radio" name="assur-ca" value="lt50" checked> <span class="text-[14px]">Moins de 50 000 €</span></label>
-            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50"><input type="radio" name="assur-ca" value="50-150"> <span class="text-[14px]">50 000 € – 150 000 €</span></label>
-            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50"><input type="radio" name="assur-ca" value="150-500"> <span class="text-[14px]">150 000 € – 500 000 €</span></label>
-            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50"><input type="radio" name="assur-ca" value="gt500"> <span class="text-[14px]">Plus de 500 000 €</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50" for="r-assur-ca-lt50"><input type="radio" name="assur-ca" value="lt50" checked id="r-assur-ca-lt50"> <span class="text-[14px]">Moins de 50 000 €</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50" for="r-assur-ca-50-150"><input type="radio" name="assur-ca" value="50-150" id="r-assur-ca-50-150"> <span class="text-[14px]">50 000 € – 150 000 €</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50" for="r-assur-ca-150-500"><input type="radio" name="assur-ca" value="150-500" id="r-assur-ca-150-500"> <span class="text-[14px]">150 000 € – 500 000 €</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50" for="r-assur-ca-gt500"><input type="radio" name="assur-ca" value="gt500" id="r-assur-ca-gt500"> <span class="text-[14px]">Plus de 500 000 €</span></label>
           </div>
         </div>
 
@@ -1463,7 +1500,7 @@
         <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
           <button type="submit" class="btn-primary inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-3 text-white transition-transform hover:scale-[1.02]">
             <span class="text-[15px] font-semibold">Calculer mes garanties</span>
-            <span class="grid h-8 w-8 place-items-center rounded-full bg-white" style="color:var(--brand)"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white text-brand"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
           </button>
         </div>
       </form>
@@ -1665,7 +1702,7 @@
           <button type="button" onclick="closeDevis()" class="rounded-[14px] border border-black/10 bg-white px-5 py-3 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Fermer</button>
           <button type="submit" class="btn-primary inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-3 text-white transition-transform hover:scale-[1.02]">
             <span class="text-[15px] font-semibold">Générer le devis conforme (PDF)</span>
-            <span class="grid h-8 w-8 place-items-center rounded-full bg-white" style="color:var(--brand)"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white text-brand"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>
           </button>
         </div>
       </form>
@@ -1842,6 +1879,35 @@ animate();
 
 <!-- App logic -->
 <script>
+  // ---------- Notifications inline (remplace alert()) ----------
+  // type: 'error' | 'warning' | 'success'
+  function showInlineError(message, type){
+    type = type || 'error';
+    const container = document.getElementById('toast-container');
+    if (!container){ console.warn('[toast]', message); return; }
+
+    const icons = { error: '⚠️', warning: '⚠️', success: '✓' };
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.innerHTML =
+      '<span class="toast-icon">' + (icons[type] || icons.error) + '</span>' +
+      '<span class="toast-msg"></span>' +
+      '<button type="button" class="toast-close" aria-label="Fermer">✕</button>';
+    toast.querySelector('.toast-msg').textContent = message;
+
+    const remove = () => {
+      toast.classList.remove('toast-show');
+      setTimeout(() => toast.remove(), 250);
+    };
+    toast.querySelector('.toast-close').addEventListener('click', remove);
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('toast-show'));
+    setTimeout(remove, 6000);
+  }
+  window.showInlineError = showInlineError;
+
   // ---------- Data ----------
   const NAV = [
     { id: "accueil", label: "Accueil" },
@@ -2243,20 +2309,20 @@ animate();
 
   // Features
   document.getElementById('features').innerHTML = FEATURES.map((f,i)=>`
-    <button data-reveal style="transition-delay:${i*60}ms" onclick="scrollToId('how')" class="group relative overflow-hidden rounded-3xl border border-black/5 glass p-7 text-left transition-all duration-500 hover:-translate-y-1 hover:border-[color:var(--brand)]/30 hover:shadow-xl hover:shadow-[color:var(--brand)]/10">
+    <button data-reveal style="transition-delay:${i*60}ms" onclick="scrollToId('how')" class="blueprint-corners group relative overflow-hidden rounded-3xl border border-black/5 glass p-7 text-left transition-all duration-500 hover:-translate-y-1 hover:border-[color:var(--brand)]/30 hover:shadow-xl hover:shadow-[color:var(--brand)]/10">
       <div class="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[color:var(--brand)]/10 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-      <div class="mb-5 grid h-12 w-12 place-items-center rounded-2xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" style="background:rgba(0,132,255,.1); color:var(--brand)">${icon(f.icon,"h-6 w-6")}</div>
+      <div class="mb-5 grid h-12 w-12 place-items-center rounded-2xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 bg-brand-tint-2">${icon(f.icon,"h-6 w-6")}</div>
       <div class="mb-2 inline-flex rounded-full bg-neutral-100 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-neutral-600">${f.tag}</div>
       <h3 class="font-display text-xl font-semibold text-neutral-950">${f.title}</h3>
       <p class="mt-2 text-sm leading-relaxed text-neutral-600">${f.desc}</p>
-      <div class="mt-5 inline-flex items-center gap-1 text-sm font-medium" style="color:var(--brand)">En savoir plus ${icon('arrow','h-4 w-4')}</div>
+      <div class="mt-5 inline-flex items-center gap-1 text-sm font-medium text-brand">En savoir plus ${icon('arrow','h-4 w-4')}</div>
     </button>
   `).join('');
 
   // Steps
   document.getElementById('steps').innerHTML = STEPS.map((s,i)=>`
     <li data-reveal style="transition-delay:${i*100}ms" class="relative rounded-3xl border border-black/5 glass p-7 transition-transform duration-500 hover:-translate-y-1">
-      <div class="font-display text-5xl font-bold" style="color:rgba(0,132,255,.2)">${s.n}</div>
+      <div class="font-display text-5xl font-bold" style="color:rgba(29,95,163,.2)">${s.n}</div>
       <h3 class="mt-2 font-display text-lg font-semibold">${s.t}</h3>
       <p class="mt-2 text-sm text-neutral-600">${s.d}</p>
     </li>
@@ -2265,7 +2331,7 @@ animate();
   // About list & stats
   document.getElementById('about-list').innerHTML = ABOUT_LIST.map(t=>`
     <li class="flex gap-3">
-      <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full" style="background:rgba(0,132,255,.1); color:var(--brand)">${icon('check','h-3.5 w-3.5')}</span>
+      <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-tint-2">${icon('check','h-3.5 w-3.5')}</span>
       <span class="text-sm text-neutral-700">${t}</span>
     </li>`).join('');
   document.getElementById('stats').innerHTML = STATS.map(s=>`
@@ -2276,15 +2342,15 @@ animate();
 
   // Pricing
   document.getElementById('pricing').innerHTML = PRICING.map((p,i)=>`
-    <div data-reveal style="transition-delay:${i*100}ms" class="relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-transform duration-500 hover:-translate-y-1 ${p.highlight?'border-[color:var(--brand)]/40 shadow-2xl shadow-[color:var(--brand)]/20':'border-black/5 bg-white/70'}" style="${p.highlight?'background:linear-gradient(135deg, rgba(0,132,255,.1), rgba(255,255,255,.9))':''}">
-      ${p.highlight?`<span class="absolute right-6 top-6 rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-white" style="background:var(--brand)">Populaire</span>`:''}
+    <div data-reveal style="transition-delay:${i*100}ms" class="relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-transform duration-500 hover:-translate-y-1 ${p.highlight?'border-[color:var(--brand)]/40 shadow-2xl shadow-[color:var(--brand)]/20':'border-black/5 bg-white/70'}" style="${p.highlight?'background:linear-gradient(135deg, rgba(29,95,163,.1), rgba(255,255,255,.9))':''}">
+      ${p.highlight?`<span class="absolute right-6 top-6 rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-white bg-brand">Populaire</span>`:''}
       <div class="text-sm font-medium uppercase tracking-wide text-neutral-500">${p.name}</div>
       <div class="mt-3 flex items-baseline gap-2">
         <span class="font-display text-5xl font-bold">${p.price}</span>
         <span class="text-sm text-neutral-500">${p.sub}</span>
       </div>
       <ul class="mt-6 space-y-3">
-        ${p.features.map(f=>`<li class="flex items-start gap-2 text-sm text-neutral-700"><span class="mt-0.5 shrink-0" style="color:var(--brand)">${icon('check','h-4 w-4')}</span>${f}</li>`).join('')}
+        ${p.features.map(f=>`<li class="flex items-start gap-2 text-sm text-neutral-700"><span class="mt-0.5 shrink-0 text-brand">${icon('check','h-4 w-4')}</span>${f}</li>`).join('')}
       </ul>
       <button data-plan-btn="${p.plan||'gratuit'}" onclick="handlePricingClick(${p.plan?`'${p.plan}'`:'null'})" class="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait" style="background:${p.highlight?'var(--brand)':'#0a0a0a'}"><span data-plan-btn-label>${p.cta} ${icon('arrow','h-4 w-4')}</span></button>
     </div>
@@ -2306,7 +2372,7 @@ animate();
   async function startCheckout(planKey){
     const sb = window.__supabase;
     if (!sb){
-      alert("Connexion au serveur indisponible. Réessayez dans un instant.");
+      showInlineError("Connexion au serveur indisponible. Réessayez dans un instant.");
       return;
     }
     const btn = document.querySelector(`[data-plan-btn="${planKey}"]`);
@@ -2356,7 +2422,7 @@ animate();
       }
     } catch(e){
       console.error('Erreur création session de paiement :', e);
-      alert("Une erreur est survenue lors de la préparation du paiement. Réessayez dans un instant.\n\n(" + (e.message || e) + ")");
+      showInlineError("Une erreur est survenue lors de la préparation du paiement. Réessayez dans un instant. (" + (e.message || e) + ")");
       if (btn){ btn.disabled = false; }
       if (label && originalHTML !== null){ label.innerHTML = originalHTML; }
     }
@@ -2365,8 +2431,8 @@ animate();
   // Qualification form population
   document.getElementById('metier').innerHTML = '<option value="" selected>Choisissez votre métier…</option>' + METIERS.map(m=>`<option value="${m.v}">${m.l}${m.reglemente?' — activité réglementée':''}</option>`).join('');
   document.getElementById('diplome-group').innerHTML = DIPLOMES.map((d,i)=>`
-    <label class="radio-card flex cursor-pointer items-center gap-3 rounded-[12px] border border-black/10 bg-white/60 px-4 py-3 text-[14px] transition hover:border-[color:var(--brand)]/40 hover:bg-white">
-      <input type="radio" name="diplome" value="${d.v}" class="h-4 w-4" style="accent-color:var(--brand)" ${i===0?'checked':''} onchange="saveQualifDraft()"/>
+    <label class="radio-card flex cursor-pointer items-center gap-3 rounded-[12px] border border-black/10 bg-white/60 px-4 py-3 text-[14px] transition hover:border-[color:var(--brand)]/40 hover:bg-white" for="r-diplome-${d.v}">
+      <input type="radio" name="diplome" value="${d.v}" id="r-diplome-${d.v}" class="h-4 w-4 accent-brand" ${i===0?'checked':''} onchange="saveQualifDraft()"/>
       <span class="text-neutral-800">${d.l}</span>
     </label>
   `).join('');
@@ -2390,7 +2456,7 @@ animate();
         document.querySelectorAll('.nav-link').forEach(b=>{
           const active = b.getAttribute('data-nav')===e.target.id;
           b.style.color = active ? 'var(--brand)' : '';
-          b.style.background = active ? 'rgba(0,132,255,.08)' : '';
+          b.style.background = active ? 'rgba(29,95,163,.08)' : '';
         });
       }
     });
@@ -2547,7 +2613,7 @@ animate();
   async function goToInpiGated(){
     if (!currentUser){ requireAuth(goToInpiGated); return; }
     const sb = window.__supabase;
-    if (!sb){ alert("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
     const btn = document.getElementById('statut-inpi-btn');
     if (btn) btn.disabled = true;
     const userId = currentUser.id || currentUser.user_id;
@@ -2559,7 +2625,7 @@ animate();
     if (btn) btn.disabled = false;
     if (error){
       console.error('Erreur vérification entitlements :', error);
-      alert("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
+      showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
       return;
     }
     const hasAccess = (data || []).some(e => e.product_key === 'dossier' || e.product_key === 'pro');
@@ -2803,7 +2869,7 @@ animate();
       const d = new Date(submission.date);
       const status = submission.res ? submission.res.status : null;
       const color = status==='eligible' ? '#10b981' : status==='presque' ? '#f59e0b' : status==='non' ? '#ef4444' : 'var(--brand)';
-      const bg = status==='eligible' ? 'rgba(16,185,129,.08)' : status==='presque' ? 'rgba(245,158,11,.08)' : status==='non' ? 'rgba(239,68,68,.08)' : 'rgba(0,132,255,.08)';
+      const bg = status==='eligible' ? 'rgba(16,185,129,.08)' : status==='presque' ? 'rgba(245,158,11,.08)' : status==='non' ? 'rgba(239,68,68,.08)' : 'rgba(29,95,163,.08)';
       const icon = document.getElementById('espace-qualif-icon');
       if (icon) icon.style.cssText = `background:${bg};color:${color}`;
       box.innerHTML = `
@@ -2854,7 +2920,7 @@ animate();
 
       ${res.specifics && res.specifics.length ? `
       <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-        <h4 class="text-[13px] font-semibold uppercase tracking-wide" style="color:#b45309">Exigences spécifiques au métier « ${res.metier.l} »</h4>
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-warning">Exigences spécifiques au métier « ${res.metier.l} »</h4>
         <ul class="mt-3 space-y-3 text-[14px] text-neutral-800">
           ${res.specifics.map(s=>`<li class="flex flex-col rounded-xl border border-black/5 bg-white p-3"><span class="font-semibold">${s.label}</span><span class="text-[12px] text-neutral-600 mt-0.5">${s.detail}</span></li>`).join('')}
         </ul>
@@ -2898,7 +2964,7 @@ animate();
     if (!currentUser){
       content.innerHTML = `
         <p class="text-neutral-600 text-[14px]">Vous devez être connecté pour consulter votre rapport de qualification.</p>
-        <button onclick="closeQualifReport(); openAuth();" class="rapport-noprint mt-4 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white" style="background:var(--brand)">Se connecter</button>
+        <button onclick="closeQualifReport(); openAuth();" class="rapport-noprint mt-4 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white bg-brand">Se connecter</button>
       `;
       return;
     }
@@ -2937,7 +3003,7 @@ animate();
         date: submission.date,
       });
     } else {
-      content.innerHTML = `<p class="text-neutral-600 text-[14px]">Aucun test de qualification trouvé pour ce compte. <button onclick="closeQualifReport(); openQualif();" class="rapport-noprint font-semibold" style="color:var(--brand)">Passer le test</button></p>`;
+      content.innerHTML = `<p class="text-neutral-600 text-[14px]">Aucun test de qualification trouvé pour ce compte. <button onclick="closeQualifReport(); openQualif();" class="rapport-noprint font-semibold text-brand">Passer le test</button></p>`;
     }
   }
 
@@ -2956,7 +3022,7 @@ animate();
   async function openBillingPortal(){
     const sb = window.__supabase;
     if (!sb){
-      alert("Connexion au serveur indisponible. Réessayez dans un instant.");
+      showInlineError("Connexion au serveur indisponible. Réessayez dans un instant.");
       return;
     }
 
@@ -2988,7 +3054,7 @@ animate();
       }
     } catch(e){
       console.error('Erreur ouverture portail client :', e);
-      alert("Impossible d'ouvrir la gestion d'abonnement pour le moment.\n\n(" + (e.message || e) + ")");
+      showInlineError("Impossible d'ouvrir la gestion d'abonnement pour le moment. (" + (e.message || e) + ")");
       if (btn){ btn.disabled = false; btn.innerHTML = originalHTML; }
     }
   }
@@ -2997,7 +3063,7 @@ animate();
   // le provider correspondant soit activé côté projet Supabase (Auth > Providers).
   async function oauthSignIn(provider){
     const sb = window.__supabase;
-    if (!sb){ alert("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
     try {
       const { error } = await sb.auth.signInWithOAuth({
         provider,
@@ -3005,7 +3071,7 @@ animate();
       });
       if (error) throw error;
     } catch(e){
-      alert("Connexion " + (provider === 'google' ? 'Google' : 'Microsoft') + " indisponible pour le moment.\n\n(" + (e.message || e) + ")");
+      showInlineError("Connexion " + (provider === 'google' ? 'Google' : 'Microsoft') + " indisponible pour le moment. (" + (e.message || e) + ")");
     }
   }
   window.oauthSignIn = oauthSignIn;
@@ -3427,11 +3493,11 @@ if (isAuthed) await renderAdminDashboard();
   // Utile pour que le créateur du site se donne l'accès complet sans payer.
   async function grantMyProAccess(){
     if (!currentUser){
-      alert("Tu dois être connecté sur le site (avec ton compte) pour utiliser ce bouton. Connecte-toi d'abord, puis rouvre ce dashboard.");
+      showInlineError("Tu dois être connecté sur le site (avec ton compte) pour utiliser ce bouton. Connecte-toi d'abord, puis rouvre ce dashboard.");
       return;
     }
     const sb = window.__supabase;
-    if (!sb){ alert("Connexion au serveur indisponible."); return; }
+    if (!sb){ showInlineError("Connexion au serveur indisponible."); return; }
 
     const userId = currentUser.id || currentUser.user_id;
     const statutEl = document.getElementById('admin-mon-compte-statut');
@@ -3804,7 +3870,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   function submitQualif(){
     const metier = document.getElementById('metier').value;
     if (!metier){
-      alert('Merci de choisir votre métier avant de vérifier votre qualification.');
+      showInlineError('Merci de choisir votre métier avant de vérifier votre qualification.');
       return;
     }
     const diplome = document.querySelector('input[name="diplome"]:checked').value;
@@ -3853,7 +3919,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
 
         ${res.specifics && res.specifics.length ? `
         <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-          <h4 class="text-[13px] font-semibold uppercase tracking-wide" style="color:#b45309">Exigences spécifiques au métier « ${res.metier.l} »</h4>
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-warning">Exigences spécifiques au métier « ${res.metier.l} »</h4>
           <p class="mt-1 text-[12px] text-neutral-600">Ces obligations s'ajoutent à la qualification et à l'immatriculation — elles ne sont ni remplacées ni couvertes par le diplôme ou l'expérience seuls.</p>
           <ul class="mt-3 space-y-3 text-[14px] text-neutral-800">
             ${res.specifics.map(s=>`<li class="flex flex-col rounded-xl border border-black/5 bg-white p-3"><span class="font-semibold">${s.label}</span><span class="text-[12px] text-neutral-600 mt-0.5">${s.detail}</span></li>`).join('')}
@@ -3863,7 +3929,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
         <div class="mt-6 flex flex-wrap gap-3">
           <button onclick="closeQualif(); goToEspaceClient();" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
             <span class="text-[15px] font-semibold">Voir mon orientation dans mon espace</span>
-            <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">${icon('arrow','h-4 w-4')}</span>
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
           </button>
           ${res.status==='eligible' ? `
             <button onclick="closeQualif(); openStatut();" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">${res.next}</button>` : `
@@ -3972,7 +4038,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     wrap.classList.remove('hidden');
 
     const color = res.confidence >= 75 ? '#10b981' : res.confidence >= 55 ? '#0084FF' : '#f59e0b';
-    const bg = res.confidence >= 75 ? 'rgba(16,185,129,.08)' : res.confidence >= 55 ? 'rgba(0,132,255,.08)' : 'rgba(245,158,11,.08)';
+    const bg = res.confidence >= 75 ? 'rgba(16,185,129,.08)' : res.confidence >= 55 ? 'rgba(29,95,163,.08)' : 'rgba(245,158,11,.08)';
 
     const others = Object.entries(res.scores)
       .filter(([k])=>k!==res.winner)
@@ -4019,26 +4085,26 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
 
       ${res.needsExpert ? `
       <div class="mt-4 rounded-2xl border p-5" style="border-color:#f59e0b30;background:rgba(245,158,11,.08)">
-        <h4 class="text-[13px] font-semibold uppercase tracking-wide" style="color:#b45309">Validation experte recommandée</h4>
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-warning">Validation experte recommandée</h4>
         <p class="mt-2 text-[14px] text-neutral-700">Vos réponses sont proches entre plusieurs statuts. Nous vous conseillons un échange avec un expert-comptable partenaire avant l'immatriculation.</p>
       </div>` : ''}
 
       <div class="mt-6 flex flex-wrap gap-3">
         <button id="statut-inpi-btn" onclick="goToInpiGated()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[15px] font-semibold">Passer à l'étape suivante : dossier INPI</span>
-          <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">${icon('arrow','h-4 w-4')}</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
         </button>
         <button onclick="resetStatut()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier mes réponses</button>
       </div>
 
-      <div id="statut-inpi-paywall" class="mt-4 hidden rounded-2xl border p-5" style="border-color:rgba(0,132,255,.25); background:rgba(0,132,255,.05)">
-        <div class="flex items-center gap-2 text-[13px] font-semibold" style="color:var(--brand)">
+      <div id="statut-inpi-paywall" class="mt-4 hidden rounded-2xl border p-5" style="border-color:rgba(29,95,163,.25); background:rgba(29,95,163,.05)">
+        <div class="flex items-center gap-2 text-[13px] font-semibold text-brand">
           ${icon('lock','h-4 w-4')} Étape réservée au Pack Lancement
         </div>
         <p class="mt-2 text-[14px] text-neutral-700">La génération du dossier INPI fait partie du <b>Pack Lancement (89 €, paiement unique)</b>. Achetez-le pour continuer votre immatriculation.</p>
         <button onclick="handlePricingClick('dossier')" class="btn-primary group mt-4 inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-2 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[14px] font-semibold">Acheter le pack — 89 €</span>
-          <span class="grid h-7 w-7 place-items-center rounded-full bg-white" style="color:var(--brand)">${icon('arrow','h-3.5 w-3.5')}</span>
+          <span class="grid h-7 w-7 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-3.5 w-3.5')}</span>
         </button>
       </div>
 
@@ -4290,13 +4356,13 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
             return `<li class="flex items-center gap-2 ${ok?'text-neutral-800':'text-neutral-500'}"><span class="grid h-5 w-5 place-items-center rounded-full text-[11px] font-bold" style="background:${ok?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)'};color:${ok?'#10b981':'#b45309'}">${ok?'✓':'!'}</span>${l}</li>`;
           }).join('')}
         </ul>
-        ${missing.length ? `<p class="mt-3 text-[13px]" style="color:#b45309">À téléverser avant transmission : ${missing.map(k=>DOC_LABEL[k]).join(', ')}.</p>` : ''}
+        ${missing.length ? `<p class="mt-3 text-[13px] text-warning">À téléverser avant transmission : ${missing.map(k=>DOC_LABEL[k]).join(', ')}.</p>` : ''}
       </div>
 
       <div class="mt-6 flex flex-wrap gap-3">
         <button onclick="downloadInpiPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[15px] font-semibold">Télécharger le dossier (PDF)</span>
-          <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">${icon('arrow','h-4 w-4')}</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
         </button>
         <button onclick="closeInpi(); openAssur();" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[15px] font-semibold">Passer à l'assurance décennale</span>
@@ -4521,7 +4587,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       </div>
 
       <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-        <h4 class="text-[13px] font-semibold uppercase tracking-wide" style="color:#b45309">Points de vigilance</h4>
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-warning">Points de vigilance</h4>
         <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-800 list-disc list-inside">
           ${res.warnings.map(w=>`<li>${w}</li>`).join('')}
         </ul>
@@ -4537,7 +4603,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       <div class="mt-6 flex flex-wrap gap-3">
         <button onclick="downloadAssurPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[15px] font-semibold">Télécharger la synthèse (PDF)</span>
-          <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)">${icon('arrow','h-4 w-4')}</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
         </button>
         <button onclick="closeAssur(); openDevis();" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[15px] font-semibold">Passer au devis conforme</span>
@@ -4855,7 +4921,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   function submitDevis(){
     const d = readDevisForm();
     if (!d.lines.length || d.lines.every(L=>!L.d)){
-      alert('Ajoutez au moins une ligne de prestation.'); return;
+      showInlineError('Ajoutez au moins une ligne de prestation.'); return;
     }
     computeDevisTotals();
     window.__devisData = d;
@@ -4880,8 +4946,8 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
           <div class="mt-1 font-display text-2xl font-bold">${fmtEUR(T.totalTVA)}</div>
           ${T.franchise ? '<div class="mt-1 text-[11px] text-neutral-500">Franchise en base (art. 293 B CGI)</div>' : ''}
         </div>
-        <div class="rounded-2xl border p-5" style="border-color:rgba(0,132,255,.25);background:rgba(0,132,255,.05)">
-          <div class="text-[11px] font-semibold uppercase tracking-wide" style="color:var(--brand)">Total TTC</div>
+        <div class="rounded-2xl border p-5" style="border-color:rgba(29,95,163,.25);background:rgba(29,95,163,.05)">
+          <div class="text-[11px] font-semibold uppercase tracking-wide text-brand">Total TTC</div>
           <div class="mt-1 font-display text-3xl font-bold">${fmtEUR(T.totalTTC)}</div>
         </div>
       </div>
@@ -4893,7 +4959,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       <div class="mt-6 flex flex-wrap gap-3">
         <button onclick="downloadDevisPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[15px] font-semibold">Télécharger le devis (PDF)</span>
-          <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>
         </button>
         <button onclick="editDevis()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier le devis</button>
         <button onclick="closeDevis()" class="rounded-[16px] bg-neutral-950 px-5 py-4 text-[14px] font-medium text-white hover:opacity-90">Terminer</button>
