@@ -4165,7 +4165,7 @@ if (submission && submission.res){
     };
 
     const sb = window.__supabase;
-    if (!sb) { persistLocal(); return; }
+    if (!sb) { persistLocal(); return Promise.resolve({ ok:false, remote:false }); }
 
     const userId = (currentUser && (currentUser.id || currentUser.user_id)) || null;
     const row = {
@@ -4175,14 +4175,17 @@ if (submission && submission.res){
       payload: { ...entry, ...(data && typeof data === 'object' ? {} : {}) , _data: data },
     };
 
-    sb.from('submissions').insert(row).then(({ error }) => {
+    return sb.from('submissions').insert(row).then(({ error }) => {
       if (error) {
         console.warn('Supabase insert submissions échoué, fallback localStorage:', error);
         persistLocal();
+        return { ok:false, remote:false };
       }
+      return { ok:true, remote:true };
     }).catch(err => {
       console.warn('Supabase insert submissions exception, fallback localStorage:', err);
       persistLocal();
+      return { ok:false, remote:false };
     });
   }
 
@@ -5073,7 +5076,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   const FORME_LABEL = { micro:'Micro-entreprise', ei:'Entreprise Individuelle (EI)', sasu:'SASU' };
   const DOC_LABEL = { cni:"Pièce d'identité", domicile:'Justificatif de domicile', qualif:'Justificatif de qualification', ncnf:'Déclaration de non-condamnation', conjoint:"Attestation d'information du conjoint" };
 
-  function submitInpi(){
+  async function submitInpi(){
     if (!validateInpiStep()) return;
     const d = readInpiForm();
     window.__inpiData = d;
@@ -5082,7 +5085,11 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     const ref = 'BP-' + Date.now().toString(36).toUpperCase().slice(-6) + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
     window.__inpiRef = ref;
     const missing = REQUIRED_DOCS.filter(k => !(d.doc || []).includes(k));
-    recordSubmission('inpi', `Dossier ${ref} — ${d.denomination || d.nom || 'sans dénomination'} (${FORME_LABEL[d.forme] || d.forme})${missing.length?' — pièces manquantes':''}`, { ref, ...d });
+    // Le bouton "Télécharger le PDF" appelle désormais une Edge Function qui
+    // relit cette soumission en base côté serveur : on doit donc attendre la
+    // confirmation d'écriture avant d'autoriser le clic, sinon le premier
+    // téléchargement pourrait tomber sur "Aucun dossier trouvé".
+    window.__inpiSavePromise = recordSubmission('inpi', `Dossier ${ref} — ${d.denomination || d.nom || 'sans dénomination'} (${FORME_LABEL[d.forme] || d.forme})${missing.length?' — pièces manquantes':''}`, { ref, ...d });
 
     document.getElementById('inpi-form-wrap').classList.add('hidden');
     const wrap = document.getElementById('inpi-result');
@@ -5143,8 +5150,8 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       </div>
 
       <div class="mt-6 flex flex-wrap gap-3">
-        <button onclick="downloadInpiPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
-          <span class="text-[15px] font-semibold">Télécharger le dossier (PDF)</span>
+        <button id="inpi-download-btn" onclick="downloadInpiPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
+          <span id="inpi-download-btn-label" class="text-[15px] font-semibold">Télécharger le dossier (PDF)</span>
           <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
         </button>
         <button onclick="closeInpi(); goToAssurGated();" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02]">
@@ -5159,78 +5166,76 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     wrap.scrollTop = 0;
   }
 
-  function downloadInpiPdf(){
-    const d = window.__inpiData || {};
-    const ref = window.__inpiRef || '—';
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit:'pt', format:'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const marginX = 48;
-    const maxWidth = pageWidth - marginX*2;
-    let y = 56;
+  // Génère et télécharge le PDF du dossier INPI en appelant la Edge
+  // Function `generate-inpi-pdf`. Le PDF est construit côté serveur, après
+  // vérification (avec la clé service_role, infalsifiable depuis le
+  // navigateur) que le compte a bien un entitlement 'dossier' ou 'pro' actif.
+  // Il n'y a plus aucune génération de PDF possible depuis la console :
+  // sans token valide + paiement confirmé en base, la fonction renvoie 403
+  // et rien n'est produit.
+  async function downloadInpiPdf(){
+    const btn = document.getElementById('inpi-download-btn');
+    const label = document.getElementById('inpi-download-btn-label');
+    const originalLabel = label ? label.textContent : null;
 
-    function addSpace(h){ y += h; if (y > 780){ doc.addPage(); y = 56; } }
-    function heading(text, size=12.5){
-      doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20,20,20);
-      doc.text(text, marginX, y); addSpace(size+8);
-    }
-    function line(label, value, size=10.5){
-      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
-      const text = (label ? label + ' : ' : '') + (value || '—');
-      const lines = doc.splitTextToSize(text, maxWidth);
-      lines.forEach(l => { doc.text(l, marginX, y); addSpace(size+5); });
+    const sb = window.__supabase;
+    if (!sb){
+      showInlineError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
     }
 
-    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(0,132,255);
-    doc.text('Bâtipro — Dossier INPI', marginX, y); addSpace(26);
+    if (btn) btn.disabled = true;
+    if (label) label.textContent = 'Génération en cours…';
 
-    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(120,120,120);
-    doc.text('Référence interne : ' + ref + '  —  Horodaté ' + new Date().toLocaleString('fr-FR'), marginX, y); addSpace(24);
+    try {
+      // Attend la confirmation d'écriture de la soumission si l'appel vient
+      // juste après submitInpi() (cf. window.__inpiSavePromise).
+      if (window.__inpiSavePromise){
+        await window.__inpiSavePromise;
+        window.__inpiSavePromise = null;
+      }
 
-    heading('Déclarant');
-    line(null, `${d.civ||''} ${d.prenom||''} ${d.nom||''}`.trim());
-    line('Né(e) le', `${d.ddn||'—'} à ${d.villeNaissance||'—'} (${d.paysNaissance||'—'})`);
-    line('Nationalité', d.nationalite);
-    line('Contact', `${d.email||'—'} · ${d.tel||'—'}`);
-    addSpace(6);
+      const { data: sessionData } = await sb.auth.getSession();
+      const token = sessionData && sessionData.session && sessionData.session.access_token;
+      if (!token){
+        showInlineError("Veuillez vous reconnecter pour télécharger votre dossier.");
+        return;
+      }
 
-    heading('Entreprise');
-    line(null, d.denomination);
-    line('Forme', FORME_LABEL[d.forme] || d.forme);
-    line('Code APE', d.ape);
-    line('Début d\'activité', d.debut);
-    if (d.activite){ addSpace(2); line(null, d.activite, 9.5); }
-    addSpace(6);
+      const resp = await fetch(`${window.SUPABASE_URL}/functions/v1/generate-inpi-pdf`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    heading('Siège social');
-    line(null, d.adresse);
-    line(null, `${d.cp||''} ${d.ville||''}`.trim());
-    line('Local', d.local);
-    addSpace(6);
+      if (!resp.ok){
+        let message = "Impossible de générer le PDF pour le moment.";
+        try {
+          const errBody = await resp.json();
+          if (errBody && errBody.error) message = errBody.error;
+        } catch (_e) {}
+        showInlineError(message);
+        return;
+      }
 
-    heading('Options');
-    line(null, d.acre ? '✓ ACRE demandée' : '— ACRE non demandée');
-    line(null, d.honneur ? '✓ Déclaration sur l\'honneur signée' : '— Non signée');
-    addSpace(6);
-
-    heading('Pièces justificatives');
-    Object.entries(DOC_LABEL).forEach(([k,l])=>{
-      const ok = (d.doc || []).includes(k);
-      line(null, (ok ? '✓ ' : '! ') + l);
-    });
-    const missing = Object.keys(DOC_LABEL).filter(k => REQUIRED_DOCS.includes(k) && !(d.doc||[]).includes(k));
-    if (missing.length){
-      addSpace(4);
-      doc.setTextColor(180,83,9);
-      line(null, 'À téléverser avant transmission : ' + missing.map(k=>DOC_LABEL[k]).join(', ') + '.', 9.5);
-      doc.setTextColor(50,50,50);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'batipro-dossier-inpi.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Erreur téléchargement PDF INPI :', err);
+      showInlineError("Une erreur est survenue pendant la génération du PDF.");
+    } finally {
+      if (btn) btn.disabled = false;
+      if (label && originalLabel) label.textContent = originalLabel;
     }
-
-    addSpace(10);
-    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(140,140,140);
-    line(null, "Ce récapitulatif alimente le formulaire du Guichet unique INPI. La transmission finale s'effectue après signature électronique.", 8.5);
-
-    doc.save('batipro-dossier-inpi.pdf');
   }
 
   window.submitInpi = submitInpi;
