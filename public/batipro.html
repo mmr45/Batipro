@@ -3400,16 +3400,14 @@ animate();
   window.closeLegal = closeLegal;
 
   // ---------- ADMIN DASHBOARD (créateur uniquement) ----------
-  // ⚠️ Protection uniquement côté navigateur (mot de passe visible dans le
-  // code source si quelqu'un l'inspecte). Suffisant pour un usage perso tant
-  // qu'il n'y a pas de backend, mais À CHANGER avant toute mise en ligne,
-  // et à remplacer par une vraie authentification serveur dès que possible.
-  const ADMIN_PASSWORD = '56?@87hjdHG/:%ksye98'; // <-- changez ce mot de passe
-  // Comptes Supabase considérés comme admin : si l'utilisateur connecté sur le
-  // site a l'un de ces emails, l'accès au dashboard se fait en 1 clic, sans
-  // redemander le mot de passe (qui reste un fallback si l'email ne correspond
-  // pas ou si l'utilisateur n'est pas connecté).
-  const ADMIN_EMAILS = ['osman874pro@gmail.com'];
+  // ⚠️ SÉCURITÉ : il n'y a plus AUCUN mot de passe ni email admin en dur
+  // dans ce fichier. Le statut admin est désormais vérifié côté serveur
+  // via la fonction RPC Supabase `is_admin()` (security definer), qui lit
+  // le rôle de l'utilisateur dans une table `profiles` protégée par RLS
+  // et non modifiable par l'utilisateur lui-même.
+  // Voir le script SQL fourni séparément pour créer cette fonction avant
+  // de remettre ce site en ligne — sans elle, le dashboard admin restera
+  // inaccessible (comportement volontaire, fail-closed).
   const LS_SUBMISSIONS_KEY = 'batipro_submissions';
   const LS_ADMIN_SESSION_KEY = 'batipro_admin_session'; // sessionStorage : expire à la fermeture de l'onglet
 
@@ -3471,69 +3469,53 @@ animate();
     });
   }
 
+  // Vérifie côté serveur (RPC Supabase `is_admin`, security definer) si
+  // l'utilisateur connecté a le rôle admin en base. Impossible à falsifier
+  // depuis le navigateur : la réponse dépend de la session Supabase réelle
+  // et du contenu de la table `profiles`, protégée par RLS.
+  async function checkIsAdminServerSide(){
+    const sb = window.__supabase;
+    if (!sb || !currentUser) return false;
+    try {
+      const { data, error } = await sb.rpc('is_admin');
+      if (error) { console.warn('is_admin RPC error:', error); return false; }
+      return data === true;
+    } catch(e){
+      console.warn('is_admin RPC exception:', e);
+      return false;
+    }
+  }
+
   async function openAdmin(){
     const m = document.getElementById('admin-modal');
     m.classList.remove('hidden');
     m.classList.add('flex');
     document.body.style.overflow = 'hidden';
-    // Accès en 1 clic : si le compte Supabase actuellement connecté sur le
-    // site est un email admin reconnu, on saute l'écran de mot de passe.
-    const isRecognizedAdmin = !!(currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase()));
-    if (isRecognizedAdmin) {
-      sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
-    }
-    const isAuthed = isRecognizedAdmin || sessionStorage.getItem(LS_ADMIN_SESSION_KEY) === 'ok';
+
+    const alreadyAuthed = sessionStorage.getItem(LS_ADMIN_SESSION_KEY) === 'ok';
+    const isAuthed = alreadyAuthed || await checkIsAdminServerSide();
+    if (isAuthed) sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
+
     document.getElementById('admin-login').classList.toggle('hidden', isAuthed);
     document.getElementById('admin-dashboard').classList.toggle('hidden', !isAuthed);
-if (isAuthed) await renderAdminDashboard();
+    document.getElementById('admin-login-error').classList.toggle('hidden', isAuthed);
+    if (!isAuthed) {
+      document.getElementById('admin-login-error').textContent = "Accès refusé. Connecte-toi avec un compte administrateur.";
+      document.getElementById('admin-login-error').classList.remove('hidden');
+    }
+    if (isAuthed) await renderAdminDashboard();
   }
 
-  // Donne (ou confirme) l'accès Pro au compte actuellement connecté sur le
-  // site — c'est-à-dire "currentUser", pas un compte cherché par email.
-  // Utile pour que le créateur du site se donne l'accès complet sans payer.
+  // ⚠️ SUPPRIMÉ : grantMyProAccess() permettait à N'IMPORTE QUEL utilisateur
+  // connecté de s'auto-attribuer l'accès Pro gratuitement en appelant cette
+  // fonction depuis la console du navigateur (elle était exposée sur window).
+  // L'activation d'un accès Pro doit être déclenchée UNIQUEMENT côté serveur,
+  // par exemple via un webhook Stripe déclenché après paiement confirmé, qui
+  // écrit dans `entitlements` avec la clé service_role (jamais avec la clé
+  // anon utilisée par le navigateur). Voir le script SQL fourni séparément
+  // pour verrouiller les policies RLS de la table `entitlements`.
   async function grantMyProAccess(){
-    if (!currentUser){
-      showInlineError("Tu dois être connecté sur le site (avec ton compte) pour utiliser ce bouton. Connecte-toi d'abord, puis rouvre ce dashboard.");
-      return;
-    }
-    const sb = window.__supabase;
-    if (!sb){ showInlineError("Connexion au serveur indisponible."); return; }
-
-    const userId = currentUser.id || currentUser.user_id;
-    const statutEl = document.getElementById('admin-mon-compte-statut');
-
-    try {
-      // Vérifie si une ligne existe déjà pour ce compte + ce produit.
-      const { data: existing, error: selectError } = await sb
-        .from('entitlements')
-        .select('user_id, product_key, active')
-        .eq('user_id', userId)
-        .eq('product_key', 'pro')
-        .maybeSingle();
-
-      if (selectError) throw selectError;
-
-      if (existing){
-        const { error: updateError } = await sb
-          .from('entitlements')
-          .update({ active: true })
-          .eq('user_id', userId)
-          .eq('product_key', 'pro');
-        if (updateError) throw updateError;
-      } else {
-        const { error: insertError } = await sb
-          .from('entitlements')
-          .insert({ user_id: userId, product_key: 'pro', active: true });
-        if (insertError) throw insertError;
-      }
-
-      statutEl.textContent = '✅ Accès Pro activé pour ce compte.';
-      statutEl.style.color = '#15803d';
-    } catch(e){
-      console.error('Erreur activation accès Pro :', e);
-      statutEl.textContent = "❌ Échec : " + (e.message || e) + " (vérifie les règles RLS de la table entitlements dans Supabase — il faut autoriser insert/update pour l'utilisateur connecté).";
-      statutEl.style.color = '#b91c1c';
-    }
+    showInlineError("L'activation de l'accès Pro se fait automatiquement après paiement confirmé, pas depuis ce dashboard.");
   }
   function closeAdmin(){
     const m = document.getElementById('admin-modal');
@@ -3543,16 +3525,13 @@ if (isAuthed) await renderAdminDashboard();
     document.getElementById('admin-password').value = '';
     document.getElementById('admin-login-error').classList.add('hidden');
   }
-  function checkAdminPassword(){
-    const val = document.getElementById('admin-password').value;
-    if (val === ADMIN_PASSWORD){
-      sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
-      document.getElementById('admin-login').classList.add('hidden');
-      document.getElementById('admin-dashboard').classList.remove('hidden');
-      renderAdminDashboard();
-    } else {
-      document.getElementById('admin-login-error').classList.remove('hidden');
-    }
+  // Le formulaire "mot de passe admin" n'est plus utilisé : l'accès admin
+  // est désormais vérifié côté serveur (voir openAdmin / checkIsAdminServerSide).
+  // Fonction conservée uniquement pour ne pas casser l'ancien onsubmit du
+  // formulaire HTML ; elle relance simplement la vérification serveur.
+  async function checkAdminPassword(){
+    document.getElementById('admin-login-error').classList.add('hidden');
+    await openAdmin();
   }
   // Déconnexion du dashboard admin : efface la session admin (le mot de passe
   // sera de nouveau demandé) et referme le dashboard.
