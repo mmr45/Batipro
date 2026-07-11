@@ -672,7 +672,7 @@
           <p class="mt-4 max-w-lg text-white/70">Testez votre qualification en 3 minutes, sans engagement. Vous recevez votre pré-orientation par email immédiatement.</p>
         </div>
         <div class="flex md:justify-end">
-          <button onclick="openQualif()" class="btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-8 py-4 text-[15px] font-semibold text-white transition-transform hover:scale-[1.03]">
+          <button onclick="ctaTesterOuOrientation()" class="btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-8 py-4 text-[15px] font-semibold text-white transition-transform hover:scale-[1.03]">
             Tester ma qualification
             <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
           </button>
@@ -2692,6 +2692,42 @@ animate();
   // Conserve le dernier résultat complet de qualification (objet `res`) pour
   // permettre l'ouverture de la page de rapport détaillée / imprimable.
   window.__lastQualifSubmission = null;
+
+  // Vérifie rapidement (sans toucher au DOM) si l'utilisateur connecté a déjà
+  // au moins un test de qualification enregistré (Supabase, avec repli
+  // localStorage) — utilisé par le CTA du bas de page pour savoir s'il doit
+  // renvoyer vers "Mon espace" ou ouvrir directement le test.
+  async function hasQualifSubmission(){
+    if (!currentUser) return false;
+    const sb = window.__supabase;
+    if (sb && currentUser.id){
+      try {
+        const { data, error } = await sb
+          .from('submissions')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .eq('type', 'qualif')
+          .limit(1);
+        if (!error && data && data.length) return true;
+      } catch(e){
+        console.warn('Erreur vérification test de qualification :', e);
+      }
+    }
+    const list = loadSubmissions().filter(s => s.type === 'qualif' && s.email === currentUser.email);
+    return list.length > 0;
+  }
+
+  // CTA du bandeau du bas de page : si l'utilisateur est déjà connecté et a
+  // déjà réalisé le test, on l'envoie directement voir son orientation dans
+  // "Mon espace" ; sinon on ouvre le test de qualification comme avant.
+  async function ctaTesterOuOrientation(){
+    if (currentUser && await hasQualifSubmission()){
+      goToEspaceClient();
+    } else {
+      openQualif();
+    }
+  }
+  window.ctaTesterOuOrientation = ctaTesterOuOrientation;
 
   async function loadEspaceQualif(userId){
     const box = document.getElementById('espace-qualif');
