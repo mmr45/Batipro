@@ -331,7 +331,11 @@
   }
 
   /* ---------- Page de rapport imprimable (qualification) ---------- */
-  #rapport-qualif-page { background:#fff; }
+  /* z-index et position forcés en CSS natif (pas via classe Tailwind
+     arbitraire) pour garantir que cette page passe TOUJOURS au-dessus de la
+     barre de navigation (sticky, z-50), même si le bundle Tailwind compilé
+     (output.css) n'a pas été régénéré après l'ajout de cette fonctionnalité. */
+  #rapport-qualif-page { background:#fff; position: fixed !important; inset: 0 !important; z-index: 200 !important; }
   #rapport-qualif-page .rapport-shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
   @media print {
     body * { visibility: hidden; }
@@ -419,7 +423,7 @@
       <button id="nav-account-btn" onclick="requireAuth(goToEspaceClient)" class="hidden items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50">
         <span id="nav-account-label">Mon compte</span>
       </button>
-      <button id="nav-auth-btn" onclick="openQualif()" class="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">
+      <button id="nav-auth-btn" onclick="openAuth()" class="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">
         <span id="nav-auth-label">Inscription</span>
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
       </button>
@@ -3094,7 +3098,7 @@ animate();
       btn.classList.remove('hidden');
       btn.style.display = '';
       label.textContent = 'Inscription';
-      btn.onclick = () => openQualif();
+      btn.onclick = () => openAuth();
 
       accountBtn.classList.add('hidden');
       accountBtn.classList.remove('inline-flex');
