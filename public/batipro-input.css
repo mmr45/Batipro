@@ -65,4 +65,9 @@
   src: url('/fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2');
 }
 
+/* Scan explicite du dossier public (guides métiers, batipro.html, etc.) —
+   garantit que Tailwind détecte toutes les classes utilisées dans ces
+   fichiers HTML, indépendamment de l'heuristique de détection automatique. */
+@source "./**/*.html";
+
 @import "tailwindcss";
