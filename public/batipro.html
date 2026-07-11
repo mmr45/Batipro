@@ -3416,7 +3416,7 @@ animate();
       }
     }
 
-    if (submission){
+    if (submission && hasAccess){
       const d = new Date(submission.date);
       box.innerHTML = `
         <p class="font-medium">${escapeHtml(submission.summary)}</p>
@@ -3430,6 +3430,12 @@ animate();
         window.__inpiRef = submission.data.ref || '—';
         if (voirBtn) voirBtn.classList.remove('hidden');
       }
+    } else if (submission && !hasAccess){
+      // Le formulaire a été rempli (gratuit) mais le Pack Lancement / Pro
+      // n'a pas été acheté : la Edge Function refuserait la génération
+      // (403), donc on ne montre pas un bouton "Télécharger" qui échouerait.
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Votre dossier <b>${escapeHtml(submission.summary)}</b> est prêt — achetez le Pack Lancement pour le télécharger.</p>`;
+      if (acheterBtn) acheterBtn.classList.remove('hidden');
     } else if (hasAccess){
       box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore créé votre dossier INPI.</p>`;
       if (creerBtn) creerBtn.classList.remove('hidden');
