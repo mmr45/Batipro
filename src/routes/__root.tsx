@@ -88,8 +88,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     
       { name: "twitter:title", content: "Bâtipro" },
       { name: "twitter:description", content: "Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/166fbe52-0c9c-4a57-8efa-b082e94c1613/id-preview-3b458392--8e25ad70-1203-4ec6-bf38-ec7cff1cdccc.lovable.app-1783174785373.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/166fbe52-0c9c-4a57-8efa-b082e94c1613/id-preview-3b458392--8e25ad70-1203-4ec6-bf38-ec7cff1cdccc.lovable.app-1783174785373.png" },
+      content: "https://batipro-ten.vercel.app/og-image.png"
+      content: "https://batipro-ten.vercel.app/og-image.png"
     ],
     links: [
       {
