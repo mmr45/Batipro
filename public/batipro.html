@@ -3124,12 +3124,16 @@ animate();
     m.classList.remove('hidden');
     m.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    const header = document.querySelector('header');
+    if (header) header.style.visibility = 'hidden';
   }
   function closeEspaceClient(){
     const m = document.getElementById('espace-client');
     m.classList.add('hidden');
     m.classList.remove('flex');
     document.body.style.overflow = '';
+    const header = document.querySelector('header');
+    if (header) header.style.visibility = '';
   }
   window.closeEspaceClient = closeEspaceClient;
 
