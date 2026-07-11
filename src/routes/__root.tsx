@@ -1,131 +1,6237 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  Outlet,
-  Link,
-  createRootRouteWithContext,
-  useRouter,
-  HeadContent,
-  Scripts,
-} from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
 
-import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bâtipro — Lancez votre boîte du bâtiment, sans friction</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='64' height='64'%3E%3Crect width='24' height='24' rx='6' fill='%230084FF'/%3E%3Cpath d='M3 11L12 4L21 11' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M5 9.5V20H19V9.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Crect x='10' y='13' width='4' height='7' fill='white'/%3E%3C/svg%3E" />
+<meta name="description" content="Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." />
+<meta name="google-site-verification" content="oOxKuEScJ97Fa9OoO57ncdJkPIetpabSj1WQEty-GJQ" />
 
-function NotFoundComponent() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
+<!-- Open Graph / Twitter Card — pour l'aperçu de lien (Discord, WhatsApp,
+     Slack, Twitter/X, etc.). Les URLs doivent être absolues : les crawlers
+     de ces plateformes ne résolvent pas les chemins relatifs comme le fait
+     un navigateur. -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://batipro-ten.vercel.app/" />
+<meta property="og:title" content="Bâtipro — Lancez votre boîte du bâtiment, sans friction" />
+<meta property="og:description" content="Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." />
+<meta property="og:image" content="https://batipro-ten.vercel.app/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Bâtipro — Lancez votre boîte du bâtiment, sans friction" />
+<meta name="twitter:description" content="Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." />
+<meta name="twitter:image" content="https://batipro-ten.vercel.app/og-image.png" />
+<link href="/output.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ---------- Supabase config ----------
+  // Renseignez ici l'URL du projet + la clé anon (publique) du site en ligne.
+  // Ces valeurs sont publiques (côté navigateur) — la sécurité doit être
+  // assurée par les policies RLS sur la table `submissions`.
+  window.SUPABASE_URL      = window.SUPABASE_URL      || "https://pznuuwydfqvsuilimjgm.supabase.co";
+  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6bnV1d3lkZnF2c3VpbGltamdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxODA5NjcsImV4cCI6MjA5ODc1Njk2N30.FsbtveO1ZYGlaXsub4X3s6yi61nU0oyJqmrSODKOpDM";
+  window.__supabase = null;
+  try {
+    if (window.supabase && typeof window.supabase.createClient === 'function'
+        && !/YOUR-/.test(window.SUPABASE_URL) && !/YOUR-/.test(window.SUPABASE_ANON_KEY)) {
+      window.__supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+  } catch(e){ console.warn('Supabase init failed:', e); }
+</script>
+
+
+<style>
+  :root { --brand: #1D5FA3; --brand-2: #4A86C4; --accent: #FF6A13; }
+  html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
+  body { font-family: 'Inter', sans-serif; background: #fff; color: #0a0a0a; overflow-x: hidden; width: 100%; position: relative; max-width: 100vw; }
+  img, svg, video { max-width: 100%; height: auto; }
+  h1, h2, h3, .font-display { font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: -0.01em; }
+
+  /* Eyebrows de section façon annotation de plan technique */
+  .text-sm.font-medium.uppercase.tracking-\[0\.15em\] { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 12px; letter-spacing: .1em; }
+
+  /* Repères d'angle "plan technique" — signature visuelle des cartes clés */
+  .blueprint-corners { position: relative; }
+  .blueprint-corners::before, .blueprint-corners::after {
+    content: ""; position: absolute; width: 14px; height: 14px; pointer-events: none; opacity: .55;
+    border-color: var(--accent);
+  }
+  .blueprint-corners::before { top: 10px; left: 10px; border-top: 2px solid; border-left: 2px solid; }
+  .blueprint-corners::after { bottom: 10px; right: 10px; border-bottom: 2px solid; border-right: 2px solid; }
+
+  @keyframes floaty { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-24px) rotate(2deg)} }
+  @keyframes blobA { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(60px,40px) scale(1.1)} }
+  @keyframes blobB { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-80px,30px) scale(1.15)} }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  @keyframes fadeInScale { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+  @keyframes pingDot { 0%{transform:scale(1);opacity:.75} 75%,100%{transform:scale(2.2);opacity:0} }
+  #server-status-pulse { animation: pingDot 1.8s cubic-bezier(0,0,0.2,1) infinite; }
+  .anim-blob-a{animation:blobA 18s ease-in-out infinite}
+  .anim-blob-b{animation:blobB 22s ease-in-out infinite}
+  .anim-float{animation:floaty 9s ease-in-out infinite}
+  .anim-marquee{animation:marquee 40s linear infinite}
+  [data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+  [data-reveal].is-visible{opacity:1;transform:none}
+  [data-reveal="left"]{transform:translateX(-30px)}
+  [data-reveal="left"].is-visible{transform:none}
+  [data-reveal="right"]{transform:translateX(30px)}
+  [data-reveal="right"].is-visible{transform:none}
+
+  .btn-primary {
+    background: rgba(29,95,163,0.9);
+    box-shadow: inset 0px 4px 4px 0px rgba(255,255,255,0.35), 0 20px 40px -12px rgba(29,95,163,0.4);
+    backdrop-filter: blur(2px);
+  }
+  .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  .radio-card:has(input:checked) { border-color: var(--brand); background: rgba(29,95,163,0.06); }
+
+  /* Modal */
+  .modal-backdrop { animation: fadeInScale .3s ease-out; }
+  .modal-panel { animation: fadeInScale .35s cubic-bezier(.2,.9,.3,1.2); }
+
+  /* Range */
+  input[type=range]::-webkit-slider-thumb { appearance: none; height: 22px; width: 22px; border-radius: 999px; background: var(--brand); cursor:pointer; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(29,95,163,.4); }
+  input[type=range] { -webkit-appearance:none; height: 6px; background: linear-gradient(to right, var(--brand) var(--val,0%), #e5e7eb var(--val,0%)); border-radius:999px; outline:none; }
+
+  /* 3D canvas */
+  #hero-canvas { width: 100%; height: 100%; display: block; cursor: grab; }
+  #hero-canvas:active { cursor: grabbing; }
+
+  /* Logo texte "Bâtipro" animé en pseudo-3D (extrusion + rotation) */
+  .brand-logo-3d {
+    position: relative;
+    display: inline-block;
+    transform-style: preserve-3d;
+    animation: brandLogoSpin 7s ease-in-out infinite;
+    transform-origin: 50% 50%;
+    cursor: pointer;
+  }
+  .brand-logo-3d .bl-layer {
+    position: absolute;
+    inset: 0;
+    left: 0;
+    top: 0;
+    white-space: nowrap;
+    backface-visibility: hidden;
+  }
+  .brand-logo-3d .bl-layer.bl-front { position: static; }
+  @keyframes brandLogoSpin {
+    0%, 12%   { transform: rotateY(0deg); }
+    45%, 60%  { transform: rotateY(360deg); }
+    100%      { transform: rotateY(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-logo-3d { animation: none; }
+  }
+
+  /* Cartes de fonctionnalités animées (modale de connexion) */
+  .auth-feature-row {
+    opacity: 0;
+    transform: translateX(-14px);
+    animation: authFeatureIn .6s cubic-bezier(.2,.8,.3,1) forwards;
+    transition: background-color .25s ease, transform .25s ease;
+  }
+  .auth-feature-row:hover { background: rgba(255,255,255,0.09); transform: translateX(2px); }
+  @keyframes authFeatureIn { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .auth-feature-row { animation: none; opacity: 1; transform: none; }
+  }
+
+  /* Carrousel "Exemple concret" : devis par métier */
+  #devis-carousel-track {
+    transition: transform .65s cubic-bezier(.22,1,.36,1);
+    will-change: transform;
+  }
+  #devis-carousel-track > .devis-slide { width: 100%; flex-shrink: 0; }
+  .devis-tab {
+    border: 1px solid rgba(0,0,0,.1);
+    color: #525252;
+    background: #fff;
+    transition: all .2s ease;
+  }
+  .devis-tab:hover { background: #fafafa; }
+  .devis-tab.devis-tab-active {
+    border-color: var(--brand);
+    background: rgba(29,95,163,.08);
+    color: var(--brand);
+  }
+
+  /* ---------- Sélecteur de date moderne (remplace les <input type=date> natifs) ---------- */
+  .mdp-native {
+    position: absolute !important;
+    width: 1px !important; height: 1px !important;
+    padding: 0 !important; margin: -1px !important;
+    overflow: hidden !important; clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important; border: 0 !important;
+    opacity: 0 !important; pointer-events: none !important;
+  }
+  .mdp-wrap { position: relative; }
+  .mdp-trigger {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; text-align: left; cursor: pointer;
+    background: #fff; color: #0a0a0a;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .mdp-trigger:hover { background: #fafafa; }
+  .mdp-trigger.mdp-open,
+  .mdp-trigger:focus-visible {
+    border-color: var(--brand) !important;
+    box-shadow: 0 0 0 3px rgba(29,95,163,.15);
+    outline: none;
+  }
+  .mdp-trigger .mdp-value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mdp-trigger .mdp-value[data-empty="1"] { color: #9ca3af; }
+  .mdp-trigger .mdp-icon { flex-shrink: 0; color: var(--brand); opacity: .8; display: flex; }
+  .mdp-panel {
+    position: absolute; z-index: 80; top: calc(100% + 8px); left: 0;
+    width: 300px; max-width: min(300px, 90vw);
+    background: #fff; border-radius: 20px;
+    box-shadow: 0 24px 60px -16px rgba(10,10,10,.28), 0 0 0 1px rgba(10,10,10,.06);
+    padding: 16px; animation: fadeInScale .16s cubic-bezier(.2,.9,.3,1.1);
+    font-family: 'Inter', sans-serif;
+  }
+  .mdp-panel[data-align="right"] { left: auto; right: 0; }
+  .mdp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .mdp-head-label { font-family: 'Inter',sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; text-transform: capitalize; }
+  .mdp-nav-btn {
+    display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px;
+    color: #525252; transition: background .15s ease, color .15s ease;
+  }
+  .mdp-nav-btn:hover { background: rgba(29,95,163,.1); color: var(--brand); }
+  .mdp-weekdays { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 4px; }
+  .mdp-weekdays span {
+    text-align: center; font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .04em; color: #a3a3a3; padding-bottom: 6px;
+  }
+  .mdp-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+  .mdp-day {
+    position: relative; aspect-ratio: 1/1; display: grid; place-items: center;
+    border-radius: 10px; font-size: 13px; font-weight: 500; color: #171717;
+    cursor: pointer; transition: background .12s ease, color .12s ease, transform .12s ease;
+  }
+  .mdp-day:hover:not(.mdp-day-disabled):not(.mdp-day-selected) { background: rgba(29,95,163,.09); }
+  .mdp-day-muted { color: #d4d4d4; }
+  .mdp-day-today:not(.mdp-day-selected)::after {
+    content: ""; position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px;
+    border-radius: 999px; background: var(--accent); transform: translateX(-50%);
+  }
+  .mdp-day-selected {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff; font-weight: 700; box-shadow: 0 6px 16px -4px rgba(29,95,163,.55);
+  }
+  .mdp-day-disabled { color: #e5e5e5; cursor: not-allowed; }
+  .mdp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+  .mdp-link-btn {
+    font-size: 12.5px; font-weight: 600; color: var(--brand); border-radius: 8px; padding: 6px 10px;
+    transition: background .15s ease;
+  }
+  .mdp-link-btn:hover { background: rgba(29,95,163,.08); }
+  .mdp-link-btn.mdp-clear { color: #9ca3af; }
+  .mdp-link-btn.mdp-clear:hover { background: #f5f5f5; color: #737373; }
+  @media (prefers-reduced-motion: reduce) { .mdp-panel { animation: none; } }
+
+  /* ---------- Dashboard "Mon espace" ---------- */
+  .dash-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    padding: 40px 32px;
+    background: radial-gradient(120% 140% at 0% 0%, #101425 0%, #05070f 55%, #000 100%);
+    color: #fff;
+  }
+  .dash-hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(340px 340px at 88% -10%, rgba(29,95,163,.45), transparent 60%),
+      radial-gradient(280px 280px at 100% 100%, rgba(255,128,30,.28), transparent 60%);
+    pointer-events: none;
+  }
+  .dash-hero::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(circle at 85% 0%, black, transparent 65%);
+    mask-image: radial-gradient(circle at 85% 0%, black, transparent 65%);
+    pointer-events: none;
+  }
+  .dash-avatar {
+    display: grid; place-items: center;
+    height: 64px; width: 64px; border-radius: 20px;
+    font-weight: 700; font-size: 22px; letter-spacing: .02em;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    box-shadow: 0 10px 30px rgba(29,95,163,.45);
+    color: #fff;
+  }
+  .dash-card {
+    position: relative;
+    border-radius: 22px;
+    background: rgba(255,255,255,.92);
+    border: 1px solid rgba(0,0,0,.06);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 12px 28px -12px rgba(16,24,40,.10);
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .dash-card::before, .dash-card::after {
+    content: ""; position: absolute; width: 12px; height: 12px; pointer-events: none; opacity: .5;
+    border-color: var(--accent);
+  }
+  .dash-card::before { top: 8px; left: 8px; border-top: 2px solid; border-left: 2px solid; }
+  .dash-card::after { bottom: 8px; right: 8px; border-bottom: 2px solid; border-right: 2px solid; }
+  .dash-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 20px 40px -14px rgba(16,24,40,.16);
+    border-color: rgba(29,95,163,.25);
+  }
+  .dash-glow-btn {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    box-shadow: 0 8px 20px -6px rgba(29,95,163,.55);
+  }
+  .dash-glow-btn:hover { box-shadow: 0 10px 26px -6px rgba(29,95,163,.7); }
+  .dash-stat-icon {
+    display:grid; place-items:center; height:44px; width:44px; border-radius:14px;
+    transition: transform .35s cubic-bezier(.2,.8,.3,1.4);
+  }
+  .dash-card:hover .dash-stat-icon { transform: scale(1.08) rotate(-4deg); }
+
+  /* Éyebrows façon annotation de plan technique, cohérent avec le reste du site */
+  .dash-eyebrow { font-family:'IBM Plex Mono', monospace; font-size:10.5px; font-weight:600; letter-spacing:.12em; }
+
+  /* Liseré de couleur par catégorie de dossier (reprend les teintes déjà
+     utilisées ailleurs pour ces mêmes modules : qualif=vert, inpi=violet,
+     assurance=orange, abonnement=bleu de marque) */
+  .dash-card[data-tone] { border-top: 3px solid transparent; }
+  .dash-card[data-tone="blue"]   { border-top-color: var(--brand); }
+  .dash-card[data-tone="green"]  { border-top-color: #0E9F6E; }
+  .dash-card[data-tone="violet"] { border-top-color: #7C3AED; }
+  .dash-card[data-tone="orange"] { border-top-color: #FF6A13; }
+
+  /* Cascade d'apparition des cartes du dashboard */
+  .dash-grid > [data-reveal]:nth-child(1) { transition-delay: .05s; }
+  .dash-grid > [data-reveal]:nth-child(2) { transition-delay: .12s; }
+  .dash-grid > [data-reveal]:nth-child(3) { transition-delay: .19s; }
+  .dash-grid > [data-reveal]:nth-child(4) { transition-delay: .26s; }
+
+  /* Avatar : halo pulsé discret, comme un signal "connecté" */
+  .dash-avatar { position: relative; }
+  .dash-avatar::after {
+    content: ""; position: absolute; inset: -5px; border-radius: 24px;
+    border: 1px solid rgba(255,255,255,.28);
+    animation: dashAvatarPulse 2.8s ease-in-out infinite;
+  }
+  @keyframes dashAvatarPulse {
+    0%   { transform: scale(1); opacity: .65; }
+    70%  { transform: scale(1.14); opacity: 0; }
+    100% { transform: scale(1.14); opacity: 0; }
+  }
+
+  /* Ligne de cotation animée (signature "plan technique") sous le header du dashboard */
+  .dash-dim { display:block; width:100%; height:22px; overflow:visible; }
+  .dash-dim path, .dash-dim line { stroke-dasharray: 600; stroke-dashoffset: 600; transition: stroke-dashoffset 1.1s cubic-bezier(.2,.7,.2,1) .25s; }
+  .dash-hero.is-visible .dash-dim path,
+  .dash-hero.is-visible .dash-dim line { stroke-dashoffset: 0; }
+
+  /* Lignes "Mes devis" : léger glissement au survol */
+  .dash-devis-row { transition: transform .2s ease, border-color .2s ease, background-color .2s ease; }
+  .dash-devis-row:hover { transform: translateX(3px); background: rgba(29,95,163,.045); border-color: rgba(29,95,163,.18); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dash-avatar::after { animation: none; opacity: .35; }
+    .dash-dim path, .dash-dim line { transition: none; stroke-dashoffset: 0; }
+    .dash-card:hover .dash-stat-icon { transform: none; }
+  }
+
+  /* ---------- Sécurité d'empilement (z-index) pour toutes les fenêtres et
+     bandeaux plein écran ---------- */
+  /* Ces règles sont écrites en CSS natif (pas via des classes Tailwind
+     arbitraires comme z-[110], z-[115], z-[120]...) afin de garantir le bon
+     empilement même si le bundle Tailwind compilé (output.css) n'a pas été
+     régénéré après l'ajout ou la modification de ces éléments. Les valeurs
+     reprennent exactement celles prévues dans le balisage HTML. */
+  #server-status      { position: fixed !important; z-index: 60  !important; }
+  #qualif-modal,
+  #statut-modal,
+  #inpi-modal,
+  #assur-modal,
+  #devis-modal         { position: fixed !important; inset: 0 !important; z-index: 100 !important; }
+  #legal-modal,
+  #auth-modal          { position: fixed !important; inset: 0 !important; z-index: 110 !important; }
+  #espace-client       { position: fixed !important; inset: 0 !important; z-index: 115 !important; }
+  #admin-modal         { position: fixed !important; inset: 0 !important; z-index: 120 !important; }
+
+  /* ---------- Page de rapport imprimable (qualification) ---------- */
+  /* z-index et position forcés en CSS natif (pas via classe Tailwind
+     arbitraire) pour garantir que cette page passe TOUJOURS au-dessus de la
+     barre de navigation (sticky, z-50), même si le bundle Tailwind compilé
+     (output.css) n'a pas été régénéré après l'ajout de cette fonctionnalité. */
+  #rapport-qualif-page { background:#fff; position: fixed !important; inset: 0 !important; z-index: 200 !important; }
+  #rapport-qualif-page .rapport-shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  @media print {
+    body * { visibility: hidden; }
+    #rapport-qualif-page, #rapport-qualif-page * { visibility: visible; }
+    #rapport-qualif-page { position: absolute; inset: 0; padding: 0; }
+    .rapport-noprint { display: none !important; }
+    .rapport-shell { max-width: 100% !important; padding: 0 24px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #devis-carousel-track { transition: none; }
+  }
+
+  /* Dropdown "Guides par métier" intégré à la barre de nav */
+  .nav-guides-panel { display: none; }
+  .nav-guides:hover .nav-guides-panel,
+  .nav-guides:focus-within .nav-guides-panel { display: block; }
+
+  .noise::before {
+    content:""; position:absolute; inset:0; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/></svg>");
+  }
+
+/* --- Classes utilitaires (remplacent les styles inline répétés) --- */
+.text-brand{ color:var(--brand); }
+.accent-brand{ accent-color:var(--brand); }
+.bg-brand-tint{ background:rgba(29,95,163,.08); color:var(--brand); }
+.bg-brand{ background:var(--brand); }
+.text-warning{ color:#b45309; }
+.bg-brand-tint-2{ background:rgba(29,95,163,.1); color:var(--brand); }
+.bg-orange{ background:#FF801E; }
+.text-danger{ color:#b91c1c; }
+
+#toast-container{
+  position:fixed; top:16px; left:50%; transform:translateX(-50%);
+  z-index:99999; display:flex; flex-direction:column; gap:8px;
+  width:min(92vw,420px); pointer-events:none;
+}
+.toast{
+  pointer-events:auto;
+  background:#1f2937; color:#fff; border-radius:10px;
+  padding:12px 16px; font-size:14px; line-height:1.4;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  display:flex; align-items:flex-start; gap:10px;
+  opacity:0; transform:translateY(-12px);
+  transition:opacity .25s ease, transform .25s ease;
+  border-left:4px solid #6b7280;
+}
+.toast.toast-show{ opacity:1; transform:translateY(0); }
+.toast.toast-error{ border-left-color:#ef4444; }
+.toast.toast-warning{ border-left-color:#f59e0b; }
+.toast.toast-success{ border-left-color:#22c55e; }
+.toast .toast-icon{ flex:0 0 auto; font-size:16px; line-height:1; margin-top:1px; }
+.toast .toast-msg{ flex:1 1 auto; white-space:pre-line; }
+.toast .toast-close{
+  flex:0 0 auto; cursor:pointer; opacity:.6; font-size:16px; line-height:1;
+  background:none; border:none; color:inherit; padding:0 0 0 4px;
+}
+.toast .toast-close:hover{ opacity:1; }
+</style>
+</head>
+<body class="relative overflow-x-hidden">
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Ambient blobs -->
+<div class="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+  <div class="anim-blob-a absolute -left-40 -top-40 h-[600px] w-[600px] rounded-full opacity-60 blur-[120px]" style="background:#60B1FF"></div>
+  <div class="anim-blob-b absolute left-40 -top-20 h-[500px] w-[500px] rounded-full opacity-50 blur-[140px]" style="background:#319AFF"></div>
+  <div class="anim-blob-a absolute right-[-200px] top-[600px] h-[500px] w-[500px] rounded-full opacity-30 blur-[160px]" style="background:#60B1FF"></div>
+  <div class="anim-blob-b absolute left-1/2 top-[1600px] h-[500px] w-[500px] rounded-full opacity-25 blur-[160px] bg-orange"></div>
+</div>
+
+<!-- NAV -->
+<header class="sticky top-4 z-50 mx-auto max-w-[1600px] px-4 md:px-8">
+  <nav class="flex items-center justify-between gap-4 rounded-2xl border border-black/5 glass px-4 py-3 shadow-sm md:px-6">
+    <button onclick="scrollToId('accueil')" class="font-display text-xl font-bold tracking-tight" style="perspective:600px;">
+      <span id="brand-logo-3d" class="brand-logo-3d" aria-label="Bâtipro"></span>
+    </button>
+    <div class="hidden items-center gap-1 md:flex" id="nav-links"></div>
+    <div class="hidden items-center gap-2 md:flex">
+      <button id="nav-logout-btn" onclick="logout()" class="hidden rounded-full border border-black/10 px-3 py-2 text-[13px] font-medium text-neutral-500 hover:bg-neutral-50">Se déconnecter</button>
+      <button id="nav-resume-btn" onclick="requireAuth(openQualifModal)" class="hidden animate-pulse items-center gap-2 rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">
+        <span>↩ Reprendre mon test de qualification</span>
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+      </button>
+      <button id="nav-account-btn" onclick="requireAuth(goToEspaceClient)" class="hidden items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50">
+        <span id="nav-account-label">Mon compte</span>
+      </button>
+      <button id="nav-auth-btn" onclick="openAuth()" class="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">
+        <span id="nav-auth-label">Inscription</span>
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+      </button>
+    </div>
+    <button class="md:hidden" onclick="toggleMenu()" aria-label="menu">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </nav>
+  <div id="mobile-menu" class="mt-2 hidden rounded-2xl border border-black/5 glass p-3 md:hidden"></div>
+</header>
+
+<script>
+  (function(){
+    var DEPTH = 9; // nombre de couches d'extrusion
+    function shade(hex, i, total){
+      var f = i / total; // 0 = face avant, 1 = fond
+      var c = hex.replace('#','');
+      var r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+      var k = 1 - f * 0.55;
+      r = Math.round(r*k); g = Math.round(g*k); b = Math.round(b*k);
+      return 'rgb(' + r + ',' + g + ',' + b + ')';
+    }
+    function buildBrandLogo(elId, batiColor, proColor){
+      var el = document.getElementById(elId);
+      if (!el) return;
+      var frag = document.createDocumentFragment();
+      for (var i = DEPTH; i >= 0; i--) {
+        var layer = document.createElement('span');
+        layer.className = 'bl-layer' + (i === 0 ? ' bl-front' : '');
+        layer.style.transform = 'translateZ(-' + i + 'px)';
+        var batiSpan = document.createElement('span');
+        batiSpan.textContent = 'Bâti';
+        batiSpan.style.color = shade(batiColor, i, DEPTH);
+        var proSpan = document.createElement('span');
+        proSpan.textContent = 'pro';
+        proSpan.style.color = shade(proColor, i, DEPTH);
+        layer.appendChild(batiSpan);
+        layer.appendChild(proSpan);
+        frag.appendChild(layer);
+      }
+      el.appendChild(frag);
+    }
+    // Logo nav (fond clair) : texte foncé + bleu marque
+    // Logo modale de connexion (fond bleu nuit) : texte blanc + bleu clair
+    // (la modale est plus bas dans le DOM, on attend qu'elle soit parsée)
+    document.addEventListener('DOMContentLoaded', function(){
+      buildBrandLogo('brand-logo-3d', '#0a0a0a', '#0084ff');
+      buildBrandLogo('brand-logo-3d-modal', '#ffffff', '#60b1ff');
+    });
+  })();
+</script>
+
+<!-- Bulle statut serveur -->
+<div id="server-status" class="fixed bottom-5 right-5 z-[60] flex items-center gap-2 rounded-full border border-black/5 glass px-3 py-2 text-[12px] font-medium text-neutral-700 shadow-lg">
+  <span id="server-status-dot" class="relative grid h-2 w-2 place-items-center rounded-full" style="background:#9ca3af">
+    <span id="server-status-pulse" class="absolute inline-flex h-full w-full rounded-full opacity-75" style="background:#9ca3af"></span>
+  </span>
+  <span id="server-status-label">Connexion…</span>
+</div>
+
+<main class="relative z-10 mx-auto max-w-[1600px] px-6 md:px-12">
+
+  <!-- HERO -->
+  <section id="accueil" class="scroll-mt-28 pt-16 md:pt-24">
+    <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8">
+      <div class="flex flex-col" data-reveal="left">
+        <div class="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-black/5 glass px-3 py-1.5">
+          <span class="grid h-2 w-2 place-items-center rounded-full" style="background:#10b981"></span>
+          <span class="text-[13px] font-medium text-neutral-700">Nouveau — rejoignez les premiers artisans à tester Bâtipro</span>
+        </div>
+        <h1 class="font-display font-bold text-neutral-950" style="font-size:clamp(44px,6vw,75px);line-height:1.05">Lancez votre boîte du bâtiment, sans friction.</h1>
+        <p class="mt-6 max-w-xl text-neutral-600" style="font-size:18px;line-height:1.5">De la vérification de qualification au premier devis conforme : un parcours guidé, automatisé et 100% en ligne pour créer votre entreprise d'artisan en toute sérénité.</p>
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+          <button onclick="ctaTesterOuOrientation()" class="btn-primary group inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.03]">
+            <span id="cta-hero-label" class="text-[16px] font-semibold">Tester ma qualification</span>
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45 text-brand">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </span>
+          </button>
+          <button onclick="scrollToId('how')" class="text-[15px] font-medium text-neutral-700 underline-offset-4 hover:underline">Comment ça marche →</button>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-neutral-500">
+          <span>✓ Conforme Guichet Unique INPI</span>
+          <span>✓ Données hébergées en UE (RGPD)</span>
+          <span>✓ Sans engagement</span>
+        </div>
+      </div>
+
+      <!-- 3D immersive scene -->
+      <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden noise rounded-[32px]" data-reveal="right">
+        <canvas id="hero-canvas"></canvas>
+        <div class="pointer-events-none absolute bottom-4 left-4 rounded-full glass border border-black/5 px-3 py-1.5 text-[11px] font-medium text-neutral-600">
+          Interactif — cliquez et déplacez
         </div>
       </div>
     </div>
-  );
-}
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
-  const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
+    <!-- Marquee -->
+    <div class="mt-24 pb-4" data-reveal>
+      <p class="text-center text-[13px] font-medium uppercase tracking-[0.15em] text-neutral-400">Les démarches et organismes couverts par notre parcours</p>
+      <div class="mt-8 overflow-hidden">
+        <div class="anim-marquee flex w-max gap-[100px] whitespace-nowrap opacity-60 grayscale" id="marquee"></div>
+      </div>
+    </div>
+  </section>
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
+  <!-- FONCTIONNALITES -->
+  <section id="fonctionnalites" class="scroll-mt-28 py-28">
+    <div class="max-w-2xl" data-reveal>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Fonctionnalités</p>
+      <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Un parcours complet, du diplôme au premier devis.</h2>
+      <p class="mt-4 text-neutral-600">Six modules pensés pour les artisans du BTP. Automatisés là où c'est fiable, ils vous orientent vers un pro dès qu'une décision engage votre responsabilité.</p>
+    </div>
+    <div class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" id="features"></div>
+  </section>
+
+  <!-- HOW -->
+  <section id="how" class="scroll-mt-28 py-28">
+    <div class="max-w-2xl" data-reveal>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Comment ça marche</p>
+      <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Quatre étapes, zéro coup de fil.</h2>
+      <p class="mt-4 text-neutral-600">Le fondateur n'intervient jamais par téléphone. Vous avancez à votre rythme, en ligne, avec des relais vers des pros lorsque c'est nécessaire.</p>
+    </div>
+    <ol class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4" id="steps"></ol>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="apropos" class="scroll-mt-28 py-28">
+    <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+      <div data-reveal="left">
+        <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">À propos</p>
+        <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Un outil honnête, pensé pour le terrain.</h2>
+        <p class="mt-5 text-neutral-600">Bâtipro ne prétend pas remplacer un expert. Il rend les démarches accessibles, guidées, et vous redirige vers un professionnel externe uniquement quand la décision l'exige — patrimoine, seuils de CA, conjoint collaborateur, activité mixte.</p>
+        <ul class="mt-8 space-y-4" id="about-list"></ul>
+      </div>
+      <div class="relative" data-reveal="right">
+        <div class="relative overflow-hidden rounded-3xl border border-black/5 p-10 glass" style="background:linear-gradient(135deg, rgba(29,95,163,.08), rgba(255,255,255,.7), rgba(255,128,30,.08))">
+          <div class="grid grid-cols-2 gap-6" id="stats"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXEMPLE CONCRET -->
+  <section id="exemple" class="scroll-mt-28 py-28">
+    <div class="max-w-2xl" data-reveal>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Exemple concret</p>
+      <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Voici ce que vous obtenez, en vrai.</h2>
+      <p class="mt-4 text-neutral-600">Pas de promesse abstraite : un aperçu réel du devis généré par l'outil, avec les mentions légales BTP intégrées automatiquement.</p>
+    </div>
+
+    <div class="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-5 lg:items-center">
+      <!-- Mockup devis (carrousel multi-métiers) -->
+      <div class="lg:col-span-3" data-reveal="left">
+        <div class="relative">
+          <!-- Cartes empilées en arrière-plan pour montrer plusieurs rendus -->
+          <div class="absolute inset-0 -z-10 translate-x-4 translate-y-6 rotate-[2deg] rounded-3xl border border-black/5 bg-white/70 shadow-xl"></div>
+          <div class="absolute inset-0 -z-20 translate-x-8 translate-y-12 rotate-[4deg] rounded-3xl border border-black/5 bg-white/40"></div>
+          <span class="absolute -top-3 right-6 z-10 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold text-white shadow-lg bg-brand">
+            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            Rendu réel exporté
+          </span>
+
+          <div id="devis-carousel-viewport" class="relative overflow-hidden rounded-3xl border border-black/10 bg-white shadow-2xl shadow-black/5">
+            <div id="devis-carousel-track" class="flex"></div>
+          </div>
+
+          <!-- Navigation par métier -->
+          <div class="mt-5 flex items-center gap-2">
+            <button onclick="devisCarouselPrev()" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-black/10 text-neutral-500 transition hover:bg-neutral-50 hover:text-neutral-900" aria-label="Métier précédent">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div id="devis-carousel-tabs" class="flex flex-1 flex-wrap items-center justify-center gap-2"></div>
+            <button onclick="devisCarouselNext()" class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-black/10 text-neutral-500 transition hover:bg-neutral-50 hover:text-neutral-900" aria-label="Métier suivant">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Points clés -->
+      <div class="lg:col-span-2" data-reveal="right">
+        <ul class="space-y-5">
+          <li class="flex gap-3">
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-tint-2"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="text-[14px] text-neutral-700"><b>Mentions légales BTP automatiques</b> — décennale, RC Pro, pénalités de retard, médiation : rien à rédiger vous-même.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-tint-2"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="text-[14px] text-neutral-700"><b>TVA calculée automatiquement</b> selon la nature des travaux (5,5% / 10% / 20%).</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-tint-2"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="text-[14px] text-neutral-700"><b>Export PDF prêt à envoyer</b> à votre client, en moins de 3 minutes.</span>
+          </li>
+        </ul>
+
+        <!-- Pack Lancement 89€ -->
+        <div class="mt-8 rounded-3xl border p-6" style="border-color:rgba(29,95,163,.25); background:linear-gradient(135deg, rgba(29,95,163,.08), rgba(255,255,255,.9))">
+          <div class="flex items-center justify-between">
+            <span class="text-[12px] font-semibold uppercase tracking-wide text-brand">Pack Lancement</span>
+            <span class="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white bg-brand">Paiement unique</span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-1.5">
+            <span class="font-display text-4xl font-bold">89 €</span>
+            <span class="text-[13px] text-neutral-500">une seule fois</span>
+          </div>
+          <p class="mt-2 text-[13px] text-neutral-600">Générateur de dossier INPI, pièces justificatives incluses.</p>
+          <button id="hero-pack-btn" onclick="handlePricingClick('dossier')" class="btn-primary group mt-5 inline-flex w-full items-center justify-center gap-3 rounded-[14px] py-3.5 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed">
+            <span id="hero-pack-btn-label" class="text-[15px] font-semibold">Acheter le pack — 89 €</span>
+            <span id="hero-pack-btn-icon" class="grid h-8 w-8 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45 text-brand">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </span>
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
+        </div>
+
+        <!-- Éditeur de devis (offre Pro) -->
+        <div class="relative mt-4 overflow-hidden rounded-3xl border p-6" style="border-color:rgba(255,128,30,.25); background:linear-gradient(135deg, rgba(255,128,30,.07), rgba(255,255,255,.97))">
+          <div class="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-40 blur-[50px] bg-orange"></div>
+          <div class="relative">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-2">
+                <span class="grid h-8 w-8 place-items-center rounded-xl" style="background:rgba(255,128,30,.15)">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="#FF801E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h3"/></svg>
+                </span>
+                <span class="text-[12px] font-semibold uppercase tracking-wide" style="color:var(--accent)">Éditeur de devis</span>
+              </span>
+              <span class="rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white" style="background:var(--accent)">Abonnement</span>
+            </div>
+            <div class="mt-3 flex items-baseline gap-1.5">
+              <span class="font-display text-4xl font-bold">19 €</span>
+              <span class="text-[13px] text-neutral-500">/ mois, sans engagement</span>
+            </div>
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-start gap-2 text-[13px] text-neutral-700">
+                <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#FF801E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Devis conformes comme celui ci-dessus, générés et exportés en illimité
+              </li>
+              <li class="flex items-start gap-2 text-[13px] text-neutral-700">
+                <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#FF801E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Mises à jour automatiques des taux TVA & décennale
+              </li>
+              <li class="flex items-start gap-2 text-[13px] text-neutral-700">
+                <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#FF801E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Résiliable à tout moment, en un clic
+              </li>
+            </ul>
+            <button onclick="handlePricingClick('pro')" class="group mt-5 inline-flex w-full items-center justify-center gap-3 rounded-[14px] py-3.5 pl-6 pr-2 text-white shadow-[inset_0px_4px_4px_0px_rgba(255,255,255,0.35),0_20px_40px_-12px_rgba(255,128,30,0.4)] transition-transform duration-300 hover:scale-[1.02]" style="background:rgba(255,128,30,.92)">
+              <span class="text-[15px] font-semibold">Activer l'éditeur de devis — 19 €/mois</span>
+              <span class="grid h-8 w-8 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45" style="color:var(--accent)">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TARIFS -->
+  <section id="tarifs" class="scroll-mt-28 py-28">
+    <div class="max-w-2xl" data-reveal>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Tarifs</p>
+      <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Commencez gratuitement.</h2>
+      <p class="mt-4 text-neutral-600">Le test de qualification est offert. Vous ne payez qu'au moment de générer votre dossier.</p>
+    </div>
+    <div class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3" id="pricing"></div>
+  </section>
+
+  <!-- Espace client -->
+  <div id="espace-client" class="fixed inset-0 z-[115] hidden items-center justify-center p-4">
+    <div class="modal-backdrop absolute inset-0 bg-neutral-950/75 backdrop-blur-md" onclick="closeEspaceClient()"></div>
+    <div class="modal-panel relative z-10 w-full max-w-[1400px] max-h-[92vh] overflow-y-auto rounded-[28px] border border-black/5 bg-neutral-50 shadow-2xl">
+    <button onclick="closeEspaceClient()" class="rapport-noprint absolute right-5 top-5 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-neutral-500 shadow-sm ring-1 ring-black/5 hover:bg-neutral-100 hover:text-neutral-800" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <div class="px-6 py-9 md:px-10 md:py-12">
+
+      <!-- Hero -->
+      <div class="dash-hero" data-reveal>
+        <div class="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-4">
+            <div id="espace-avatar" class="dash-avatar">--</div>
+            <div>
+              <p class="dash-eyebrow text-white/50">Mon espace</p>
+              <h2 id="espace-nom" class="mt-1 font-display text-2xl font-bold md:text-3xl">—</h2>
+              <p id="espace-email" class="mt-0.5 text-[13px] text-white/60">—</p>
+            </div>
+          </div>
+          <button onclick="logout()" class="rapport-noprint inline-flex items-center justify-center gap-2 self-start rounded-2xl border border-white/15 bg-white/5 px-4 py-2.5 text-[13px] font-semibold text-white/80 backdrop-blur transition-colors hover:bg-white/10 sm:self-auto">
+            Se déconnecter
+          </button>
+        </div>
+        <svg class="dash-dim relative mt-7" viewBox="0 0 600 22" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" y1="4" x2="600" y2="4" stroke="rgba(255,255,255,.22)" stroke-width="1"/>
+          <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+          <line x1="600" y1="0" x2="600" y2="10" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+          <path d="M0 4 L600 4" stroke="var(--brand-2)" stroke-width="1.5" fill="none"/>
+        </svg>
+      </div>
+
+      <!-- Cartes -->
+      <div class="dash-grid mt-7 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+
+        <!-- Abonnement -->
+        <div class="dash-card p-7" data-tone="blue" data-reveal>
+          <div class="flex items-start justify-between gap-3">
+            <div class="dash-stat-icon bg-brand-tint">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
+            </div>
+            <span class="dash-eyebrow text-neutral-400">Abonnement</span>
+          </div>
+          <p id="espace-statut" class="mt-4 text-[15px] font-semibold text-neutral-900">Chargement…</p>
+          <button
+            id="espace-manage-btn"
+            data-manage-subscription-btn
+            onclick="openBillingPortal()"
+            class="hidden mt-4 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait"
+            style="background:#0a0a0a">
+            Gérer mon abonnement
+          </button>
+        </div>
+
+        <!-- Qualification -->
+        <div class="dash-card p-7" data-tone="green" data-reveal>
+          <div class="flex items-start justify-between gap-3">
+            <div id="espace-qualif-icon" class="dash-stat-icon bg-brand-tint">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+            </div>
+            <span class="dash-eyebrow text-neutral-400">Test de qualification</span>
+          </div>
+          <div id="espace-qualif" class="mt-4">
+            <p class="text-neutral-500 text-[14px]">Chargement…</p>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <button id="espace-qualif-voir-btn" onclick="openQualifReport()" class="hidden inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] bg-brand">
+              Voir le rapport
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+            </button>
+            <button onclick="openQualif()" class="inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              Refaire le test
+            </button>
+          </div>
+        </div>
+
+        <!-- Dossier INPI -->
+        <div class="dash-card p-7" data-tone="violet" data-reveal>
+          <div class="flex items-start justify-between gap-3">
+            <div id="espace-inpi-icon" class="dash-stat-icon bg-brand-tint">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+            </div>
+            <span class="dash-eyebrow text-neutral-400">Dossier INPI</span>
+          </div>
+          <div id="espace-inpi" class="mt-4">
+            <p class="text-neutral-500 text-[14px]">Chargement…</p>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <button id="espace-inpi-voir-btn" onclick="downloadInpiPdf()" class="hidden inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] bg-brand">
+              Télécharger mon dossier
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            </button>
+            <button id="espace-inpi-creer-btn" onclick="openInpiFromEspace()" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              Créer mon dossier INPI
+            </button>
+            <button id="espace-inpi-acheter-btn" onclick="handlePricingClick('dossier')" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              Acheter le pack — 89 €
+            </button>
+          </div>
+        </div>
+
+        <!-- Assurance décennale -->
+        <div class="dash-card p-7" data-tone="orange" data-reveal>
+          <div class="flex items-start justify-between gap-3">
+            <div id="espace-assur-icon" class="dash-stat-icon bg-brand-tint">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5z"/></svg>
+            </div>
+            <span class="dash-eyebrow text-neutral-400">Assurance décennale</span>
+          </div>
+          <div id="espace-assur" class="mt-4">
+            <p class="text-neutral-500 text-[14px]">Chargement…</p>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <button id="espace-assur-voir-btn" onclick="downloadAssurPdf()" class="hidden inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] bg-brand">
+              Télécharger la synthèse
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            </button>
+            <button id="espace-assur-refaire-btn" onclick="goToAssurGated()" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60 disabled:cursor-wait">
+              <span id="espace-assur-refaire-label">Faire la simulation</span>
+            </button>
+            <button id="espace-assur-acheter-btn" onclick="handlePricingClick('dossier')" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              Acheter le pack — 89 €
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mes devis -->
+      <div class="dash-card mt-6 p-7" data-tone="blue" data-reveal>
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="dash-stat-icon bg-brand-tint">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5a1 1 0 0 0 1 1h5"/><path d="M6 3h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+            </div>
+            <div>
+              <h3 class="text-[15px] font-semibold text-neutral-900">Mes devis</h3>
+              <p class="text-[13px] text-neutral-500">Retrouvez et retéléchargez vos devis générés</p>
+            </div>
+          </div>
+          <button id="espace-devis-nouveau-btn" onclick="goToDevisGated()" class="hidden shrink-0 inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+            Nouveau devis
+          </button>
+        </div>
+        <div id="espace-devis-list" class="mt-5">
+          <p class="text-neutral-500 text-[14px]">Chargement…</p>
+        </div>
+      </div>
+
+      <!-- Paramètres du compte -->
+      <div class="dash-card mt-6 p-7" data-reveal>
+        <div class="flex items-center gap-3">
+          <div class="dash-stat-icon bg-brand-tint">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <div>
+            <h3 class="text-[15px] font-semibold text-neutral-900">Paramètres du compte</h3>
+            <p class="text-[13px] text-neutral-500">Email, mot de passe, téléphone</p>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <!-- Email -->
+          <div>
+            <label class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Adresse email</label>
+            <input id="settings-email" type="email" placeholder="votre@email.com" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            <button onclick="updateAccountEmail()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Mettre à jour</button>
+            <p id="settings-email-msg" class="mt-1.5 min-h-[16px] text-[12px]"></p>
+          </div>
+
+          <!-- Mot de passe -->
+          <div>
+            <label class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Mot de passe</label>
+            <div class="relative mt-2">
+              <input id="settings-password-old" type="password" placeholder="Mot de passe actuel" autocomplete="current-password" class="w-full rounded-xl border border-black/10 px-3.5 py-2.5 pr-10 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+              <button type="button" onclick="togglePasswordVisibility('settings-password-old', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800" aria-label="Afficher le mot de passe" tabindex="-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+            <button onclick="updateAccountPassword()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Recevoir le lien de changement</button>
+            <p class="mt-1.5 text-[11px] text-neutral-400">Un email de vérification vous permettra de choisir le nouveau mot de passe.</p>
+            <p id="settings-password-msg" class="mt-1.5 min-h-[16px] text-[12px]"></p>
+          </div>
+
+
+          <!-- Téléphone -->
+          <div>
+            <label class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Numéro de téléphone</label>
+            <input id="settings-telephone" type="tel" placeholder="06 12 34 56 78" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-[14px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            <button onclick="updateAccountPhone()" class="mt-2 w-full rounded-xl border border-black/10 px-3.5 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Mettre à jour</button>
+            <p id="settings-telephone-msg" class="mt-1.5 min-h-[16px] text-[12px]"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+  <div id="rapport-qualif-page" class="fixed inset-0 z-[200] hidden overflow-y-auto bg-white">
+    <div class="rapport-shell">
+      <div class="rapport-noprint mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-6">
+        <div class="flex items-center gap-2">
+          <div class="flex h-8 w-8 items-center justify-center rounded-[9px] text-white bg-brand">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 11L12 4L21 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 9.5V20H19V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="10" y="13" width="4" height="7" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="font-display text-[15px] font-bold">Bâti<span style="color:var(--brand-2)">pro</span></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="downloadQualifReportPdf()" class="dash-glow-btn inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white">
+            Télécharger en PDF
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          </button>
+          <button onclick="closeQualifReport()" class="rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Fermer</button>
+        </div>
+      </div>
+      <div id="rapport-qualif-content"></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <section id="inscription" class="scroll-mt-28 pb-28">
+    <div data-reveal class="relative overflow-hidden rounded-[32px] border border-black/5 bg-neutral-950 p-10 text-white md:p-16">
+      <div class="anim-blob-a absolute -right-20 -top-20 h-[400px] w-[400px] rounded-full opacity-40 blur-[120px]" style="background:#0084FF"></div>
+      <div class="anim-blob-b absolute -left-20 -bottom-20 h-[300px] w-[300px] rounded-full opacity-30 blur-[120px] bg-orange"></div>
+      <div class="relative grid grid-cols-1 items-center gap-10 md:grid-cols-2">
+        <div>
+          <h2 class="font-display text-4xl font-bold leading-tight md:text-5xl">Prêt à lancer votre boîte du bâtiment ?</h2>
+          <p class="mt-4 max-w-lg text-white/70">Testez votre qualification en 3 minutes, sans engagement. Vous recevez votre pré-orientation par email immédiatement.</p>
+        </div>
+        <div class="flex md:justify-end">
+          <button onclick="ctaTesterOuOrientation()" class="btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-8 py-4 text-[15px] font-semibold text-white transition-transform hover:scale-[1.03]">
+            <span id="cta-bottom-label">Tester ma qualification</span>
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="-mx-6 mt-10 rounded-t-[32px] bg-neutral-950 px-6 py-14 text-sm text-neutral-400 md:-mx-12 md:px-12">
+    <div class="grid grid-cols-2 gap-10 sm:grid-cols-4 lg:grid-cols-5">
+      <div class="col-span-2 sm:col-span-1">
+        <div class="flex items-center gap-2">
+          <div class="flex h-9 w-9 items-center justify-center rounded-[10px] text-white bg-brand">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 11L12 4L21 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 9.5V20H19V9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="10" y="13" width="4" height="7" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="font-display text-lg font-bold text-white">Bâti<span style="color:var(--brand-2)">pro</span></span>
+        </div>
+        <p class="mt-3 max-w-[240px] text-[13px] leading-relaxed text-neutral-400">Un outil fait en France. Simple par choix, conforme par design. Pour les artisans qui veulent avancer, pas s'administrer.</p>
+        <div class="mt-5 flex items-center gap-3">
+          <div class="flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-medium text-neutral-300">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="12" fill="#fff"/></svg>
+            Hébergement UE
+          </div>
+          <div class="flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-medium text-neutral-300">
+            Conforme RGPD
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Navigation</div>
+        <div class="mt-3 flex flex-col gap-2.5" id="footer-nav-dark"></div>
+      </div>
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Ressources</div>
+        <div class="mt-3 flex flex-col gap-2.5">
+          <button onclick="scrollToId('apropos')" class="w-fit text-left text-neutral-400 hover:text-white">À propos</button>
+          <button onclick="scrollToId('tarifs')" class="w-fit text-left text-neutral-400 hover:text-white">Tarifs</button>
+          <a href="mailto:osman874pro@gmail.com" class="w-fit text-neutral-400 hover:text-white">Nous contacter</a>
+          <a href="https://www.linkedin.com/in/osman-undefined-316228420/?skipRedirect=true" target="_blank" rel="noopener noreferrer" class="w-fit text-neutral-400 hover:text-white">LinkedIn</a>
+        </div>
+      </div>
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Guides par métier</div>
+        <div class="mt-3 flex flex-col gap-2.5" id="footer-guides"></div>
+      </div>
+      <div>
+        <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Légal &amp; Sécurité</div>
+        <div class="mt-3 flex flex-col gap-2.5">
+          <button onclick="openLegal('mentions')" class="w-fit text-left text-neutral-400 hover:text-white">Mentions légales</button>
+          <button onclick="openLegal('confidentialite')" class="w-fit text-left text-neutral-400 hover:text-white">Confidentialité</button>
+          <button onclick="openLegal('cgu')" class="w-fit text-left text-neutral-400 hover:text-white">Conditions d'utilisation</button>
+          <button onclick="openLegal('dmca')" class="w-fit text-left text-neutral-400 hover:text-white">DMCA</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-col items-center gap-4 border-t border-white/10 pt-6 text-center sm:flex-row sm:justify-between sm:text-left">
+      <div class="text-[13px] text-neutral-500">© <span id="year"></span> Bâtipro — Créé en France pour vous.</div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-[12px] text-neutral-400">
+          🇫🇷 FR
+        </div>
+        <div class="flex items-center gap-3 text-neutral-500">
+          <a href="mailto:osman874pro@gmail.com" aria-label="Email" class="hover:text-white">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          </a>
+          <a href="https://www.linkedin.com/in/osman-undefined-316228420/?skipRedirect=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="hover:text-white">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.11 20.45H3.56V9h3.55v11.45z"/></svg>
           </a>
         </div>
+        <div class="flex items-center gap-2 text-[12px] text-neutral-500">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M3 10H21" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          Stripe
+        </div>
       </div>
     </div>
-  );
+
+    <div class="mt-6 flex justify-center">
+      <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-[12px] text-neutral-400">
+        <span class="relative flex h-2 w-2">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+        </span>
+        Lien vérifié : batipro-ten.vercel.app
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ADMIN MODAL (dashboard créateur uniquement) -->
+<div id="admin-modal" class="fixed inset-0 z-[120] hidden items-center justify-center p-4">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/75 backdrop-blur-md" onclick="closeAdmin()"></div>
+  <div class="modal-panel relative z-10 w-full max-w-[1040px] max-h-[92vh] overflow-y-auto rounded-[28px] border border-black/5 bg-neutral-50 shadow-2xl">
+    <button onclick="closeAdmin()" class="absolute right-5 top-5 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-neutral-500 shadow-sm ring-1 ring-black/5 hover:bg-neutral-100 hover:text-neutral-800" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+
+    <!-- Login gate -->
+    <div id="admin-login" class="p-8 md:p-14">
+      <div class="mx-auto max-w-[420px] text-center">
+        <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-neutral-950 text-white shadow-lg">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <span class="mt-5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(10,10,10,.06);color:#0a0a0a">
+          <span class="h-1.5 w-1.5 rounded-full bg-neutral-400"></span> Accès restreint
+        </span>
+        <h3 class="mt-4 font-display text-3xl font-bold">Dashboard créateur</h3>
+        <p class="mt-2 text-[14px] leading-relaxed text-neutral-600">Réservé à l'administrateur de Bâtipro. Saisissez le mot de passe admin pour continuer.</p>
+        <form class="mt-7 flex flex-col gap-3" onsubmit="event.preventDefault(); checkAdminPassword();">
+          <input type="password" id="admin-password" placeholder="Mot de passe admin" class="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-center text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <button type="submit" class="btn-primary rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Entrer</button>
+        </form>
+        <p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium text-danger">Mot de passe incorrect.</p>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="admin-dashboard" class="hidden">
+      <!-- Bandeau d'en-tête -->
+      <div class="relative overflow-hidden rounded-t-[28px] px-6 py-8 md:px-10 md:py-10" style="background: radial-gradient(1100px 260px at 15% -20%, rgba(74,134,196,.35), transparent), linear-gradient(135deg, #0a1a2e, #0f2a4a 55%, #123a63);">
+        <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[color:var(--brand-2)]/25 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-[color:var(--accent)]/20 blur-3xl"></div>
+        <div class="relative flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white ring-1 ring-white/15 backdrop-blur">
+              <span class="relative flex h-1.5 w-1.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400"></span></span>
+              Dashboard créateur
+            </span>
+            <h3 class="mt-3 font-display text-3xl font-bold text-white md:text-4xl">Vue d'ensemble</h3>
+            <p class="mt-1.5 text-[13.5px] text-white/60">Suivi en temps réel des comptes et des soumissions Bâtipro.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="exportAdminData()" class="inline-flex items-center gap-2 rounded-[12px] bg-white/10 px-4 py-2.5 text-[13px] font-semibold text-white ring-1 ring-white/15 backdrop-blur transition hover:bg-white/20">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+              Exporter
+            </button>
+            <button onclick="resetAdminData()" class="inline-flex items-center gap-2 rounded-[12px] bg-red-500/15 px-4 py-2.5 text-[13px] font-semibold text-red-200 ring-1 ring-red-400/25 transition hover:bg-red-500/25">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              Réinitialiser
+            </button>
+            <button onclick="logoutAdmin()" class="inline-flex items-center gap-2 rounded-[12px] bg-white px-4 py-2.5 text-[13px] font-semibold text-neutral-900 transition hover:bg-neutral-100">
+              Se déconnecter
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 pb-10 pt-6 md:px-10">
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4" id="admin-stats"></div>
+
+        <div class="mt-6 flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Mon accès</h4>
+            <p class="mt-1 text-[14px] text-neutral-500">Compte actuellement connecté sur le site</p>
+            <p id="admin-mon-compte-info" class="mt-2 text-[14.5px] font-medium text-neutral-900">—</p>
+            <p id="admin-mon-compte-statut" class="mt-1 text-[13.5px]">—</p>
+          </div>
+          <button onclick="grantMyProAccess()" class="shrink-0 rounded-[12px] bg-neutral-950 px-5 py-2.5 text-[13px] font-semibold text-white transition hover:bg-neutral-800">
+            M'activer l'accès Pro
+          </button>
+        </div>
+
+        <div class="mt-8">
+          <div class="flex items-center gap-2">
+            <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Comptes créés</h4>
+          </div>
+          <div class="mt-3 overflow-hidden overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
+            <table class="w-full text-left text-[13px]">
+              <thead class="bg-neutral-50/80 text-neutral-500">
+                <tr><th class="px-4 py-3 font-semibold">Nom</th><th class="px-4 py-3 font-semibold">Email</th><th class="px-4 py-3 font-semibold">Soumissions</th></tr>
+              </thead>
+              <tbody id="admin-accounts-body" class="divide-y divide-neutral-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <div class="flex items-center gap-2">
+            <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Soumissions</h4>
+            <span class="text-[12px] text-neutral-400">— les plus récentes en premier</span>
+          </div>
+          <div class="mt-3 overflow-hidden overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
+            <table class="w-full text-left text-[13px]">
+              <thead class="bg-neutral-50/80 text-neutral-500">
+                <tr><th class="px-4 py-3 font-semibold">Date</th><th class="px-4 py-3 font-semibold">Compte</th><th class="px-4 py-3 font-semibold">Module</th><th class="px-4 py-3 font-semibold">Résumé</th></tr>
+              </thead>
+              <tbody id="admin-submissions-body" class="divide-y divide-neutral-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="legal-modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/60 backdrop-blur-sm" onclick="closeLegal()"></div>
+  <div class="modal-panel relative z-10 w-full max-w-[720px] max-h-[85vh] overflow-y-auto rounded-[24px] border border-black/5 bg-white p-6 shadow-2xl md:p-10">
+    <button onclick="closeLegal()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Légal</p>
+    <h3 id="legal-title" class="mt-2 font-display text-3xl font-bold md:text-4xl"></h3>
+    <p id="legal-updated" class="mt-2 text-[13px] text-neutral-500"></p>
+    <div id="legal-body" class="prose-legal mt-6 space-y-4 text-[14px] leading-relaxed text-neutral-700"></div>
+  </div>
+</div>
+
+<!-- AUTH MODAL (Connexion / Inscription) -->
+<div id="auth-modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/60 backdrop-blur-sm" onclick="closeAuth()"></div>
+  <div class="modal-panel relative z-10 grid w-full max-w-[900px] max-h-[92vh] grid-cols-1 overflow-hidden overflow-y-auto rounded-[24px] border border-black/5 bg-white shadow-2xl md:grid-cols-2">
+    <button onclick="closeAuth()" class="absolute right-4 top-4 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-neutral-500 shadow hover:bg-neutral-100" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+
+    <!-- Volet visuel de marque -->
+    <div class="relative hidden overflow-hidden p-10 text-white md:flex md:flex-col md:justify-end" style="background:linear-gradient(160deg, #04070d 0%, #0a1a33 45%, var(--brand) 130%)">
+      <div class="anim-blob-a absolute -right-16 -top-16 h-[280px] w-[280px] rounded-full opacity-40 blur-[100px]" style="background:#0084FF"></div>
+      <div class="anim-blob-b absolute -left-10 bottom-10 h-[220px] w-[220px] rounded-full opacity-30 blur-[100px] bg-orange"></div>
+      <div class="relative z-10">
+        <div class="relative inline-block" style="perspective:600px;">
+          <div class="absolute inset-0 -z-10 rounded-full blur-xl" style="background:radial-gradient(circle, rgba(29,95,163,.55), transparent 70%)"></div>
+          <span id="brand-logo-3d-modal" class="brand-logo-3d font-display text-3xl font-bold tracking-tight" aria-label="Bâtipro" style="display:inline-block; padding:6px 2px;"></span>
+        </div>
+        <h3 class="mt-4 font-display text-3xl font-bold leading-tight">Lancez votre boîte du bâtiment, sans friction.</h3>
+        <p class="mt-3 text-[14px] text-white/70">Qualification, statut, dossier INPI et premier devis conforme : tout au même endroit.</p>
+      </div>
+      <div class="relative z-10 mt-8 space-y-2.5" id="auth-feature-list">
+        <div class="auth-feature-row flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur" style="animation-delay:.05s">
+          <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style="background:rgba(29,95,163,.18)">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="#60B1FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] font-semibold text-white">Qualification en 5 minutes</div>
+            <div class="text-[11px] text-white/50">Un questionnaire guidé, sans jargon</div>
+          </div>
+        </div>
+        <div class="auth-feature-row flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur" style="animation-delay:.2s">
+          <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style="background:rgba(255,128,30,.18)">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="#FF801E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V6z"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] font-semibold text-white">Assurance décennale vérifiée</div>
+            <div class="text-[11px] text-white/50">Seuils conformes à la loi Spinetta</div>
+          </div>
+        </div>
+        <div class="auth-feature-row flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur" style="animation-delay:.35s">
+          <div class="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style="background:rgba(96,177,255,.18)">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="#60B1FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h3"/></svg>
+          </div>
+          <div>
+            <div class="text-[13px] font-semibold text-white">Devis conforme en un clic</div>
+            <div class="text-[11px] text-white/50">Mentions légales BTP incluses automatiquement</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 md:p-8">
+
+    <div class="mb-6 flex rounded-full bg-neutral-100 p-1" id="auth-tabs">
+      <button onclick="setAuthMode('signup')" data-auth-tab="signup" class="flex-1 rounded-full px-4 py-2 text-[14px] font-semibold transition">Créer un compte</button>
+      <button onclick="setAuthMode('login')" data-auth-tab="login" class="flex-1 rounded-full px-4 py-2 text-[14px] font-semibold transition">Se connecter</button>
+    </div>
+
+    <p id="auth-context" class="mb-4 hidden rounded-xl border border-black/10 bg-neutral-50 px-3 py-2 text-[13px] text-neutral-600">Créez votre compte pour tester votre qualification et suivre votre dossier.</p>
+    <p id="auth-error" class="mb-4 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium text-danger"></p>
+
+    <!-- Signup form -->
+    <form id="signup-form" class="space-y-4" onsubmit="event.preventDefault(); handleSignup();">
+      <h3 class="font-display text-2xl font-bold">Créer votre compte</h3>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="block text-[13px] font-semibold text-neutral-900">Prénom</label>
+          <input type="text" id="signup-prenom" required placeholder="Jean" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        </div>
+        <div>
+          <label class="block text-[13px] font-semibold text-neutral-900">Nom</label>
+          <input type="text" id="signup-nom" required placeholder="Dupont" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
+        <input type="email" id="signup-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
+        <div class="relative mt-2">
+          <input type="password" id="signup-password" required minlength="8" placeholder="8 caractères minimum" class="w-full rounded-xl border border-black/10 px-3 py-2 pr-10 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <button type="button" onclick="togglePasswordVisibility('signup-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800" aria-label="Afficher le mot de passe" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+      </div>
+      <label class="flex items-start gap-2 text-[13px] text-neutral-600" for="signup-cgu">
+        <input type="checkbox" id="signup-cgu" required class="mt-0.5 accent-brand">
+        <span>J'accepte les conditions générales d'utilisation et la politique de confidentialité.</span>
+      </label>
+      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Créer mon compte</button>
+      <p class="text-center text-[13px] text-neutral-500">Déjà un compte ? <button type="button" onclick="setAuthMode('login')" class="font-semibold text-brand">Se connecter</button></p>
+    </form>
+
+    <!-- Login form -->
+    <form id="login-form" class="hidden space-y-4" onsubmit="event.preventDefault(); handleLogin();">
+      <h3 class="font-display text-2xl font-bold">Se connecter</h3>
+      <div>
+        <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
+        <input type="email" id="login-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+      </div>
+      <div>
+        <label class="block text-[13px] font-semibold text-neutral-900">Mot de passe</label>
+        <div class="relative mt-2">
+          <input type="password" id="login-password" required class="w-full rounded-xl border border-black/10 px-3 py-2 pr-10 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800" aria-label="Afficher le mot de passe" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button type="button" onclick="setAuthMode('forgot')" class="text-[13px] font-semibold text-brand">Mot de passe oublié ?</button>
+      </div>
+      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Se connecter</button>
+      <p class="text-center text-[13px] text-neutral-500">Pas encore de compte ? <button type="button" onclick="setAuthMode('signup')" class="font-semibold text-brand">Créer un compte</button></p>
+    </form>
+
+    <!-- Forgot password form -->
+    <form id="forgot-form" class="hidden space-y-4" onsubmit="event.preventDefault(); handleForgotPassword();">
+      <h3 class="font-display text-2xl font-bold">Mot de passe oublié</h3>
+      <p class="text-[13px] text-neutral-500">Entrez votre email, nous vous enverrons un lien pour réinitialiser votre mot de passe.</p>
+      <div>
+        <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
+        <input type="email" id="forgot-email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+      </div>
+      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Envoyer le lien</button>
+      <p class="text-center text-[13px] text-neutral-500"><button type="button" onclick="setAuthMode('login')" class="font-semibold text-brand">← Retour à la connexion</button></p>
+    </form>
+
+    <!-- Reset password form (affiché automatiquement après clic sur le lien reçu par email) -->
+    <form id="reset-form" class="hidden space-y-4" onsubmit="event.preventDefault(); handleResetPassword();">
+      <h3 class="font-display text-2xl font-bold">Nouveau mot de passe</h3>
+      <p class="text-[13px] text-neutral-500">Choisissez un nouveau mot de passe pour votre compte.</p>
+      <div>
+        <label class="block text-[13px] font-semibold text-neutral-900">Nouveau mot de passe</label>
+        <div class="relative mt-2">
+          <input type="password" id="reset-password" required minlength="8" placeholder="8 caractères minimum" class="w-full rounded-xl border border-black/10 px-3 py-2 pr-10 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <button type="button" onclick="togglePasswordVisibility('reset-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800" aria-label="Afficher le mot de passe" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]">Mettre à jour le mot de passe</button>
+    </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- QUALIFICATION MODAL -->
+<div id="qualif-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/60 backdrop-blur-sm"></div>
+  <div class="modal-panel relative z-10 w-full max-w-[720px] max-h-[92vh] overflow-y-auto rounded-[24px] border border-black/5 bg-white p-6 shadow-2xl md:p-10">
+    <button onclick="closeQualif()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+
+    <div id="qualif-form-wrap">
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 1/5 — Test de qualification</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Ai-je le droit d'ouvrir mon entreprise&nbsp;?</h3>
+      <p class="mt-3 text-[14px] text-neutral-600">Vérification factuelle et instantanée de vos critères légaux selon le Code de l'artisanat (art. L.121-1 à L.121-3, issu de la loi Raffarin n°96-603 du 5 juillet 1996, recodifiée depuis le 1er juillet 2023). Aucun conseil personnalisé, uniquement les faits.</p>
+
+      <div id="qualif-draft-banner" class="mt-4 hidden items-center justify-between gap-3 rounded-[12px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-neutral-700">
+        <span class="flex items-start gap-2">
+          <span class="mt-0.5 shrink-0 text-emerald-600">✓</span>
+          <span id="qualif-draft-text"></span>
+        </span>
+        <button type="button" onclick="discardQualifDraft()" class="shrink-0 whitespace-nowrap rounded-full border border-black/10 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-500 hover:bg-neutral-50">Effacer et repartir de zéro</button>
+      </div>
+
+      <form id="qualif-form" class="mt-8 space-y-8" onsubmit="event.preventDefault(); submitQualif();">
+        <div>
+          <label for="metier" class="block text-[14px] font-semibold text-neutral-900">Métier visé</label>
+          <p class="mt-1 text-[13px] text-neutral-500">L'activité principale que vous exercerez.</p>
+          <select id="metier" name="metier" onchange="saveQualifDraft()" class="mt-3 w-full rounded-[12px] border border-black/10 bg-white px-4 py-3 text-[15px] outline-none transition focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20"></select>
+        </div>
+
+        <div>
+          <label class="block text-[14px] font-semibold text-neutral-900">Diplôme le plus élevé dans ce métier</label>
+          <p class="mt-1 text-[13px] text-neutral-500">Un CAP / BEP ou tout titre homologué de niveau équivalent suffit à valider la qualification.</p>
+          <div class="mt-3 grid gap-2" id="diplome-group"></div>
+        </div>
+
+        <div>
+          <label for="experience" class="block text-[14px] font-semibold text-neutral-900">Années d'expérience effective dans le métier : <span id="exp-val" class="font-bold text-brand">0</span> an(s)</label>
+          <p class="mt-1 text-[13px] text-neutral-500">Cumul des périodes en tant que salarié, non-salarié ou dirigeant dans le métier visé.</p>
+          <input id="experience" type="range" min="0" max="30" step="1" value="0" class="mt-4 w-full" oninput="onExpChange(this); saveQualifDraft();" />
+        </div>
+
+        <label class="flex cursor-pointer items-start gap-3 rounded-[12px] border border-black/10 bg-white px-4 py-3" for="ueDiploma">
+          <input id="ueDiploma" type="checkbox" class="mt-1 h-4 w-4 accent-brand" onchange="saveQualifDraft()" />
+          <span class="text-[14px] text-neutral-800">Je détiens un diplôme équivalent obtenu dans un autre État membre de l'UE / EEE
+            <span class="mt-0.5 block text-[12px] text-neutral-500">Article R.123-30 du Code de commerce.</span>
+          </span>
+        </label>
+
+        <div class="flex gap-3 rounded-[12px] bg-neutral-50 p-4 text-[13px] text-neutral-600">
+          <svg class="mt-0.5 h-4 w-4 shrink-0 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <p>Ce test est un contrôle factuel automatisé. Il ne remplace pas la validation par la Chambre de Métiers et de l'Artisanat lors de votre immatriculation.</p>
+        </div>
+
+        <button type="submit" class="btn-primary group mt-2 inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.02]">
+          <span class="text-[16px] font-semibold">Vérifier ma qualification</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <div id="qualif-result" class="hidden"></div>
+  </div>
+</div>
+
+<!-- STATUT (SIMULATEUR) MODAL -->
+<div id="statut-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/60 backdrop-blur-sm" onclick="closeStatut()"></div>
+  <div class="modal-panel relative z-10 w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-8 md:p-10" style="max-height:90vh">
+    <button onclick="closeStatut()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+
+    <div id="statut-form-wrap">
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 2/5 — Simulateur de statut</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Quel statut juridique pour votre activité ?</h3>
+      <p class="mt-2 text-[14px] text-neutral-600">Répondez à 5 questions. L'algorithme vous pré-oriente vers Micro-entreprise, EI ou SASU, avec un niveau de confiance.</p>
+
+      <div class="mt-6">
+        <div class="flex items-center justify-between text-[12px] font-medium text-neutral-500">
+          <span id="statut-step-label">0 question sur 5 confirmée</span>
+          <span id="statut-step-pct">0%</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div id="statut-progress" class="h-full rounded-full transition-all duration-500" style="width:0%;background:var(--brand)"></div>
+        </div>
+      </div>
+
+
+      <form id="statut-form" class="mt-8 space-y-8" onsubmit="event.preventDefault(); submitStatut();">
+        <div>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Chiffre d'affaires prévisionnel la 1re année</label>
+          <div class="mt-3 grid gap-2">
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-lt40"><input type="radio" name="ca" value="lt40" class="mt-1 accent-brand" checked id="r-ca-lt40"><span><b>Moins de 40 000 €</b><span class="block text-[13px] text-neutral-500">Démarrage progressif, chantiers ponctuels</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-40to83"><input type="radio" name="ca" value="40to83" class="mt-1 accent-brand" id="r-ca-40to83"><span><b>40 000 € – 83 600 €</b><span class="block text-[13px] text-neutral-500">Sous le seuil micro BIC prestations</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-83to203"><input type="radio" name="ca" value="83to203" class="mt-1 accent-brand" id="r-ca-83to203"><span><b>83 600 € – 203 100 €</b><span class="block text-[13px] text-neutral-500">Dépassement probable du plafond services</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-gt188"><input type="radio" name="ca" value="gt188" class="mt-1 accent-brand" id="r-ca-gt188"><span><b>Plus de 203 100 €</b><span class="block text-[13px] text-neutral-500">Activité soutenue, achats/reventes de matériaux</span></span></label>
+          </div>
+        </div>
+
+        <div>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Souhaitez-vous vous associer ?</label>
+          <div class="mt-3 grid gap-2 sm:grid-cols-2">
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-associes-non"><input class="accent-brand" type="radio" name="associes" value="non" checked id="r-associes-non"><span><b>Seul(e)</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-associes-oui"><input class="accent-brand" type="radio" name="associes" value="oui" id="r-associes-oui"><span><b>Avec un ou plusieurs associés</b></span></label>
+          </div>
+        </div>
+
+        <div>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg></span>Protection du patrimoine personnel</label>
+          <p class="mt-1 text-[13px] text-neutral-500">En EI (depuis 2022) et en SASU, votre patrimoine personnel est séparé de celui de l'entreprise.</p>
+          <div class="mt-3 grid gap-2 sm:grid-cols-2">
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-patrimoine-oui"><input class="accent-brand" type="radio" name="patrimoine" value="oui" checked id="r-patrimoine-oui"><span><b>Oui, priorité forte</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-patrimoine-non"><input class="accent-brand" type="radio" name="patrimoine" value="non" id="r-patrimoine-non"><span><b>Peu important</b></span></label>
+          </div>
+        </div>
+
+        <div>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>Régime social souhaité</label>
+          <div class="mt-3 grid gap-2">
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-tns"><input type="radio" name="social" value="tns" class="mt-1 accent-brand" checked id="r-social-tns"><span><b>Travailleur non-salarié (TNS)</b><span class="block text-[13px] text-neutral-500">Cotisations plus faibles, protection sociale de base</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-assimile"><input type="radio" name="social" value="assimile" class="mt-1 accent-brand" id="r-social-assimile"><span><b>Assimilé-salarié</b><span class="block text-[13px] text-neutral-500">Meilleure couverture, cotisations plus élevées</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-indiff"><input type="radio" name="social" value="indiff" class="mt-1 accent-brand" id="r-social-indiff"><span><b>Indifférent</b></span></label>
+          </div>
+        </div>
+
+        <div>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h13l3 3v17l-3-2-3 2-3-2-3 2-3-2-3 2V5z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg></span>Besoin de récupérer la TVA sur vos achats ?</label>
+          <p class="mt-1 text-[13px] text-neutral-500">La micro-entreprise ne facture ni ne récupère la TVA sous le seuil de franchise.</p>
+          <div class="mt-3 grid gap-2 sm:grid-cols-2">
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-tva-oui"><input class="accent-brand" type="radio" name="tva" value="oui" id="r-tva-oui"><span><b>Oui, achats importants</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-tva-non"><input class="accent-brand" type="radio" name="tva" value="non" checked id="r-tva-non"><span><b>Non, peu d'achats</b></span></label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary group inline-flex w-full items-center justify-center gap-3 rounded-[16px] py-4 text-white transition-transform hover:scale-[1.02]">
+          <span class="text-[16px] font-semibold">Obtenir ma pré-orientation</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <div id="statut-result" class="hidden"></div>
+  </div>
+</div>
+
+<!-- INPI (DOSSIER) MODAL -->
+<div id="inpi-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/60 backdrop-blur-sm" onclick="closeInpi()"></div>
+  <div class="modal-panel relative z-10 w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-8 md:p-10" style="max-height:92vh">
+    <button onclick="closeInpi()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+
+    <div id="inpi-form-wrap">
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 3/5 — Dossier INPI</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Constituez votre dossier d'immatriculation</h3>
+      <p class="mt-2 text-[14px] text-neutral-600">Ces informations alimentent le formulaire du <b>Guichet unique INPI</b>. Vous pourrez relire et signer avant transmission.</p>
+
+      <!-- Progress -->
+      <div class="mt-6">
+        <div class="flex items-center justify-between text-[12px] font-medium text-neutral-500">
+          <span id="inpi-step-label">Étape 1 sur 4 — Identité</span>
+          <span id="inpi-step-pct">25%</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div id="inpi-progress" class="h-full rounded-full transition-all duration-500" style="width:25%;background:var(--brand)"></div>
+        </div>
+      </div>
+
+      <form id="inpi-form" class="mt-8" onsubmit="event.preventDefault(); submitInpi();" autocomplete="off">
+        <!-- Step 1 — Identité -->
+        <section data-inpi-step="1" class="space-y-5">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Civilité</label>
+              <div class="mt-2 grid grid-cols-2 gap-2">
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-civ-M"><input class="accent-brand" type="radio" name="civ" value="M" checked id="r-civ-M"><span>M.</span></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-civ-Mme"><input class="accent-brand" type="radio" name="civ" value="Mme" id="r-civ-Mme"><span>Mme</span></label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Date de naissance</label>
+              <input type="date" name="ddn" required class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Prénom</label>
+              <input type="text" name="prenom" required placeholder="Jean" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Nom</label>
+              <input type="text" name="nom" required placeholder="Dupont" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Ville de naissance</label>
+              <input type="text" name="villeNaissance" required placeholder="Lyon" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Pays de naissance</label>
+              <input type="text" name="paysNaissance" required value="France" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Nationalité</label>
+              <input type="text" name="nationalite" required value="Française" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Email</label>
+              <input type="email" name="email" required placeholder="jean.dupont@email.fr" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[13px] font-semibold text-neutral-900">Téléphone</label>
+              <input type="tel" name="tel" required placeholder="06 12 34 56 78" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 2 — Entreprise -->
+        <section data-inpi-step="2" class="hidden space-y-5">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label class="block text-[13px] font-semibold text-neutral-900">Dénomination / Nom commercial</label>
+              <input type="text" name="denomination" required placeholder="Ex. Dupont Rénovation" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+              <p class="mt-1 text-[12px] text-neutral-500">En Micro/EI, la dénomination est facultative (nom personnel par défaut).</p>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[13px] font-semibold text-neutral-900">Description de l'activité</label>
+              <textarea name="activite" required rows="3" placeholder="Ex. Travaux de plomberie sanitaire et chauffage chez les particuliers et petits professionnels." class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20"></textarea>
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Code APE proposé</label>
+              <select name="ape" class="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+                <option value="43.22A">43.22A — Travaux d'installation d'eau et de gaz</option>
+                <option value="43.21A">43.21A — Travaux d'installation électrique</option>
+                <option value="43.31Z">43.31Z — Travaux de plâtrerie</option>
+                <option value="43.32A">43.32A — Travaux de menuiserie bois et PVC</option>
+                <option value="43.33Z">43.33Z — Travaux de revêtement des sols et des murs</option>
+                <option value="43.34Z">43.34Z — Travaux de peinture et vitrerie</option>
+                <option value="43.39Z">43.39Z — Autres travaux de finition</option>
+                <option value="43.91B">43.91B — Travaux de couverture par éléments</option>
+                <option value="43.99C">43.99C — Travaux de maçonnerie générale</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Date de début d'activité</label>
+              <input type="date" name="debut" required class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[13px] font-semibold text-neutral-900">Forme juridique</label>
+              <select name="forme" class="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+                <option value="micro">Micro-entreprise</option>
+                <option value="ei">Entreprise Individuelle (EI)</option>
+                <option value="sasu">SASU</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 3 — Adresse -->
+        <section data-inpi-step="3" class="hidden space-y-5">
+          <div class="rounded-2xl border border-black/10 bg-neutral-50 p-4 text-[13px] text-neutral-700">
+            L'adresse déclarée est le <b>siège social</b>. Elle sera publique au registre national des entreprises (RNE).
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label class="block text-[13px] font-semibold text-neutral-900">Adresse</label>
+              <input type="text" name="adresse" required placeholder="12 rue des Artisans" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Code postal</label>
+              <input type="text" name="cp" required inputmode="numeric" pattern="[0-9]{5}" placeholder="69003" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div>
+              <label class="block text-[13px] font-semibold text-neutral-900">Ville</label>
+              <input type="text" name="ville" required placeholder="Lyon" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-[13px] font-semibold text-neutral-900">Type de local</label>
+              <div class="mt-2 grid gap-2 sm:grid-cols-3">
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-local-domicile"><input class="accent-brand" type="radio" name="local" value="domicile" checked id="r-local-domicile"><span>Domicile</span></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-local-pro"><input class="accent-brand" type="radio" name="local" value="pro" id="r-local-pro"><span>Local professionnel</span></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2 hover:bg-neutral-50" for="r-local-domiciliation"><input class="accent-brand" type="radio" name="local" value="domiciliation" id="r-local-domiciliation"><span>Société de domiciliation</span></label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 4 — Pièces & options -->
+        <section data-inpi-step="4" class="hidden space-y-5">
+          <div>
+            <label class="block text-[14px] font-semibold text-neutral-900">Pièces justificatives à joindre</label>
+            <p class="mt-1 text-[13px] text-neutral-500">Les pièces marquées d'un <span class="font-semibold text-red-500">*</span> sont obligatoires pour générer votre dossier — formats acceptés : image ou PDF.</p>
+            <div class="mt-3 grid gap-3" id="inpi-docs">
+
+              <div class="rounded-xl border border-black/10 p-3 transition-colors" data-doc-card="cni">
+                <label class="flex cursor-pointer items-start gap-3">
+                  <span class="flex-1">
+                    <b>Pièce d'identité <span class="text-red-500">*</span></b>
+                    <span class="block text-[13px] text-neutral-500">CNI, passeport ou titre de séjour en cours de validité</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-cni-status">Ajouter un fichier →</span>
+                  </span>
+                  <input type="file" name="doc-cni" id="doc-cni-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'cni')">
+                </label>
+                <div id="doc-cni-preview" class="mt-2 hidden"></div>
+              </div>
+
+              <div class="rounded-xl border border-black/10 p-3 transition-colors" data-doc-card="domicile">
+                <label class="flex cursor-pointer items-start gap-3">
+                  <span class="flex-1">
+                    <b>Justificatif de domicile <span class="text-red-500">*</span></b>
+                    <span class="block text-[13px] text-neutral-500">Facture &lt; 3 mois ou bail au nom du déclarant</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-domicile-status">Ajouter un fichier →</span>
+                  </span>
+                  <input type="file" name="doc-domicile" id="doc-domicile-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'domicile')">
+                </label>
+                <div id="doc-domicile-preview" class="mt-2 hidden"></div>
+              </div>
+
+              <div class="rounded-xl border border-black/10 p-3 transition-colors" data-doc-card="qualif">
+                <label class="flex cursor-pointer items-start gap-3">
+                  <span class="flex-1">
+                    <b>Justificatif de qualification <span class="text-red-500">*</span></b>
+                    <span class="block text-[13px] text-neutral-500">Diplôme (CAP/BEP…) ou attestation d'expérience 3 ans</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-qualif-status">Ajouter un fichier →</span>
+                  </span>
+                  <input type="file" name="doc-qualif" id="doc-qualif-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'qualif')">
+                </label>
+                <div id="doc-qualif-preview" class="mt-2 hidden"></div>
+              </div>
+
+              <div class="rounded-xl border border-black/10 bg-neutral-50 p-3" data-doc-card="ncnf">
+                <div class="flex items-start gap-3">
+                  <span class="flex-1">
+                    <b>Déclaration de non-condamnation</b>
+                    <span class="block text-[13px] text-neutral-500">Générée automatiquement en fin de parcours — aucun fichier à joindre.</span>
+                  </span>
+                  <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[12px] font-bold" style="background:rgba(16,185,129,.15);color:#10b981">✓</span>
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-black/10 p-3 transition-colors" data-doc-card="conjoint">
+                <label class="flex cursor-pointer items-start gap-3">
+                  <span class="flex-1">
+                    <b>Attestation d'information du conjoint <span class="text-[11px] font-normal text-neutral-400">(si concerné)</span></b>
+                    <span class="block text-[13px] text-neutral-500">Obligatoire si marié sous régime de communauté</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-conjoint-status">Ajouter un fichier →</span>
+                  </span>
+                  <input type="file" name="doc-conjoint" id="doc-conjoint-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'conjoint')">
+                </label>
+                <div id="doc-conjoint-preview" class="mt-2 hidden"></div>
+              </div>
+
+            </div>
+            <p id="inpi-docs-error" class="mt-3 hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] font-medium text-danger">Merci de joindre les pièces obligatoires marquées d'un * avant de générer votre dossier.</p>
+          </div>
+
+          <div class="rounded-2xl border border-black/10 p-4">
+            <label class="flex cursor-pointer items-start gap-3">
+              <input type="checkbox" name="acre" class="mt-1 accent-brand" checked>
+              <span><b>Demander l'ACRE</b><span class="block text-[13px] text-neutral-500">Exonération partielle de cotisations sociales la 1re année (sous conditions).</span></span>
+            </label>
+          </div>
+
+          <div class="rounded-2xl border border-black/10 p-4">
+            <label class="flex cursor-pointer items-start gap-3">
+              <input type="checkbox" name="honneur" required class="mt-1 accent-brand">
+              <span><b>Je certifie sur l'honneur</b> l'exactitude des informations et l'absence de condamnation empêchant l'exercice.</span>
+            </label>
+          </div>
+        </section>
+
+        <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
+          <button type="button" id="inpi-prev" onclick="inpiPrev()" class="hidden rounded-[14px] border border-black/10 bg-white px-5 py-3 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">← Précédent</button>
+          <div class="ml-auto flex gap-3">
+            <button type="button" id="inpi-next" onclick="inpiNext()" class="btn-primary inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-3 text-white transition-transform hover:scale-[1.02]">
+              <span class="text-[15px] font-semibold">Continuer</span>
+              <span class="grid h-8 w-8 place-items-center rounded-full bg-white text-brand">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+              </span>
+            </button>
+            <button type="submit" id="inpi-submit" class="btn-primary hidden inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-3 text-white transition-transform hover:scale-[1.02]">
+              <span class="text-[15px] font-semibold">Générer mon dossier</span>
+              <span class="grid h-8 w-8 place-items-center rounded-full bg-white text-brand">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="inpi-result" class="hidden"></div>
+  </div>
+    </div>
+
+<!-- ASSURANCE DÉCENNALE MODAL -->
+<div id="assur-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/60 backdrop-blur-sm" onclick="closeAssur()"></div>
+  <div class="modal-panel relative z-10 w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-8 md:p-10" style="max-height:92vh">
+    <button onclick="closeAssur()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+
+    <div id="assur-form-wrap">
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 4/5 — Assurance décennale & RC Pro</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Dimensionnez vos garanties obligatoires</h3>
+      <p class="mt-2 text-[14px] text-neutral-600">Loi Spinetta (art. L.241-1 C. assur.) : la <b>garantie décennale</b> est obligatoire dès l'ouverture du chantier. Nous calculons vos <b>seuils de référence</b> pour éviter la sous-couverture.</p>
+
+      <form id="assur-form" class="mt-8 space-y-6" onsubmit="event.preventDefault(); submitAssur();" autocomplete="off">
+        <div>
+          <label class="text-[13px] font-semibold text-neutral-800">Métier principal</label>
+          <select id="assur-metier" class="mt-2 w-full rounded-[12px] border border-black/10 bg-white px-4 py-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand"></select>
+          <p class="mt-1 text-[12px] text-neutral-500">Pré-rempli depuis le test de qualification.</p>
+        </div>
+
+        <div>
+          <label class="text-[13px] font-semibold text-neutral-800">Chiffre d'affaires prévisionnel (12 mois)</label>
+          <div class="mt-2 grid gap-2 sm:grid-cols-2">
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50" for="r-assur-ca-lt50"><input type="radio" name="assur-ca" value="lt50" checked id="r-assur-ca-lt50"> <span class="text-[14px]">Moins de 50 000 €</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50" for="r-assur-ca-50-150"><input type="radio" name="assur-ca" value="50-150" id="r-assur-ca-50-150"> <span class="text-[14px]">50 000 € – 150 000 €</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50" for="r-assur-ca-150-500"><input type="radio" name="assur-ca" value="150-500" id="r-assur-ca-150-500"> <span class="text-[14px]">150 000 € – 500 000 €</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50" for="r-assur-ca-gt500"><input type="radio" name="assur-ca" value="gt500" id="r-assur-ca-gt500"> <span class="text-[14px]">Plus de 500 000 €</span></label>
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="text-[13px] font-semibold text-neutral-800">Effectif prévu</label>
+            <select id="assur-effectif" class="mt-2 w-full rounded-[12px] border border-black/10 bg-white px-4 py-3 text-[15px]">
+              <option value="0">Seul(e) — 0 salarié</option>
+              <option value="1-2">1 à 2 salariés</option>
+              <option value="3-5">3 à 5 salariés</option>
+              <option value="6+">6 salariés et plus</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[13px] font-semibold text-neutral-800">Sinistralité passée (5 ans)</label>
+            <select id="assur-sinistre" class="mt-2 w-full rounded-[12px] border border-black/10 bg-white px-4 py-3 text-[15px]">
+              <option value="0">Aucun sinistre déclaré</option>
+              <option value="1">1 sinistre</option>
+              <option value="2+">2 sinistres ou plus</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[13px] font-semibold text-neutral-800">Interventions à risque majoré (facultatif)</label>
+          <div class="mt-2 grid gap-2 sm:grid-cols-2">
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50"><input type="checkbox" name="assur-risk" value="grande-hauteur"> <span class="text-[14px]">Travaux en grande hauteur (&gt; 6 m)</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50"><input type="checkbox" name="assur-risk" value="erp"> <span class="text-[14px]">Chantiers ERP / tertiaire</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50"><input type="checkbox" name="assur-risk" value="sous-traitance"> <span class="text-[14px]">Recours à la sous-traitance</span></label>
+            <label class="flex items-center gap-3 rounded-[12px] border border-black/10 bg-white p-3 cursor-pointer hover:bg-neutral-50"><input type="checkbox" name="assur-risk" value="amiante"> <span class="text-[14px]">Amiante / plomb / travaux dangereux</span></label>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
+          <button type="submit" class="btn-primary inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-3 text-white transition-transform hover:scale-[1.02]">
+            <span class="text-[15px] font-semibold">Calculer mes garanties</span>
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white text-brand"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div id="assur-result" class="hidden"></div>
+  </div>
+</div>
+
+<!-- DEVIS CONFORME MODAL (Module 5/5) -->
+
+<div id="devis-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/60 backdrop-blur-sm" onclick="closeDevis()"></div>
+  <div class="modal-panel relative z-10 w-full max-w-4xl overflow-y-auto rounded-3xl bg-white p-8 md:p-10" style="max-height:92vh">
+    <button onclick="closeDevis()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-700 hover:bg-neutral-200" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+
+    <div id="devis-form-wrap">
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(255,128,30,.10);color:var(--accent)">Module 5/5 — Premier devis conforme</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Éditez votre premier devis BTP conforme</h3>
+      <p class="mt-2 text-[14px] text-neutral-600">Mentions obligatoires BTP (arrêté du 2 mars 1990, art. L441-1 & L441-9 C. com.), TVA multi-taux (5,5% / 10% / 20%), rappel décennale & RC Pro : votre devis est prêt à envoyer.</p>
+
+      <div class="mt-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-[12.5px] text-neutral-700">
+        <b>Brouillon local :</b> vos saisies sont automatiquement sauvegardées dans ce navigateur.
+        <button type="button" onclick="clearDevisDraft()" class="ml-2 text-[12px] font-semibold text-[color:var(--brand)] hover:underline">Réinitialiser</button>
+      </div>
+
+      <form id="devis-form" class="mt-6 space-y-8" onsubmit="event.preventDefault(); submitDevis();" autocomplete="off">
+        <!-- ÉMETTEUR -->
+        <section>
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Votre entreprise (émetteur)</h4>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Raison sociale / Nom</label>
+              <input name="em_nom" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Dupont Rénovation">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Forme juridique</label>
+              <input name="em_forme" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Micro-entreprise / EI / SASU">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-[13px] font-semibold text-neutral-800">Adresse du siège</label>
+              <input name="em_adresse" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="12 rue des Artisans, 75011 Paris">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">SIREN / SIRET</label>
+              <input name="em_siren" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="123 456 789 00012">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">N° TVA intracom. (si assujetti)</label>
+              <input name="em_tva" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="FR12345678901">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Email</label>
+              <input name="em_email" type="email" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="contact@monentreprise.fr">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Téléphone</label>
+              <input name="em_tel" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="06 12 34 56 78">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Assureur décennale</label>
+              <input name="em_assureur" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="MAAF Pro — police n° 000123">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Zone de couverture décennale</label>
+              <input name="em_zone" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="France métropolitaine" value="France métropolitaine">
+            </div>
+          </div>
+          <label class="mt-3 flex items-start gap-2 text-[13px] text-neutral-700">
+            <input type="checkbox" name="em_franchise" class="mt-1"> <span>Franchise en base de TVA (art. 293 B CGI) — mention automatique “TVA non applicable”.</span>
+          </label>
+        </section>
+
+        <!-- CLIENT -->
+        <section>
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Client</h4>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Type de client</label>
+              <select name="cl_type" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+                <option value="particulier">Particulier</option>
+                <option value="pro">Professionnel / Entreprise</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Nom / Raison sociale</label>
+              <input name="cl_nom" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Mme Martin">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-[13px] font-semibold text-neutral-800">Adresse</label>
+              <input name="cl_adresse" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="5 av. de la République, 75011 Paris">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Email</label>
+              <input name="cl_email" type="email" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Téléphone</label>
+              <input name="cl_tel" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-[13px] font-semibold text-neutral-800">SIRET (si professionnel)</label>
+              <input name="cl_siret" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+            </div>
+          </div>
+        </section>
+
+        <!-- CHANTIER -->
+        <section>
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Chantier</h4>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label class="text-[13px] font-semibold text-neutral-800">Intitulé des travaux</label>
+              <input name="ch_objet" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Rénovation salle de bains — 6 m²">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-[13px] font-semibold text-neutral-800">Adresse du chantier</label>
+              <input name="ch_adresse" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Identique au client">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Nature du logement (TVA)</label>
+              <select name="ch_nature" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+                <option value="reno">Logement achevé &gt; 2 ans — rénovation (TVA 10%)</option>
+                <option value="energie">Rénovation énergétique éligible (TVA 5,5%)</option>
+                <option value="neuf">Neuf ou &lt; 2 ans (TVA 20%)</option>
+                <option value="autre">Autre / Pro (TVA 20%)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Date prévisionnelle de début</label>
+              <input name="ch_debut" type="date" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Durée estimée</label>
+              <input name="ch_duree" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="5 jours ouvrés">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Numéro du devis</label>
+              <input name="ch_num" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Auto-généré">
+            </div>
+          </div>
+        </section>
+
+        <!-- LIGNES -->
+        <section>
+          <div class="flex items-center justify-between">
+            <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Prestations</h4>
+            <button type="button" onclick="addDevisLine()" class="rounded-[10px] border border-black/10 bg-white px-3 py-1.5 text-[12px] font-semibold text-neutral-700 hover:bg-neutral-50">+ Ajouter une ligne</button>
+          </div>
+          <div class="mt-3 overflow-x-auto">
+            <table class="w-full min-w-[720px] text-[13px]">
+              <thead class="text-left text-[11px] uppercase tracking-wide text-neutral-500">
+                <tr>
+                  <th class="pb-2 pr-2">Désignation</th>
+                  <th class="pb-2 pr-2">Unité</th>
+                  <th class="pb-2 pr-2 w-20">Qté</th>
+                  <th class="pb-2 pr-2 w-28">PU HT €</th>
+                  <th class="pb-2 pr-2 w-24">TVA</th>
+                  <th class="pb-2 pr-2 w-28 text-right">Total HT €</th>
+                  <th class="pb-2 w-8"></th>
+                </tr>
+              </thead>
+              <tbody id="devis-lines"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- CONDITIONS -->
+        <section>
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Conditions</h4>
+          <div class="mt-3 grid gap-3 sm:grid-cols-3">
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Acompte demandé (%)</label>
+              <input name="co_acompte" type="number" min="0" max="100" value="30" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Validité (jours)</label>
+              <input name="co_validite" type="number" min="1" value="30" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">Délai de paiement (jours)</label>
+              <input name="co_paiement" type="number" min="0" value="30" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+            </div>
+            <div class="sm:col-span-3">
+              <label class="text-[13px] font-semibold text-neutral-800">Notes / précisions complémentaires</label>
+              <textarea name="co_notes" rows="2" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Conditions d'accès, fournitures, gestion des déchets…"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOTAUX -->
+        <section class="rounded-2xl border border-neutral-200 bg-neutral-50/60 p-5">
+          <div id="devis-totaux" class="grid gap-2 text-[14px]"></div>
+        </section>
+
+        <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
+          <button type="button" onclick="closeDevis()" class="rounded-[14px] border border-black/10 bg-white px-5 py-3 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Fermer</button>
+          <button type="submit" class="btn-primary inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-3 text-white transition-transform hover:scale-[1.02]">
+            <span class="text-[15px] font-semibold">Générer le devis conforme (PDF)</span>
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white text-brand"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div id="devis-result" class="hidden"></div>
+  </div>
+</div>
+
+
+
+
+
+<!-- Three.js immersive orb -->
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('hero-canvas');
+const parent = canvas.parentElement;
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+camera.position.set(0, 0, 5.2);
+
+function resize() {
+  const r = parent.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false);
+  camera.aspect = r.width / r.height;
+  camera.updateProjectionMatrix();
+}
+resize();
+new ResizeObserver(resize).observe(parent);
+
+// Environment — procedural gradient for reflections
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envScene = new THREE.Scene();
+const envGeo = new THREE.SphereGeometry(50, 32, 32);
+const envMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide,
+  uniforms: { c1: {value: new THREE.Color('#EAF4FF')}, c2:{value:new THREE.Color('#0084FF')}, c3:{value:new THREE.Color('#FF801E')} },
+  vertexShader: `varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: `varying vec3 vP; uniform vec3 c1,c2,c3;
+    void main(){
+      float t = normalize(vP).y * 0.5 + 0.5;
+      vec3 col = mix(c2, c1, smoothstep(0.0,0.6,t));
+      col = mix(col, c3, smoothstep(0.85,1.0,1.0-t)*0.35);
+      gl_FragColor = vec4(col,1.0);
+    }`
+});
+envScene.add(new THREE.Mesh(envGeo, envMat));
+const envMap = pmrem.fromScene(envScene, 0.04).texture;
+scene.environment = envMap;
+
+// Main glossy orb
+const orbGeo = new THREE.IcosahedronGeometry(1.35, 64);
+// Displace vertices for organic shape
+const pos = orbGeo.attributes.position;
+const orig = new Float32Array(pos.array);
+orbGeo.userData.orig = orig;
+
+const orbMat = new THREE.MeshPhysicalMaterial({
+  color: 0x0084ff,
+  metalness: 0.15,
+  roughness: 0.08,
+  transmission: 0.85,
+  thickness: 1.2,
+  ior: 1.4,
+  clearcoat: 1.0,
+  clearcoatRoughness: 0.05,
+  iridescence: 0.6,
+  iridescenceIOR: 1.3,
+  envMapIntensity: 1.4,
+});
+const orb = new THREE.Mesh(orbGeo, orbMat);
+scene.add(orb);
+
+// Inner emissive core
+const core = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(0.55, 3),
+  new THREE.MeshBasicMaterial({ color: 0x60B1FF, transparent:true, opacity:0.6 })
+);
+scene.add(core);
+
+// Orbiting construction cubes (blueprint feel)
+const cubes = [];
+const cubeMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness:0.3, roughness:0.25, clearcoat:1 });
+for (let i = 0; i < 6; i++) {
+  const c = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.18,0.18), cubeMat);
+  c.userData = { r: 2.2 + Math.random()*0.6, a: Math.random()*Math.PI*2, s: 0.3 + Math.random()*0.4, y: (Math.random()-0.5)*1.5 };
+  scene.add(c);
+  cubes.push(c);
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Bâtipro — Lancez votre boîte du bâtiment, sans friction" },
-      { name: "description", content: "Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." },
-      { name: "author", content: "Bâtipro" },
-      { property: "og:title", content: "Bâtipro" },
-      { name: "description", content: "Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    
-    
-      { name: "twitter:title", content: "Bâtipro" },
-        { name: "twitter:description", content: "Parcours guidé 100% en ligne pour créer votre entreprise d'artisan : qualification, statut, dossier INPI, assurance et premier devis conforme." },
-        { property: "og:image", content: "https://batipro-ten.vercel.app/og-image.png" },
-        { name: "twitter:image", content: "https://batipro-ten.vercel.app/og-image.png" },
-      ],
-      links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "icon", href: "/favicon.ico?v=2", type: "image/x-icon" },
-    ],
-  }),
-  shellComponent: RootShell,
-  component: RootComponent,
-  notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
+// Accent point lights
+const l1 = new THREE.PointLight(0x60B1FF, 40, 20); l1.position.set(3,2,3); scene.add(l1);
+const l2 = new THREE.PointLight(0xFF801E, 25, 20); l2.position.set(-3,-1,2); scene.add(l2);
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+
+// Simple 3D noise displacement
+function noise3(x,y,z){
+  return Math.sin(x*1.3+y*0.7)*Math.cos(y*1.1+z*0.9)*Math.sin(z*1.7+x*0.5);
+}
+
+// Interaction — drag to rotate
+let isDown=false, px=0, py=0, rotX=0, rotY=0, tRotX=0, tRotY=0;
+canvas.addEventListener('pointerdown', e=>{ isDown=true; px=e.clientX; py=e.clientY; });
+window.addEventListener('pointerup', ()=> isDown=false);
+window.addEventListener('pointermove', e=>{
+  if(!isDown) return;
+  tRotY += (e.clientX-px)*0.005;
+  tRotX += (e.clientY-py)*0.005;
+  px=e.clientX; py=e.clientY;
 });
 
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
+const clock = new THREE.Clock();
+function animate(){
+  const t = clock.getElapsedTime();
+
+  // Auto rotation blended with user drag
+  tRotY += 0.002;
+  rotX += (tRotX-rotX)*0.08;
+  rotY += (tRotY-rotY)*0.08;
+  orb.rotation.x = rotX;
+  orb.rotation.y = rotY;
+  core.rotation.x = -rotX*0.5;
+  core.rotation.y = -rotY*0.5;
+
+  // Vertex displacement (breathing)
+  for (let i = 0; i < pos.count; i++) {
+    const ix = i*3;
+    const ox = orig[ix], oy = orig[ix+1], oz = orig[ix+2];
+    const n = noise3(ox*1.5 + t*0.4, oy*1.5, oz*1.5);
+    const s = 1 + n*0.08 + Math.sin(t*1.2)*0.02;
+    pos.array[ix] = ox*s;
+    pos.array[ix+1] = oy*s;
+    pos.array[ix+2] = oz*s;
+  }
+  pos.needsUpdate = true;
+  orbGeo.computeVertexNormals();
+
+  // Core pulse
+  const cs = 1 + Math.sin(t*2.4)*0.06;
+  core.scale.setScalar(cs);
+  core.material.opacity = 0.45 + Math.sin(t*1.7)*0.15;
+
+  // Orbits
+  cubes.forEach((c,i)=>{
+    c.userData.a += 0.005 * c.userData.s;
+    c.position.x = Math.cos(c.userData.a)*c.userData.r;
+    c.position.z = Math.sin(c.userData.a)*c.userData.r;
+    c.position.y = c.userData.y + Math.sin(t*0.8 + i)*0.2;
+    c.rotation.x += 0.01; c.rotation.y += 0.015;
+  });
+
+  // Light dance
+  l1.position.x = Math.cos(t*0.6)*3.5;
+  l1.position.y = Math.sin(t*0.5)*2.5;
+  l2.position.x = Math.cos(t*0.4 + 2)*3.5;
+  l2.position.z = Math.sin(t*0.7)*3;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+<!-- App logic -->
+<script>
+  // ---------- Notifications inline (remplace alert()) ----------
+  // type: 'error' | 'warning' | 'success'
+  function showInlineError(message, type){
+    type = type || 'error';
+    const container = document.getElementById('toast-container');
+    if (!container){ console.warn('[toast]', message); return; }
+
+    const icons = { error: '⚠️', warning: '⚠️', success: '✓' };
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.innerHTML =
+      '<span class="toast-icon">' + (icons[type] || icons.error) + '</span>' +
+      '<span class="toast-msg"></span>' +
+      '<button type="button" class="toast-close" aria-label="Fermer">✕</button>';
+    toast.querySelector('.toast-msg').textContent = message;
+
+    const remove = () => {
+      toast.classList.remove('toast-show');
+      setTimeout(() => toast.remove(), 250);
+    };
+    toast.querySelector('.toast-close').addEventListener('click', remove);
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('toast-show'));
+    setTimeout(remove, 6000);
+  }
+  window.showInlineError = showInlineError;
+
+  // ---------- Data ----------
+  const NAV = [
+    { id: "accueil", label: "Accueil" },
+    { id: "fonctionnalites", label: "Fonctionnalités" },
+    { id: "how", label: "Comment ça marche" },
+    { id: "apropos", label: "À propos" },
+    { id: "exemple", label: "Exemple concret" },
+    { id: "tarifs", label: "Tarifs" },
+  ];
+
+  // Guides métier (pages statiques dédiées, une par métier réglementé)
+  const GUIDES = [
+    { file:"guide-electricien.html", l:"Électricien" },
+    { file:"guide-plombier.html", l:"Plombier / Chauffagiste" },
+    { file:"guide-macon.html", l:"Maçon / Gros œuvre" },
+    { file:"guide-charpentier.html", l:"Charpentier" },
+    { file:"guide-couvreur.html", l:"Couvreur" },
+    { file:"guide-menuisier.html", l:"Menuisier" },
+    { file:"guide-serrurier.html", l:"Serrurier / Métallier" },
+    { file:"guide-platrier.html", l:"Plâtrier" },
+    { file:"guide-etancheur.html", l:"Étancheur" },
+    { file:"guide-ramoneur.html", l:"Ramoneur" },
+    { file:"guide-peintre.html", l:"Peintre en bâtiment" },
+    { file:"guide-carreleur.html", l:"Carreleur" },
+    { file:"guide-solier.html", l:"Solier / Moquettiste" },
+  ];
+
+  // Métiers réglementés Loi Raffarin (annexe décret 98-246)
+  const METIERS = [
+    { v:"electricien", l:"Électricien", reglemente:true },
+    { v:"plombier", l:"Plombier / Chauffagiste", reglemente:true },
+    { v:"macon", l:"Maçon / Gros œuvre", reglemente:true },
+    { v:"charpentier", l:"Charpentier", reglemente:true },
+    { v:"couvreur", l:"Couvreur", reglemente:true },
+    { v:"menuisier", l:"Menuisier", reglemente:true },
+    { v:"serrurier", l:"Serrurier / Métallier", reglemente:true },
+    { v:"platrier", l:"Plâtrier", reglemente:true },
+    { v:"etancheur", l:"Étancheur", reglemente:true },
+    { v:"ramoneur", l:"Ramoneur", reglemente:true },
+    { v:"peintre", l:"Peintre en bâtiment", reglemente:true },
+    { v:"carreleur", l:"Carreleur", reglemente:true },
+    { v:"solier", l:"Solier / Moquettiste", reglemente:true },
+    { v:"autre", l:"Autre métier du bâtiment", reglemente:false },
+  ];
+
+  // Exigences spécifiques par métier, au-delà de la qualification CAP/BEP/3 ans (Code de l'artisanat, art. L.121-1, ex-loi Raffarin).
+  // Ces obligations s'ajoutent à l'immatriculation et ne dispensent jamais de la garantie décennale.
+  const EXIGENCES_METIER = {
+    electricien: [
+      { label:"Habilitation électrique (norme NF C18-510)", detail:"Obligatoire pour intervenir sur ou à proximité d'installations électriques, y compris pour le dirigeant lui-même — distincte du CAP/diplôme de qualification." },
+      { label:"Attestation de conformité Consuel", detail:"À fournir au client pour toute installation ou rénovation électrique avant mise sous tension par le fournisseur d'énergie." },
+    ],
+    plombier: [
+      { label:"Attestation de capacité gaz (PGN/PGP)", detail:"Obligatoire pour toute intervention sur une installation de gaz (arrêté du 6 avril 1999) — distincte du CAP/diplôme de qualification." },
+      { label:"Habilitation électrique si raccordement d'équipements", detail:"Requise dès lors que l'intervention touche à l'alimentation électrique d'une chaudière ou d'un chauffe-eau." },
+    ],
+    couvreur: [
+      { label:"Formation travail en hauteur / échafaudage", detail:"Port du harnais, vérification des dispositifs de protection collective et individuelle (Code du travail, prévention des risques de chute)." },
+      { label:"Sous-section 3 ou 4 amiante si toiture ancienne", detail:"Certification spécifique obligatoire avant toute intervention sur des matériaux amiantés (fibro-ciment notamment)." },
+    ],
+    charpentier: [
+      { label:"Formation travail en hauteur", detail:"Obligatoire pour les interventions en charpente, avec équipements de protection individuelle certifiés." },
+    ],
+    macon: [
+      { label:"Sous-section 3 ou 4 amiante si bâti ancien", detail:"Certification spécifique requise avant démolition ou perçage de matériaux susceptibles de contenir de l'amiante." },
+    ],
+    platrier: [
+      { label:"Sous-section 4 amiante si bâti ancien", detail:"Requise pour les interventions sur cloisons ou enduits susceptibles de contenir de l'amiante avant 1997." },
+    ],
+    ramoneur: [
+      { label:"Attestation de ramonage après chaque intervention", detail:"Document obligatoire remis au client sous 15 jours ouvrés, attestant la vacuité du conduit sur toute sa longueur (arrêté du 20 juillet 2023)." },
+    ],
+    etancheur: [
+      { label:"Formation travail en hauteur / toiture-terrasse", detail:"Obligatoire compte tenu du risque de chute propre à ce métier." },
+    ],
+    serrurier: [
+      { label:"Habilitation électrique si automatismes/motorisations", detail:"Requise dès lors que l'intervention touche à l'alimentation électrique d'un portail ou d'une serrure motorisée." },
+    ],
+  };
+  // Obligation transversale à tous les métiers du bâtiment intervenant sur chantier.
+  const EXIGENCE_TRANSVERSALE = { label:"Carte d'identification professionnelle du BTP (carte BTP)", detail:"Obligatoire pour toute personne (dirigeant compris) intervenant sur un chantier de bâtiment ou de travaux publics en France, y compris en sous-traitance — sert à la lutte contre le travail illégal." };
+
+  const DIPLOMES = [
+    { v:"aucun", l:"Aucun diplôme dans le métier", niveau:0 },
+    { v:"cap_bep", l:"CAP / BEP dans le métier", niveau:3 },
+    { v:"bac_pro", l:"Bac Pro / BP dans le métier", niveau:4 },
+    { v:"bts_sup", l:"BTS / DUT / Diplôme supérieur dans le métier", niveau:5 },
+  ];
+
+  const FEATURES = [
+    { icon:"shield", title:"Test de qualification", desc:"Vérification factuelle et automatique de vos diplômes et de votre expérience selon la loi française.", tag:"100% automatisé" },
+    { icon:"scale", title:"Simulateur de statut", desc:"Pré-orientation vers Micro, EI ou SASU avec niveau de confiance affiché et alerte si validation experte requise.", tag:"Pré-orientation" },
+    { icon:"file-check", title:"Générateur de dossier", desc:"Saisie unique, dossier complet et pièces prêtes à téléverser sur le Guichet Unique INPI.", tag:"Conforme INPI" },
+    { icon:"umbrella", title:"Assurance décennale & RC Pro", desc:"Seuils de garantie de référence par métier pour éviter la sous-couverture, puis comparateur assurance.", tag:"Garde-fou intégré" },
+    { icon:"file-text", title:"Éditeur de devis conforme", desc:"Mentions légales BTP, décennale, TVA par type de travaux : votre premier devis prêt à envoyer.", tag:"Conforme BTP" },
+  ];
+
+  const STEPS = [
+    { n:"01", t:"Je me qualifie", d:"Renseignez métier, diplômes et expérience. Résultat immédiat sur votre éligibilité." },
+    { n:"02", t:"J'oriente mon statut", d:"L'algorithme propose Micro / EI / SASU avec un niveau de confiance clair." },
+    { n:"03", t:"Je génère mon dossier", d:"Dossier INPI complet + pièces justificatives prêtes à téléverser." },
+    { n:"04", t:"Je démarre légalement", d:"Assurance décennale, RC Pro et premier devis conforme, en un flux continu." },
+  ];
+
+  const ABOUT_LIST = [
+    "Traçabilité complète des recommandations, horodatées.",
+    "Données hébergées en UE (Supabase), conformité RGPD.",
+    "Architecture mobile-first : pensée pour l'artisan en déplacement.",
+    "Seuils et règles fiscales modifiables sans réécriture du code.",
+  ];
+
+  const STATS = [
+    { k:"5", v:"modules intégrés" },
+    { k:"0", v:"coup de fil requis" },
+    { k:"100%", v:"conforme Guichet Unique INPI" },
+    { k:"UE", v:"données hébergées RGPD" },
+  ];
+
+  // ---------- Carrousel "Exemple concret" : un devis-type par métier ----------
+  const DEVIS_EXAMPLES = [
+    {
+      metier: "Plomberie",
+      icon: '<path d="M12 2s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+      numero: "DEV-2026-04821", emis: "05/07/2026",
+      entreprise: "Dupont Plomberie", siret: "123 456 789 00012",
+      client: { nom: "M. Bernard", adresse: "12 rue Victor Hugo, 69003 Lyon" },
+      chantier: { titre: "Remplacement chauffe-eau", tvaNote: "logement > 2 ans" },
+      tvaRate: 10,
+      lignes: [
+        { d: "Dépose ancien chauffe-eau", q: "1 forfait", pu: 90 },
+        { d: "Fourniture chauffe-eau 200 L", q: "1", pu: 420 },
+        { d: "Pose et raccordement", q: "4 h", pu: 60 },
+      ],
+      mention: "Garantie décennale — Police n° 000123, MAAF Pro · Pénalités de retard : taux BCE + 10 pts · Devis valable 30 jours.",
+    },
+    {
+      metier: "Électricité",
+      icon: '<path d="M13 2 3 14h7l-1 8 11-14h-7l1-6z"/>',
+      numero: "DEV-2026-04822", emis: "05/07/2026",
+      entreprise: "Rossi Électricité", siret: "234 567 891 00013",
+      client: { nom: "Mme Rossi", adresse: "8 rue des Lilas, 44000 Nantes" },
+      chantier: { titre: "Mise aux normes tableau électrique", tvaNote: "logement > 2 ans" },
+      tvaRate: 10,
+      lignes: [
+        { d: "Tableau électrique", q: "1", pu: 350 },
+        { d: "Disjoncteurs différentiels", q: "3", pu: 45 },
+        { d: "Main d'œuvre", q: "6 h", pu: 58 },
+      ],
+      mention: "Garantie décennale — Police n° 000456, AXA Pro · Conforme NF C 15-100 · Devis valable 30 jours.",
+    },
+    {
+      metier: "Peinture",
+      icon: '<path d="M9.06 11.9 17.13 3.83a2.85 2.85 0 1 1 4.03 4.03L13.1 15.94"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-1.25 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>',
+      numero: "DEV-2026-04823", emis: "05/07/2026",
+      entreprise: "Lopez Peinture", siret: "345 678 912 00014",
+      client: { nom: "M. Lopez", adresse: "21 av. Foch, 33000 Bordeaux" },
+      chantier: { titre: "Rafraîchissement 3 pièces — 45 m²", tvaNote: "logement > 2 ans" },
+      tvaRate: 10,
+      lignes: [
+        { d: "Préparation supports (enduit, ponçage)", q: "1 forfait", pu: 220 },
+        { d: "Peinture et fournitures", q: "45 m²", pu: 12 },
+        { d: "Main d'œuvre", q: "20 h", pu: 42 },
+      ],
+      mention: "Garantie décennale — Police n° 000789, MAAF Pro · Peinture classe A+ · Devis valable 30 jours.",
+    },
+    {
+      metier: "Maçonnerie",
+      icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v6M9 15v6M15 3v6M15 15v6"/>',
+      numero: "DEV-2026-04824", emis: "05/07/2026",
+      entreprise: "Nguyen Gros Œuvre", siret: "456 789 123 00015",
+      client: { nom: "M. Nguyen", adresse: "4 chemin des Vignes, 31000 Toulouse" },
+      chantier: { titre: "Extension garage — 35 m²", tvaNote: "construction neuve" },
+      tvaRate: 20,
+      lignes: [
+        { d: "Terrassement", q: "1 forfait", pu: 1200 },
+        { d: "Fondations béton", q: "8 m³", pu: 140 },
+        { d: "Élévation murs parpaing", q: "35 m²", pu: 65 },
+      ],
+      mention: "Garantie décennale — Police n° 000234, SMABTP · Pénalités de retard : taux BCE + 10 pts · Devis valable 30 jours.",
+    },
+    {
+      metier: "Toiture",
+      icon: '<path d="m3 10 9-7 9 7"/><path d="M19 10v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9"/>',
+      numero: "DEV-2026-04825", emis: "05/07/2026",
+      entreprise: "Perrot Couverture", siret: "567 891 234 00016",
+      client: { nom: "Mme Perrot", adresse: "15 rue du Stade, 35000 Rennes" },
+      chantier: { titre: "Réfection toiture — 80 m²", tvaNote: "logement > 2 ans" },
+      tvaRate: 10,
+      lignes: [
+        { d: "Dépose ancienne couverture", q: "80 m²", pu: 8 },
+        { d: "Fourniture tuiles et isolation", q: "80 m²", pu: 55 },
+        { d: "Pose couverture", q: "80 m²", pu: 38 },
+      ],
+      mention: "Garantie décennale — Police n° 000567, MAAF Pro · Médiation de la consommation : art. L612-1 C. conso. · Devis valable 30 jours.",
+    },
+  ];
+
+  function renderDevisSlide(ex){
+    // Calcul des totaux : la quantité peut être "1 forfait", "4 h", "35 m²",
+    // on extrait le nombre en tête de chaîne pour multiplier par le PU.
+    const lignesCalc = ex.lignes.map(l => {
+      const qNum = parseFloat(String(l.q).replace(',', '.')) || 1;
+      return { ...l, total: qNum * l.pu };
+    });
+    const ht = lignesCalc.reduce((s,l) => s + l.total, 0);
+    const tva = ht * ex.tvaRate / 100;
+    const ttc = ht + tva;
+    const rows = lignesCalc.map(l => `
+      <tr class="border-t border-neutral-100">
+        <td class="py-2">${l.d}</td>
+        <td class="py-2 text-right">${l.q}</td>
+        <td class="py-2 text-right">${fmtEUR(l.pu)}</td>
+        <td class="py-2 text-right">${fmtEUR(l.total)}</td>
+      </tr>`).join('');
+    return `
+      <div class="devis-slide p-6 md:p-9">
+        <div class="flex items-start justify-between border-b border-neutral-100 pb-5">
+          <div>
+            <div class="font-display text-lg font-bold">DEVIS</div>
+            <div class="mt-1 text-[12px] text-neutral-500">N° ${ex.numero} · Émis le ${ex.emis}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[13px] font-semibold text-neutral-900">${ex.entreprise}</div>
+            <div class="text-[12px] text-neutral-500">SIRET ${ex.siret}</div>
+          </div>
+        </div>
+        <div class="mt-5 grid grid-cols-2 gap-4 text-[12.5px]">
+          <div class="rounded-xl bg-neutral-50 p-3">
+            <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Client</div>
+            <div class="mt-1 text-neutral-800">${ex.client.nom}<br>${ex.client.adresse}</div>
+          </div>
+          <div class="rounded-xl bg-neutral-50 p-3">
+            <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Chantier</div>
+            <div class="mt-1 text-neutral-800">${ex.chantier.titre}<br>TVA ${ex.tvaRate}% (${ex.chantier.tvaNote})</div>
+          </div>
+        </div>
+        <table class="mt-5 w-full text-[12.5px]">
+          <thead class="text-left text-[10.5px] uppercase tracking-wide text-neutral-400">
+            <tr><th class="pb-2">Désignation</th><th class="pb-2 text-right">Qté</th><th class="pb-2 text-right">PU HT</th><th class="pb-2 text-right">Total HT</th></tr>
+          </thead>
+          <tbody class="text-neutral-700">${rows}</tbody>
+        </table>
+        <div class="mt-5 flex justify-end">
+          <div class="w-full max-w-[220px] space-y-1.5 text-[13px]">
+            <div class="flex justify-between text-neutral-600"><span>Total HT</span><span>${fmtEUR(ht)}</span></div>
+            <div class="flex justify-between text-neutral-600"><span>TVA ${ex.tvaRate}%</span><span>${fmtEUR(tva)}</span></div>
+            <div class="flex justify-between border-t border-neutral-200 pt-1.5 font-semibold text-neutral-900"><span>Total TTC</span><span>${fmtEUR(ttc)}</span></div>
+          </div>
+        </div>
+        <div class="mt-5 rounded-xl bg-neutral-50 p-3 text-[11px] leading-relaxed text-neutral-500">${ex.mention}</div>
+      </div>`;
+  }
+
+  let devisCarouselIndex = 0;
+  let devisCarouselTimer = null;
+
+  function updateDevisCarousel(){
+    const track = document.getElementById('devis-carousel-track');
+    if (!track) return;
+    track.style.transform = `translateX(-${devisCarouselIndex * 100}%)`;
+    document.querySelectorAll('[data-devis-tab]').forEach((btn, i) => {
+      btn.classList.toggle('devis-tab-active', i === devisCarouselIndex);
+    });
+  }
+  function devisCarouselGoTo(i){
+    devisCarouselIndex = (i + DEVIS_EXAMPLES.length) % DEVIS_EXAMPLES.length;
+    updateDevisCarousel();
+    restartDevisAutoplay();
+  }
+  function devisCarouselNext(){ devisCarouselGoTo(devisCarouselIndex + 1); }
+  function devisCarouselPrev(){ devisCarouselGoTo(devisCarouselIndex - 1); }
+  function startDevisAutoplay(){
+    stopDevisAutoplay();
+    devisCarouselTimer = setInterval(() => devisCarouselGoTo(devisCarouselIndex + 1), 5000);
+  }
+  function stopDevisAutoplay(){ if (devisCarouselTimer) clearInterval(devisCarouselTimer); }
+  function restartDevisAutoplay(){ startDevisAutoplay(); }
+  window.devisCarouselNext = devisCarouselNext;
+  window.devisCarouselPrev = devisCarouselPrev;
+  window.devisCarouselGoTo = devisCarouselGoTo;
+
+  function initDevisCarousel(){
+    const track = document.getElementById('devis-carousel-track');
+    const tabs = document.getElementById('devis-carousel-tabs');
+    const viewport = document.getElementById('devis-carousel-viewport');
+    if (!track || !tabs || !viewport) return;
+    track.innerHTML = DEVIS_EXAMPLES.map(renderDevisSlide).join('');
+    tabs.innerHTML = DEVIS_EXAMPLES.map((ex, i) => `
+      <button onclick="devisCarouselGoTo(${i})" data-devis-tab="${i}" class="devis-tab inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-medium">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ex.icon}</svg>
+        ${ex.metier}
+      </button>`).join('');
+    updateDevisCarousel();
+    startDevisAutoplay();
+
+    // Pause au survol / interaction tactile, et swipe gauche-droite au doigt.
+    viewport.addEventListener('mouseenter', stopDevisAutoplay);
+    viewport.addEventListener('mouseleave', startDevisAutoplay);
+    let touchStartX = 0;
+    viewport.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; stopDevisAutoplay(); }, { passive: true });
+    viewport.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) { dx < 0 ? devisCarouselNext() : devisCarouselPrev(); }
+      else { startDevisAutoplay(); }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', initDevisCarousel);
+
+  const PRICING = [
+    // plan:null => offre gratuite, pas de paiement Stripe (ouvre juste l'inscription).
+    // plan:"lancement" / "pro" => identifiants envoyés tels quels à la fonction
+    // Supabase "create-checkout", qui doit savoir faire correspondre chaque
+    // identifiant à son Price ID Stripe (le site ne connaît pas les Price IDs).
+    { name:"Gratuit", price:"0 €", sub:"pour toujours", features:["Test de qualification complet","Simulateur de statut","Alertes de risque","Support par email"], cta:"Commencer", highlight:false, plan:null },
+    { name:"Lancement", price:"89 €", sub:"paiement unique", features:["Tout Gratuit +","Générateur de dossier INPI","Pièces justificatives incluses"], cta:"Créer ma boîte", highlight:true, plan:"dossier" },
+    { name:"Pro", price:"19 €", sub:"/ mois", features:["Tout Gratuit +","Éditeur de devis conforme","Mises à jour TVA & décennale","Archivage horodaté"], cta:"Passer Pro", highlight:false, plan:"pro" },
+  ];
+
+  const ICONS = {
+    shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+    scale:'<path d="M16 16.5a4 4 0 1 1 4 4"/><path d="M8 7.5a4 4 0 1 0-4 4"/><path d="M12 3v18"/><path d="M8 7.5h8"/><path d="M20 16.5H4"/>',
+    "file-check":'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/>',
+    handshake:'<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>',
+    umbrella:'<path d="M22 12a10.06 10.06 0 0 0-20 0z"/><path d="M12 12v8a2 2 0 0 0 4 0"/><path d="M12 2v1"/>',
+    "file-text":'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    check:'<path d="M20 6 9 17l-5-5"/>',
+    star:'<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+    arrow:'<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+    alert:'<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>',
+    lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  };
+  const icon = (name, cls="h-5 w-5") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||""}</svg>`;
+  const iconFilled = (name, cls, color) => `<svg class="${cls}" viewBox="0 0 24 24" fill="${color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||""}</svg>`;
+
+  // ---------- Render sections ----------
+  function scrollToId(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth', block:'start'}); }
+  function toggleMenu(){ document.getElementById('mobile-menu').classList.toggle('hidden'); }
+
+  // ---------- Statut serveur (ping en direct) ----------
+  async function pingServer(){
+    const dot = document.getElementById('server-status-dot');
+    const pulse = document.getElementById('server-status-pulse');
+    const label = document.getElementById('server-status-label');
+    if (!dot || !label) return;
+    const url = window.SUPABASE_URL;
+    if (!url){ label.textContent = 'Hors ligne'; dot.style.background = '#9ca3af'; if(pulse) pulse.style.background = '#9ca3af'; return; }
+    const started = performance.now();
+    try {
+      // Requête légère en mode no-cors : on ne lit pas la réponse, on mesure juste le temps d'aller-retour réseau.
+      await fetch(url + '/auth/v1/health', { mode: 'no-cors', cache: 'no-store' });
+      const ms = Math.max(1, Math.round(performance.now() - started));
+      label.textContent = ms + ' ms';
+      dot.style.background = '#10b981';
+      if (pulse) pulse.style.background = '#10b981';
+    } catch (e) {
+      label.textContent = 'Hors ligne';
+      dot.style.background = '#ef4444';
+      if (pulse) pulse.style.background = '#ef4444';
+    }
+  }
+  pingServer();
+  setInterval(pingServer, 8000);
+
+  // Nav
+  document.getElementById('nav-links').innerHTML = NAV.map(n=>`
+    <button data-nav="${n.id}" onclick="scrollToId('${n.id}')" class="nav-link relative rounded-full px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-950">${n.label}</button>
+  `).join('') + `
+    <div class="nav-guides relative">
+      <button class="flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-950" aria-haspopup="true">
+        Guides par métier
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="nav-guides-panel absolute left-1/2 top-full z-50 w-64 -translate-x-1/2 rounded-2xl border border-black/10 bg-white p-2 shadow-xl">
+        ${GUIDES.map(g=>`<a href="${g.file}" class="block px-4 py-2 text-[14px] text-neutral-700 hover:bg-neutral-50 rounded-lg">${g.l}</a>`).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('mobile-menu').innerHTML = NAV.map(n=>`
+    <button onclick="scrollToId('${n.id}'); toggleMenu();" class="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-neutral-800 hover:bg-neutral-100">${n.label}</button>
+  `).join('') + `
+    <div class="my-2 border-t border-black/5"></div>
+    <div class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Guides par métier</div>
+  ` + GUIDES.map(g=>`
+    <a href="${g.file}" class="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-neutral-800 hover:bg-neutral-100">${g.l}</a>
+  `).join('');
+  document.getElementById('footer-nav-dark').innerHTML = NAV.map(n=>`<button onclick="scrollToId('${n.id}')" class="w-fit text-left text-neutral-400 hover:text-white">${n.label}</button>`).join('');
+  var footerGuides = document.getElementById('footer-guides');
+  if (footerGuides) {
+    footerGuides.innerHTML = GUIDES.map(g=>`<a href="${g.file}" class="w-fit text-neutral-400 hover:text-white">${g.l}</a>`).join('');
+  }
+
+  // Stars
+  // (badge étoiles retiré — plus de preuve sociale fictive)
+
+  // Marquee
+  const brands = ["CAPEB","FFB","Qualibat","INPI","Urssaf","ORIAS","CMA"];
+  const brandBlock = brands.map(b=>`<span class="font-display text-[22px] font-bold tracking-tight text-neutral-500">${b}</span>`).join('');
+  document.getElementById('marquee').innerHTML = `<div class="flex items-center gap-[100px]">${brandBlock}</div><div class="flex items-center gap-[100px]">${brandBlock}</div>`;
+
+  // Features
+  document.getElementById('features').innerHTML = FEATURES.map((f,i)=>`
+    <button data-reveal style="transition-delay:${i*60}ms" onclick="scrollToId('how')" class="blueprint-corners group relative overflow-hidden rounded-3xl border border-black/5 glass p-7 text-left transition-all duration-500 hover:-translate-y-1 hover:border-[color:var(--brand)]/30 hover:shadow-xl hover:shadow-[color:var(--brand)]/10">
+      <div class="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[color:var(--brand)]/10 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+      <div class="mb-5 grid h-12 w-12 place-items-center rounded-2xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 bg-brand-tint-2">${icon(f.icon,"h-6 w-6")}</div>
+      <div class="mb-2 inline-flex rounded-full bg-neutral-100 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-neutral-600">${f.tag}</div>
+      <h3 class="font-display text-xl font-semibold text-neutral-950">${f.title}</h3>
+      <p class="mt-2 text-sm leading-relaxed text-neutral-600">${f.desc}</p>
+      <div class="mt-5 inline-flex items-center gap-1 text-sm font-medium text-brand">En savoir plus ${icon('arrow','h-4 w-4')}</div>
+    </button>
+  `).join('');
+
+  // Steps
+  document.getElementById('steps').innerHTML = STEPS.map((s,i)=>`
+    <li data-reveal style="transition-delay:${i*100}ms" class="relative rounded-3xl border border-black/5 glass p-7 transition-transform duration-500 hover:-translate-y-1">
+      <div class="font-display text-5xl font-bold" style="color:rgba(29,95,163,.2)">${s.n}</div>
+      <h3 class="mt-2 font-display text-lg font-semibold">${s.t}</h3>
+      <p class="mt-2 text-sm text-neutral-600">${s.d}</p>
+    </li>
+  `).join('');
+
+  // About list & stats
+  document.getElementById('about-list').innerHTML = ABOUT_LIST.map(t=>`
+    <li class="flex gap-3">
+      <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-tint-2">${icon('check','h-3.5 w-3.5')}</span>
+      <span class="text-sm text-neutral-700">${t}</span>
+    </li>`).join('');
+  document.getElementById('stats').innerHTML = STATS.map(s=>`
+    <div class="rounded-2xl bg-white/70 p-5 backdrop-blur">
+      <div class="font-display text-3xl font-bold text-neutral-950">${s.k}</div>
+      <div class="mt-1 text-xs uppercase tracking-wide text-neutral-500">${s.v}</div>
+    </div>`).join('');
+
+  // Pricing
+  document.getElementById('pricing').innerHTML = PRICING.map((p,i)=>`
+    <div data-reveal style="transition-delay:${i*100}ms" class="relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl transition-transform duration-500 hover:-translate-y-1 ${p.highlight?'border-[color:var(--brand)]/40 shadow-2xl shadow-[color:var(--brand)]/20':'border-black/5 bg-white/70'}" style="${p.highlight?'background:linear-gradient(135deg, rgba(29,95,163,.1), rgba(255,255,255,.9))':''}">
+      ${p.highlight?`<span class="absolute right-6 top-6 rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-white bg-brand">Populaire</span>`:''}
+      <div class="text-sm font-medium uppercase tracking-wide text-neutral-500">${p.name}</div>
+      <div class="mt-3 flex items-baseline gap-2">
+        <span class="font-display text-5xl font-bold">${p.price}</span>
+        <span class="text-sm text-neutral-500">${p.sub}</span>
+      </div>
+      <ul class="mt-6 space-y-3">
+        ${p.features.map(f=>`<li class="flex items-start gap-2 text-sm text-neutral-700"><span class="mt-0.5 shrink-0 text-brand">${icon('check','h-4 w-4')}</span>${f}</li>`).join('')}
+      </ul>
+      <button data-plan-btn="${p.plan||'gratuit'}" onclick="handlePricingClick(${p.plan?`'${p.plan}'`:'null'})" class="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait" style="background:${p.highlight?'var(--brand)':'#0a0a0a'}"><span data-plan-btn-label>${p.cta} ${icon('arrow','h-4 w-4')}</span></button>
+    </div>
+  `).join('');
+
+  // ---------- Paiement Stripe (offres Lancement / Pro) ----------
+  // Convention attendue côté fonction Supabase "create-checkout" :
+  //   - reçoit en POST (JSON) : { plan: "dossier"|"pro" } (+ le token d'auth
+  //     de l'utilisateur, envoyé automatiquement par supabase.functions.invoke())
+  //   - répond avec : { url: "https://checkout.stripe.com/..." }
+  // Si ta fonction déployée utilise un contrat différent (ex: renvoie un
+  // sessionId au lieu d'une url), ajuste juste la fonction startCheckout()
+  // ci-dessous — le reste du site n'a pas besoin de changer.
+  function handlePricingClick(planKey){
+    if (!planKey){ openQualif(); return; } // offre Gratuite : pas de paiement
+    requireAuth(() => startCheckout(planKey));
+  }
+
+  async function startCheckout(planKey){
+    const sb = window.__supabase;
+    if (!sb){
+      showInlineError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+    const btn = document.querySelector(`[data-plan-btn="${planKey}"]`);
+    const label = btn ? btn.querySelector('[data-plan-btn-label]') : null;
+    const originalHTML = label ? label.innerHTML : null;
+    if (btn){ btn.disabled = true; }
+    if (label){ label.textContent = 'Redirection vers le paiement…'; }
+
+    try {
+      const { data, error } = await sb.functions.invoke('create-checkout', {
+        body: {
+          plan: planKey,
+          email: currentUser ? currentUser.email : null,
+          userId: currentUser ? (currentUser.id || currentUser.user_id) : null,
+        },
+      });
+      if (error) {
+        // Le SDK Supabase ne remonte par défaut qu'un message générique
+        // ("Edge Function returned a non-2xx status code") ; on va chercher
+        // le vrai message d'erreur renvoyé par la fonction dans le corps de
+        // la réponse (ex: "Offre inconnue.", "Utilisateur non authentifié.").
+        let detail = error.message;
+        try {
+          if (error.context && typeof error.context.json === 'function'){
+            const body = await error.context.clone().json();
+            if (body && body.error) detail = body.error;
+          }
+        } catch(_e){ /* corps non-JSON ou déjà consommé : on garde le message générique */ }
+        throw new Error(detail);
+      }
+
+      const url = data && (data.url || data.checkoutUrl);
+      if (!url) throw new Error("Réponse inattendue du serveur de paiement (pas d'URL reçue).");
+
+      // Le site est chargé à l'intérieur d'un <iframe> (structure Lovable) :
+      // Stripe refuse de s'afficher dans un cadre imbriqué et exige une
+      // navigation au niveau supérieur de la fenêtre. window.top cible la
+      // fenêtre du navigateur elle-même plutôt que l'iframe intérieur.
+      // (Si le site est un jour servi sans iframe, window.top === window et
+      // ce code continue de fonctionner normalement.)
+      try {
+        window.top.location.href = url;
+      } catch(_e){
+        // Cas rare : iframe cross-origin où l'accès à window.top est bloqué
+        // par le navigateur. On retente une navigation classique en dernier recours.
+        window.location.href = url;
+      }
+    } catch(e){
+      console.error('Erreur création session de paiement :', e);
+      showInlineError("Une erreur est survenue lors de la préparation du paiement. Réessayez dans un instant. (" + (e.message || e) + ")");
+      if (btn){ btn.disabled = false; }
+      if (label && originalHTML !== null){ label.innerHTML = originalHTML; }
+    }
+  }
+
+  // Qualification form population
+  document.getElementById('metier').innerHTML = '<option value="" selected>Choisissez votre métier…</option>' + METIERS.map(m=>`<option value="${m.v}">${m.l}${m.reglemente?' — activité réglementée':''}</option>`).join('');
+  document.getElementById('diplome-group').innerHTML = DIPLOMES.map((d,i)=>`
+    <label class="radio-card flex cursor-pointer items-center gap-3 rounded-[12px] border border-black/10 bg-white/60 px-4 py-3 text-[14px] transition hover:border-[color:var(--brand)]/40 hover:bg-white" for="r-diplome-${d.v}">
+      <input type="radio" name="diplome" value="${d.v}" id="r-diplome-${d.v}" class="h-4 w-4 accent-brand" ${i===0?'checked':''} onchange="saveQualifDraft()"/>
+      <span class="text-neutral-800">${d.l}</span>
+    </label>
+  `).join('');
+
+  function onExpChange(el){
+    document.getElementById('exp-val').textContent = el.value;
+    const p = (el.value/el.max)*100;
+    el.style.setProperty('--val', p+'%');
+  }
+
+  // Reveal
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('[data-reveal]').forEach(el=>io.observe(el));
+
+  // Active nav
+  const sectionIO = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        document.querySelectorAll('.nav-link').forEach(b=>{
+          const active = b.getAttribute('data-nav')===e.target.id;
+          b.style.color = active ? 'var(--brand)' : '';
+          b.style.background = active ? 'rgba(29,95,163,.08)' : '';
+        });
+      }
+    });
+  }, { rootMargin: "-45% 0px -50% 0px" });
+  NAV.forEach(n=>{ const el=document.getElementById(n.id); if(el) sectionIO.observe(el); });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ---------- AUTH (comptes / connexion) ----------
+  // Authentification réelle via Supabase Auth (table auth.users).
+  // Le prénom/nom sont stockés dans les métadonnées utilisateur (user_metadata)
+  // au moment de l'inscription, puis relus depuis la session Supabase.
+  const LS_QUALIF_DRAFT_KEY = 'batipro_qualif_draft'; // déclaré tôt : lu dès le premier rendu de la barre de navigation
+
+  let currentUser = null;
+  let pendingAfterAuth = null;
+
+  // Construit l'objet currentUser utilisé partout dans le site à partir
+  // d'un objet "user" renvoyé par Supabase Auth.
+  function mapSupabaseUser(user){
+    if (!user) return null;
+    const meta = user.user_metadata || {};
+    return {
+      id: user.id,
+      email: user.email,
+      prenom: meta.prenom || meta.first_name || '',
+      nom: meta.nom || meta.last_name || '',
+      telephone: meta.telephone || meta.phone || '',
+    };
+  }
+
+  // Met à jour les CTA d'achat (carte "Pack Lancement" de la section hero +
+  // cartes de la grille tarifaire) selon les entitlements réels de
+  // l'utilisateur connecté :
+  //  - l'abonnement Pro (19 €/mois) inclut tout le Pack Lancement (89 €) —
+  //    un compte Pro ne doit donc JAMAIS être invité à (re)payer les 89 €
+  //    séparément, même s'il n'a jamais acheté le Pack Lancement isolément ;
+  //  - à l'inverse, un compte ayant déjà acheté le Pack Lancement ou déjà
+  //    abonné Pro ne doit pas se voir proposer de payer une seconde fois le
+  //    même produit.
+  // Sans utilisateur connecté (ou sans Supabase dispo), les CTA restent à
+  // leur état par défaut ("Acheter…").
+  async function updatePricingButtonsForUser(){
+    const dossierBtns = [document.getElementById('hero-pack-btn'), document.querySelector('[data-plan-btn="dossier"]')].filter(Boolean);
+    const proBtn = document.querySelector('[data-plan-btn="pro"]');
+    const allBtns = [...dossierBtns, proBtn].filter(Boolean);
+
+    const labelOf = (btn) => btn.id === 'hero-pack-btn'
+      ? document.getElementById('hero-pack-btn-label')
+      : btn.querySelector('[data-plan-btn-label]');
+
+    // Mémorise le libellé d'origine de chaque bouton (une seule fois) pour
+    // pouvoir le restaurer proprement après une déconnexion.
+    allBtns.forEach(btn => {
+      const label = labelOf(btn);
+      if (label && btn.dataset.defaultLabel === undefined) btn.dataset.defaultLabel = label.innerHTML;
+    });
+
+    const resetBtn = (btn) => {
+      if (!btn) return;
+      btn.disabled = false;
+      btn.classList.remove('opacity-60', 'cursor-not-allowed');
+      const label = labelOf(btn);
+      if (label && btn.dataset.defaultLabel !== undefined) label.innerHTML = btn.dataset.defaultLabel;
+    };
+
+    if (!currentUser){
+      allBtns.forEach(resetBtn);
+      return;
+    }
+
+    const sb = window.__supabase;
+    if (!sb) return;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (error){ console.warn('Erreur vérification entitlements (CTA tarifs) :', error); return; }
+
+    const hasDossier = (data || []).some(e => e.product_key === 'dossier');
+    const hasPro = (data || []).some(e => e.product_key === 'pro');
+    // Le Pack Lancement (89 €) et l'abonnement Pro (19 €/mois) sont deux
+    // produits indépendants : être Pro ne donne PAS accès au Pack Lancement
+    // (INPI + Assurance), il faut l'acheter séparément.
+
+    allBtns.forEach(resetBtn); // repart d'un état propre avant d'appliquer les nouveaux libellés
+
+    dossierBtns.forEach(btn => {
+      if (!hasDossier) return;
+      btn.disabled = true;
+      btn.classList.add('opacity-60', 'cursor-not-allowed');
+      const label = labelOf(btn);
+      if (label) label.textContent = 'Déjà acheté ✓';
+    });
+
+    if (proBtn && hasPro){
+      proBtn.disabled = true;
+      proBtn.classList.add('opacity-60', 'cursor-not-allowed');
+      const label = labelOf(proBtn);
+      if (label) label.textContent = 'Abonnement actif ✓';
+    }
+  }
+  window.updatePricingButtonsForUser = updatePricingButtonsForUser;
+
+
+  // était déjà connecté lors d'une visite précédente), et écoute les
+  // changements de session (connexion/déconnexion) pour garder currentUser
+  // synchronisé avec la vraie session Supabase.
+  async function restoreSession(){
+    const sb = window.__supabase;
+    if (!sb) return;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      currentUser = mapSupabaseUser(session ? session.user : null);
+      updateAuthUI();
+    } catch(e){
+      console.warn('Impossible de restaurer la session Supabase :', e);
+    }
+    updatePricingButtonsForUser();
+    sb.auth.onAuthStateChange((_event, session) => {
+      currentUser = mapSupabaseUser(session ? session.user : null);
+      updateAuthUI();
+      updatePricingButtonsForUser();
+      // Sécurité : on efface toujours la session admin locale dès qu'un
+      // changement de compte/connexion/déconnexion survient, pour qu'un
+      // compte ne puisse jamais hériter de l'accès dashboard obtenu par un
+      // autre compte (ou par le mot de passe) sur ce même onglet. L'accès
+      // admin par email (voir openAdmin) est de toute façon recalculé à
+      // chaque ouverture et n'a pas besoin de cette clé.
+      sessionStorage.removeItem(LS_ADMIN_SESSION_KEY);
+      // Quand l'utilisateur clique sur le lien "mot de passe oublié" reçu par
+      // email, Supabase le renvoie ici avec une session temporaire et cet
+      // événement PASSWORD_RECOVERY : on ouvre directement le formulaire de
+      // nouveau mot de passe, sans avoir besoin d'une page séparée.
+      if (_event === 'PASSWORD_RECOVERY') {
+        openAuth();
+        setAuthMode('reset');
+      }
+    });
+  }
+
+  // Étape 1 : demande d'envoi de l'email de réinitialisation.
+  async function handleForgotPassword(){
+    const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+    const sb = window.__supabase;
+    if (!sb){
+      showAuthError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      // On redirige vers la page actuelle : le SPA détecte ensuite l'événement
+      // PASSWORD_RECOVERY (ci-dessus) et affiche le formulaire "reset-form".
+      redirectTo: window.location.origin + window.location.pathname,
+    });
+    if (error){
+      showAuthError("Erreur : " + error.message);
+      return;
+    }
+    showAuthError("Email envoyé ! Vérifiez votre boîte de réception (et vos spams).", true);
+  }
+
+  // Étape 2 : l'utilisateur choisit son nouveau mot de passe (après avoir
+  // cliqué sur le lien reçu par email).
+  async function handleResetPassword(){
+    const password = document.getElementById('reset-password').value;
+    if (password.length < 8){
+      showAuthError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb){
+      showAuthError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+    const { error } = await sb.auth.updateUser({ password });
+    if (error){
+      showAuthError("Erreur : " + error.message);
+      return;
+    }
+    showAuthError("Mot de passe mis à jour ! Vous pouvez continuer.", true);
+    setTimeout(() => { closeAuth(); }, 1500);
+  }
+
+  function setAuthMode(mode){
+    document.getElementById('signup-form').classList.toggle('hidden', mode!=='signup');
+    document.getElementById('login-form').classList.toggle('hidden', mode!=='login');
+    document.getElementById('forgot-form').classList.toggle('hidden', mode!=='forgot');
+    document.getElementById('reset-form').classList.toggle('hidden', mode!=='reset');
+    // Les onglets "Créer un compte / Se connecter" n'ont pas de sens en mode
+    // mot-de-passe-oublié ou nouveau-mot-de-passe : on les masque.
+    document.getElementById('auth-tabs').classList.toggle('hidden', mode==='forgot' || mode==='reset');
+    document.querySelectorAll('[data-auth-tab]').forEach(b=>{
+      const active = b.getAttribute('data-auth-tab')===mode;
+      b.style.background = active ? '#fff' : 'transparent';
+      b.style.boxShadow = active ? '0 1px 4px rgba(0,0,0,.08)' : 'none';
+      b.style.color = active ? '#0a0a0a' : '#525252';
+    });
+    document.getElementById('auth-error').classList.add('hidden');
+  }
+
+  function openAuth(next){
+    pendingAfterAuth = next || null;
+    const m = document.getElementById('auth-modal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow='hidden';
+    document.getElementById('auth-context').classList.toggle('hidden', !pendingAfterAuth);
+    setAuthMode('signup');
+  }
+  function closeAuth(){
+    const m = document.getElementById('auth-modal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow='';
+    pendingAfterAuth = null;
+  }
+
+  // Porte d'accès : exécute next() si connecté, sinon ouvre la modale de compte.
+  function requireAuth(next){
+    if (currentUser) { next(); return; }
+    openAuth(next);
+  }
+
+  // Verrou d'accès au module INPI (Module 3/5) : réservé aux comptes ayant
+  // acheté le Pack Lancement (89 €, product_key "dossier") ou l'abonnement
+  // Pro (product_key "pro", qui inclut tout Lancement). Se connecte d'abord
+  // si nécessaire, vérifie les entitlements Supabase, puis ouvre soit le
+  // module INPI, soit un rappel d'achat (paywall) à la place.
+  async function goToInpiGated(){
+    if (!currentUser){ requireAuth(goToInpiGated); return; }
+    const sb = window.__supabase;
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    const btn = document.getElementById('statut-inpi-btn');
+    if (btn) btn.disabled = true;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (btn) btn.disabled = false;
+    if (error){
+      console.error('Erreur vérification entitlements :', error);
+      showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
+      return;
+    }
+    const hasAccess = (data || []).some(e => e.product_key === 'dossier');
+    if (hasAccess){
+      closeStatut();
+      openInpi();
+    } else {
+      const paywall = document.getElementById('statut-inpi-paywall');
+      if (paywall){ paywall.classList.remove('hidden'); paywall.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    }
+  }
+  window.goToInpiGated = goToInpiGated;
+
+  // Verrou d'accès au module Devis (Module 5/5) : réservé aux comptes ayant
+  // l'abonnement Pro (product_key "pro", 19 €/mois). Le Pack Lancement seul
+  // (89 €, product_key "dossier") ne donne PAS accès à l'éditeur de devis —
+  // contrairement au module INPI, qui lui est inclus dès le Pack Lancement.
+  // Se connecte d'abord si nécessaire, vérifie les entitlements Supabase,
+  // puis ouvre soit l'éditeur de devis, soit un rappel d'abonnement
+  // (paywall) à la place.
+  async function goToDevisGated(){
+    if (!currentUser){ requireAuth(goToDevisGated); return; }
+    const sb = window.__supabase;
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    const btn = document.getElementById('assur-devis-btn');
+    if (btn) btn.disabled = true;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (btn) btn.disabled = false;
+    if (error){
+      console.error('Erreur vérification entitlements :', error);
+      showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
+      return;
+    }
+    const hasAccess = (data || []).some(e => e.product_key === 'pro');
+    if (hasAccess){
+      const paywall = document.getElementById('assur-devis-paywall');
+      if (paywall) paywall.classList.add('hidden');
+      closeAssur();
+      openDevis();
+    } else {
+      const paywall = document.getElementById('assur-devis-paywall');
+      if (paywall){ paywall.classList.remove('hidden'); paywall.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    }
+  }
+  window.goToDevisGated = goToDevisGated;
+
+  // Verrou d'accès au module Assurance décennale (Module 4/5) : réservé aux
+  // comptes ayant acheté le Pack Lancement (89 €, product_key "dossier") ou
+  // l'abonnement Pro (product_key "pro"), même règle que le module INPI. Se
+  // connecte d'abord si nécessaire, vérifie les entitlements Supabase, puis
+  // ouvre soit le module Assurance, soit un rappel d'achat (toast + renvoi
+  // vers les tarifs) à la place.
+  async function goToAssurGated(){
+    if (!currentUser){ requireAuth(goToAssurGated); return; }
+    const sb = window.__supabase;
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    const btn = document.getElementById('espace-assur-refaire-btn');
+    if (btn) btn.disabled = true;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (btn) btn.disabled = false;
+    if (error){
+      console.error('Erreur vérification entitlements :', error);
+      showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
+      return;
+    }
+    const hasAccess = (data || []).some(e => e.product_key === 'dossier');
+    if (hasAccess){
+      openAssur();
+    } else {
+      showInlineError("La simulation d'assurance décennale fait partie du Pack Lancement (89 €). Achetez-le pour y accéder.", 'warning');
+      document.getElementById('tarifs')?.scrollIntoView({ behavior:'smooth' });
+    }
+  }
+  window.goToAssurGated = goToAssurGated;
+
+  function showAuthError(msg, isSuccess){
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    if (isSuccess){
+      el.classList.remove('border-red-200', 'bg-red-50');
+      el.classList.add('border-green-200', 'bg-green-50');
+      el.style.color = '#15803d';
+    } else {
+      el.classList.remove('border-green-200', 'bg-green-50');
+      el.classList.add('border-red-200', 'bg-red-50');
+      el.style.color = '#b91c1c';
+    }
+  }
+
+  function updateAuthUI(){
+    const label = document.getElementById('nav-auth-label');
+    const btn = document.getElementById('nav-auth-btn');
+    const logoutBtn = document.getElementById('nav-logout-btn');
+    const resumeBtn = document.getElementById('nav-resume-btn');
+    const accountBtn = document.getElementById('nav-account-btn');
+    const accountLabel = document.getElementById('nav-account-label');
+
+    if (currentUser){
+      // Connecté : le bouton "Inscription" disparaît, remplacé par "Mon
+      // compte" (toujours visible) + "Reprendre mon test" (seulement si un
+      // vrai brouillon est en cours).
+      // NB: on pilote l'affichage via style.display en plus de la classe
+      // "hidden", car ce bouton porte aussi la classe statique "inline-flex"
+      // et les deux utilitaires Tailwind ont la même spécificité CSS — selon
+      // l'ordre de génération du CDN, "inline-flex" peut l'emporter sur
+      // "hidden" et laisser le bouton visible malgré tout.
+      btn.classList.add('hidden');
+      btn.style.display = 'none';
+
+      accountBtn.classList.remove('hidden');
+      accountBtn.classList.add('inline-flex');
+      accountBtn.style.display = '';
+      accountLabel.textContent = `${currentUser.prenom} — Mon compte`;
+
+      const draft = (typeof getQualifDraft === 'function') ? getQualifDraft() : null;
+      if (draft){
+        resumeBtn.classList.remove('hidden');
+        resumeBtn.classList.add('inline-flex');
+        resumeBtn.style.display = '';
+      } else {
+        resumeBtn.classList.add('hidden');
+        resumeBtn.classList.remove('inline-flex');
+        resumeBtn.style.display = 'none';
+      }
+
+      if (logoutBtn) { logoutBtn.classList.remove('hidden'); logoutBtn.style.display = ''; }
+      if (typeof updateCtaBottomButton === 'function') updateCtaBottomButton();
+    } else {
+      // Déconnecté : seul le bouton "Inscription" est visible.
+      btn.classList.remove('hidden');
+      btn.style.display = '';
+      label.textContent = 'Inscription';
+      btn.onclick = () => openAuth();
+
+      accountBtn.classList.add('hidden');
+      accountBtn.classList.remove('inline-flex');
+      accountBtn.style.display = 'none';
+      resumeBtn.classList.add('hidden');
+      resumeBtn.classList.remove('inline-flex');
+      resumeBtn.style.display = 'none';
+      if (logoutBtn) { logoutBtn.classList.add('hidden'); logoutBtn.style.display = 'none'; }
+      if (typeof updateCtaBottomButton === 'function') updateCtaBottomButton();
+    }
+  }
+
+  async function logout(){
+    const sb = window.__supabase;
+    if (sb) { try { await sb.auth.signOut(); } catch(e){ console.warn('Erreur lors de la déconnexion :', e); } }
+    currentUser = null;
+    updateAuthUI();
+    // Masque immédiatement "Mon espace" (sinon il ne disparaît qu'au
+    // prochain rechargement de page).
+    closeEspaceClient();
+  }
+
+  // ---------- Espace client ----------
+  function goToEspaceClient(){
+    loadEspaceClient();
+    const m = document.getElementById('espace-client');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    const header = document.querySelector('header');
+    if (header) header.style.visibility = 'hidden';
+  }
+  function closeEspaceClient(){
+    const m = document.getElementById('espace-client');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow = '';
+    const header = document.querySelector('header');
+    if (header) header.style.visibility = '';
+  }
+  window.closeEspaceClient = closeEspaceClient;
+
+  async function loadEspaceClient(){
+    const section = document.getElementById('espace-client');
+    if (!currentUser){ section.classList.add('hidden'); return; }
+
+    section.classList.remove('hidden');
+    const fullName = `${currentUser.prenom} ${currentUser.nom}`.trim();
+    document.getElementById('espace-nom').textContent = fullName || currentUser.email;
+    document.getElementById('espace-email').textContent = currentUser.email;
+    const initials = ((currentUser.prenom||'')[0]||'') + ((currentUser.nom||'')[0]||'');
+    document.getElementById('espace-avatar').textContent = (initials || (currentUser.email||'?')[0]).toUpperCase();
+
+    const emailInput = document.getElementById('settings-email');
+    const phoneInput = document.getElementById('settings-telephone');
+    if (emailInput) emailInput.value = currentUser.email || '';
+    if (phoneInput) phoneInput.value = currentUser.telephone || '';
+
+    const statutEl = document.getElementById('espace-statut');
+    const manageBtn = document.getElementById('espace-manage-btn');
+    statutEl.textContent = 'Chargement…';
+    manageBtn.classList.add('hidden');
+
+    const sb = window.__supabase;
+    if (!sb){ statutEl.textContent = 'Indisponible pour le moment.'; return; }
+
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+
+    if (error){
+      console.error('Erreur chargement entitlements :', error);
+      statutEl.textContent = 'Impossible de charger le statut.';
+      return;
+    }
+
+    const hasPro = (data || []).some(e => e.product_key === 'pro');
+    const hasDossier = (data || []).some(e => e.product_key === 'dossier');
+
+    if (hasPro){
+      statutEl.textContent = 'Abonnement Pro actif (19 €/mois)';
+      manageBtn.classList.remove('hidden'); // abonnement récurrent : gérable via le portail Stripe
+    } else if (hasDossier){
+      statutEl.textContent = 'Dossier Lancement acheté (paiement unique)';
+      // pas de bouton "gérer" : ce n'est pas un abonnement récurrent
+    } else {
+      statutEl.textContent = 'Aucun abonnement actif — offre Gratuite';
+    }
+
+    await loadEspaceQualif(userId);
+    await loadEspaceInpi(userId, hasDossier);
+    await loadEspaceAssur(userId, hasDossier);
+    await loadEspaceDevis(userId, hasPro);
+    updatePricingButtonsForUser();
+  }
+
+  // Récupère et affiche le dernier test de qualification de l'utilisateur
+  // connecté : d'abord dans Supabase (table `submissions`), avec repli sur
+  // localStorage si Supabase est indisponible ou si la ligne n'a pas encore
+  // été synchronisée (cas d'un envoi fait avant configuration de la table).
+  // Conserve le dernier résultat complet de qualification (objet `res`) pour
+  // permettre l'ouverture de la page de rapport détaillée / imprimable.
+  window.__lastQualifSubmission = null;
+
+  // Vérifie rapidement (sans toucher au DOM) si l'utilisateur connecté a déjà
+  // au moins un test de qualification enregistré (Supabase, avec repli
+  // localStorage) — utilisé par le CTA du bas de page pour savoir s'il doit
+  // renvoyer vers "Mon espace" ou ouvrir directement le test.
+  async function hasQualifSubmission(){
+    if (!currentUser) return false;
+    const sb = window.__supabase;
+    if (sb && currentUser.id){
+      try {
+        const { data, error } = await sb
+          .from('submissions')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .eq('type', 'qualif')
+          .limit(1);
+        if (!error && data && data.length) return true;
+      } catch(e){
+        console.warn('Erreur vérification test de qualification :', e);
+      }
+    }
+    const list = loadSubmissions().filter(s => s.type === 'qualif' && s.email === currentUser.email);
+    return list.length > 0;
+  }
+
+  // CTA "Tester ma qualification" (bandeau du haut ET du bas) : si
+  // l'utilisateur est déjà connecté et a déjà réalisé le test, on l'envoie
+  // directement voir son orientation dans "Mon espace" ; sinon on ouvre le
+  // test de qualification comme avant.
+  async function ctaTesterOuOrientation(){
+    if (currentUser && await hasQualifSubmission()){
+      goToEspaceClient();
+    } else {
+      openQualif();
+    }
+  }
+  window.ctaTesterOuOrientation = ctaTesterOuOrientation;
+
+  // Met à jour le libellé des boutons CTA (bandeau du haut ET du bas) selon
+  // la situation : "Voir mon orientation" si déjà connecté avec un test
+  // fait, sinon "Tester ma qualification".
+  async function updateCtaBottomButton(){
+    const label = document.getElementById('cta-bottom-label');
+    const heroLabel = document.getElementById('cta-hero-label');
+    const done = currentUser && await hasQualifSubmission();
+    const text = done ? 'Voir mon orientation' : 'Tester ma qualification';
+    if (label) label.textContent = text;
+    if (heroLabel) heroLabel.textContent = text;
+  }
+  window.updateCtaBottomButton = updateCtaBottomButton;
+
+  async function loadEspaceQualif(userId){
+    const box = document.getElementById('espace-qualif');
+    const voirBtn = document.getElementById('espace-qualif-voir-btn');
+    box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+    if (voirBtn) voirBtn.classList.add('hidden');
+    window.__lastQualifSubmission = null;
+
+    const sb = window.__supabase;
+    let submission = null;
+
+    if (sb && userId){
+      const { data, error } = await sb
+        .from('submissions')
+        .select('summary, payload, created_at')
+        .eq('user_id', userId)
+        .eq('type', 'qualif')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (error){
+        console.warn('Erreur chargement du test de qualification :', error);
+      } else if (data && data.length){
+        const payload = data[0].payload || {};
+        submission = { summary: data[0].summary, date: data[0].created_at, res: payload._data || payload.data || null };
+      }
+    }
+
+    // Repli localStorage si rien trouvé côté Supabase
+    if (!submission){
+      const list = loadSubmissions().filter(s => s.type === 'qualif' && currentUser && s.email === currentUser.email);
+      if (list.length){
+        const last = list[list.length - 1];
+        submission = { summary: last.summary, date: last.date, res: last.data || null };
+      }
+    }
+
+    if (submission){
+      const d = new Date(submission.date);
+      const status = submission.res ? submission.res.status : null;
+      const color = status==='eligible' ? '#10b981' : status==='presque' ? '#f59e0b' : status==='non' ? '#ef4444' : 'var(--brand)';
+      const bg = status==='eligible' ? 'rgba(16,185,129,.08)' : status==='presque' ? 'rgba(245,158,11,.08)' : status==='non' ? 'rgba(239,68,68,.08)' : 'rgba(29,95,163,.08)';
+      const icon = document.getElementById('espace-qualif-icon');
+      if (icon) icon.style.cssText = `background:${bg};color:${color}`;
+      box.innerHTML = `
+        <p class="font-medium">${escapeHtml(submission.summary)}</p>
+        <p class="mt-1 text-[13px] text-neutral-500">Réalisé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+      `;
+      if (submission.res){
+        window.__lastQualifSubmission = submission;
+        if (voirBtn) voirBtn.classList.remove('hidden');
+      }
+    } else {
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore réalisé le test de qualification.</p>`;
+    }
+  }
+
+  // Récupère et affiche le dernier dossier INPI généré par l'utilisateur
+  // connecté (module payant du Pack Lancement à 89 €), afin qu'il puisse le
+  // retrouver et le retélécharger depuis "Mon espace" sans avoir à tout
+  // ressaisir. Même logique que loadEspaceQualif : Supabase (table
+  // `submissions`, type 'inpi') avec repli sur localStorage.
+  // `hasAccess` indique si le compte a bien acheté le Pack Lancement / Pro
+  // (utilisé pour proposer soit "Créer mon dossier", soit "Acheter le pack").
+  async function loadEspaceInpi(userId, hasAccess){
+    const box = document.getElementById('espace-inpi');
+    const voirBtn = document.getElementById('espace-inpi-voir-btn');
+    const creerBtn = document.getElementById('espace-inpi-creer-btn');
+    const acheterBtn = document.getElementById('espace-inpi-acheter-btn');
+    box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+    [voirBtn, creerBtn, acheterBtn].forEach(b => b && b.classList.add('hidden'));
+
+    const sb = window.__supabase;
+    let submission = null;
+
+    if (sb && userId){
+      const { data, error } = await sb
+        .from('submissions')
+        .select('summary, payload, created_at')
+        .eq('user_id', userId)
+        .eq('type', 'inpi')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (error){
+        console.warn('Erreur chargement du dossier INPI :', error);
+      } else if (data && data.length){
+        const payload = data[0].payload || {};
+        submission = { summary: data[0].summary, date: data[0].created_at, data: payload._data || payload.data || null };
+      }
+    }
+
+    // Repli localStorage si rien trouvé côté Supabase
+    if (!submission){
+      const list = loadSubmissions().filter(s => s.type === 'inpi' && currentUser && s.email === currentUser.email);
+      if (list.length){
+        const last = list[list.length - 1];
+        submission = { summary: last.summary, date: last.date, data: last.data || null };
+      }
+    }
+
+    if (submission){
+      const d = new Date(submission.date);
+      box.innerHTML = `
+        <p class="font-medium">${escapeHtml(submission.summary)}</p>
+        <p class="mt-1 text-[13px] text-neutral-500">Généré le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+      `;
+      if (submission.data){
+        // Réalimente les variables utilisées par downloadInpiPdf() pour que
+        // le bouton "Télécharger mon dossier" régénère le même PDF sans
+        // repasser par le formulaire.
+        window.__inpiData = submission.data;
+        window.__inpiRef = submission.data.ref || '—';
+        if (voirBtn) voirBtn.classList.remove('hidden');
+      }
+    } else if (hasAccess){
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore créé votre dossier INPI.</p>`;
+      if (creerBtn) creerBtn.classList.remove('hidden');
+    } else {
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Inclus dans le Pack Lancement (89 €).</p>`;
+      if (acheterBtn) acheterBtn.classList.remove('hidden');
+    }
+  }
+
+  // Récupère et affiche la dernière simulation d'assurance décennale /
+  // RC Pro de l'utilisateur connecté (module gratuit, non verrouillé par un
+  // plan payant) — même logique que loadEspaceQualif / loadEspaceInpi.
+  async function loadEspaceAssur(userId, hasAccess){
+    const box = document.getElementById('espace-assur');
+    const voirBtn = document.getElementById('espace-assur-voir-btn');
+    const refaireBtn = document.getElementById('espace-assur-refaire-btn');
+    const refaireLabel = document.getElementById('espace-assur-refaire-label');
+    const acheterBtn = document.getElementById('espace-assur-acheter-btn');
+    box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+    [voirBtn, refaireBtn, acheterBtn].forEach(b => b && b.classList.add('hidden'));
+
+    const sb = window.__supabase;
+    let submission = null;
+
+    if (sb && userId){
+      const { data, error } = await sb
+        .from('submissions')
+        .select('summary, payload, created_at')
+        .eq('user_id', userId)
+        .eq('type', 'assurance')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (error){
+        console.warn('Erreur chargement de la simulation assurance :', error);
+      } else if (data && data.length){
+        const payload = data[0].payload || {};
+        submission = { summary: data[0].summary, date: data[0].created_at, data: payload._data || payload.data || null };
+      }
+    }
+
+    if (!submission){
+      const list = loadSubmissions().filter(s => s.type === 'assurance' && currentUser && s.email === currentUser.email);
+      if (list.length){
+        const last = list[list.length - 1];
+        submission = { summary: last.summary, date: last.date, data: last.data || null };
+      }
+    }
+
+    if (submission){
+      const d = new Date(submission.date);
+      box.innerHTML = `
+        <p class="font-medium">${escapeHtml(submission.summary)}</p>
+        <p class="mt-1 text-[13px] text-neutral-500">Simulé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+      `;
+      if (submission.data){
+        // Réalimente window.__assurRes pour que downloadAssurPdf() régénère
+        // la synthèse sans repasser par le questionnaire.
+        window.__assurRes = submission.data;
+        if (voirBtn) voirBtn.classList.remove('hidden');
+      }
+      if (refaireLabel) refaireLabel.textContent = 'Refaire la simulation';
+      // Un dossier déjà existant reste consultable/retéléchargeable même si
+      // l'accès venait à changer ; seule une NOUVELLE simulation nécessite
+      // le Pack Lancement (89 €) ou l'abonnement Pro.
+      if (hasAccess && refaireBtn) refaireBtn.classList.remove('hidden');
+      else if (acheterBtn) acheterBtn.classList.remove('hidden');
+    } else if (hasAccess){
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore simulé vos besoins d'assurance.</p>`;
+      if (refaireLabel) refaireLabel.textContent = 'Faire la simulation';
+      if (refaireBtn) refaireBtn.classList.remove('hidden');
+    } else {
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Inclus dans le Pack Lancement (89 €).</p>`;
+      if (acheterBtn) acheterBtn.classList.remove('hidden');
+    }
+  }
+
+  // Recalcule les totaux d'un devis (HT / TVA par taux / TTC / acompte) à
+  // partir des données sauvegardées, sans dépendre du formulaire (DOM) —
+  // reproduit la logique de computeDevisTotals() pour pouvoir régénérer le
+  // PDF d'un devis archivé, depuis "Mon espace", sans rouvrir l'éditeur.
+  function computeDevisTotalsFromData(d){
+    const lines = (d && d.lines) || [];
+    const franchise = !!(d && d.em_franchise);
+    let totalHT = 0;
+    const tvaMap = new Map();
+    lines.forEach(L=>{
+      const ht = (Number(L.q)||0)*(Number(L.pu)||0);
+      totalHT += ht;
+      const rate = franchise ? 0 : Number(L.tva)||0;
+      const tva = ht * rate/100;
+      tvaMap.set(rate, (tvaMap.get(rate)||0) + tva);
+    });
+    const totalTVA = Array.from(tvaMap.values()).reduce((a,b)=>a+b,0);
+    const totalTTC = totalHT + totalTVA;
+    const acomptePct = Number(d && d.co_acompte)||0;
+    const acompte = totalTTC * acomptePct/100;
+    return { totalHT, totalTVA, totalTTC, tvaMap, acomptePct, acompte, franchise };
+  }
+
+  // Régénère et télécharge le PDF d'un devis archivé, listé dans "Mon
+  // espace" (voir loadEspaceDevis), à partir de son index dans
+  // window.__espaceDevisList.
+  window.downloadDevisFromEspaceList = function(i){
+    const s = (window.__espaceDevisList || [])[i];
+    if (!s || !s.data) return;
+    window.__devisData = s.data;
+    window.__devisTotals = computeDevisTotalsFromData(s.data);
+    downloadDevisPdf();
+  };
+
+  // Récupère et affiche les derniers devis générés par l'utilisateur
+  // connecté (module payant de l'abonnement Pro à 19 €/mois — "Archivage
+  // horodaté"), pour qu'il puisse les retrouver et les retélécharger depuis
+  // "Mon espace". Liste les 5 devis les plus récents.
+  async function loadEspaceDevis(userId, hasPro){
+    const box = document.getElementById('espace-devis-list');
+    const nouveauBtn = document.getElementById('espace-devis-nouveau-btn');
+    box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+    if (nouveauBtn) nouveauBtn.classList.toggle('hidden', !hasPro);
+
+    let list = [];
+    const sb = window.__supabase;
+    if (sb && userId){
+      const { data, error } = await sb
+        .from('submissions')
+        .select('summary, payload, created_at')
+        .eq('user_id', userId)
+        .eq('type', 'devis')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (error){
+        console.warn('Erreur chargement des devis :', error);
+      } else if (data){
+        list = data.map(row => {
+          const payload = row.payload || {};
+          return { summary: row.summary, date: row.created_at, data: payload._data || payload.data || null };
+        });
+      }
+    }
+
+    // Repli localStorage si rien trouvé côté Supabase
+    if (!list.length){
+      const local = loadSubmissions().filter(s => s.type === 'devis' && currentUser && s.email === currentUser.email);
+      list = local.slice(-5).reverse().map(s => ({ summary: s.summary, date: s.date, data: s.data || null }));
+    }
+
+    window.__espaceDevisList = list;
+
+    if (!list.length){
+      box.innerHTML = hasPro
+        ? `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore généré de devis.</p>`
+        : `
+          <p class="text-neutral-500 text-[14px]">Inclus dans l'abonnement Pro (19 €/mois) — éditeur de devis conforme et archivage horodaté.</p>
+          <button onclick="handlePricingClick('pro')" class="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02]" style="background:rgba(255,128,30,.92)">Activer l'éditeur de devis — 19 €/mois</button>
+        `;
+      return;
+    }
+
+    box.innerHTML = list.map((s, i) => {
+      const d = new Date(s.date);
+      return `
+        <div class="dash-devis-row flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-neutral-50 px-4 py-3 ${i>0?'mt-2':''}">
+          <div class="min-w-0">
+            <p class="truncate text-[13.5px] font-medium text-neutral-900">${escapeHtml(s.summary)}</p>
+            <p class="mt-0.5 text-[12px] text-neutral-500">${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+          </div>
+          <button onclick="downloadDevisFromEspaceList(${i})" ${s.data ? '' : 'disabled'} class="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12.5px] font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed bg-brand">
+            PDF
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ---------- Rapport de qualification (page dédiée, imprimable / PDF) ----------
+  // Construit le contenu HTML détaillé du rapport à partir d'un objet `res`
+  // (même structure que celle produite par evaluateQualif) et des métadonnées
+  // de la soumission (nom, email, date).
+  function buildQualifReportHTML(res, meta){
+    const status = res.status;
+    const color = status==='eligible' ? '#10b981' : status==='presque' ? '#f59e0b' : '#ef4444';
+    const bg = status==='eligible' ? 'rgba(16,185,129,.08)' : status==='presque' ? 'rgba(245,158,11,.08)' : 'rgba(239,68,68,.08)';
+    const badge = status==='eligible' ? 'Éligible' : status==='presque' ? 'Presque éligible' : 'Non éligible en l\'état';
+    const d = new Date(meta.date);
+
+    return `
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:${bg};color:${color}">Résultat — ${badge}</span>
+      <h1 class="mt-4 font-display text-3xl font-bold md:text-4xl">${res.title}</h1>
+      <p class="mt-3 text-[14px] text-neutral-600">Titulaire : <b>${escapeHtml(meta.nom || '—')}</b>${meta.email ? ` · ${escapeHtml(meta.email)}` : ''}</p>
+      <p class="mt-1 text-[14px] text-neutral-600">Métier : <b>${res.metier.l}</b> · Diplôme : <b>${res.diplome.l}</b> · Expérience : <b>${res.exp} an(s)</b>${res.ueDiploma?' · <b>Diplôme UE reconnu</b>':''}</p>
+      <p class="mt-1 text-[13px] text-neutral-500">Test réalisé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+
+      <div class="mt-6 rounded-2xl border p-6" style="border-color:${color}30;background:${bg}">
+        <h4 class="font-semibold text-neutral-900">Motifs de la décision</h4>
+        <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-700 list-disc list-inside">
+          ${res.reasons.map(r=>`<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+
+      ${res.warnings && res.warnings.length?`
+      <div class="mt-4 rounded-2xl border border-neutral-200 bg-white p-5">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">À retenir</h4>
+        <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-700 list-disc list-inside">
+          ${res.warnings.map(w=>`<li>${w}</li>`).join('')}
+        </ul>
+      </div>`:''}
+
+      ${res.specifics && res.specifics.length ? `
+      <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-warning">Exigences spécifiques au métier « ${res.metier.l} »</h4>
+        <ul class="mt-3 space-y-3 text-[14px] text-neutral-800">
+          ${res.specifics.map(s=>`<li class="flex flex-col rounded-xl border border-black/5 bg-white p-3"><span class="font-semibold">${s.label}</span><span class="text-[12px] text-neutral-600 mt-0.5">${s.detail}</span></li>`).join('')}
+        </ul>
+      </div>` : ''}
+
+      <p class="mt-8 text-[12px] text-neutral-400">Document généré par Bâtipro — ${new Date().toLocaleString('fr-FR')}. Ce rapport a valeur d'auto-évaluation ; la Chambre de Métiers et de l'Artisanat validera formellement la qualification lors de l'immatriculation.</p>
+    `;
+  }
+
+  // Génère et télécharge un vrai fichier PDF du rapport de qualification
+  // (jsPDF), au lieu de passer par la boîte d'impression du navigateur —
+  // même principe que downloadInpiPdf().
+  function downloadQualifReportPdf(){
+    const res = window.__qualifReportRes;
+    const meta = window.__qualifReportMeta || {};
+    if (!res){ showInlineError("Aucun rapport à télécharger pour le moment."); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'pt', format:'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginX = 48;
+    const maxWidth = pageWidth - marginX*2;
+    let y = 56;
+
+    function addSpace(h){ y += h; if (y > 780){ doc.addPage(); y = 56; } }
+    function heading(text, size=12.5){
+      doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20,20,20);
+      doc.text(text, marginX, y); addSpace(size+8);
+    }
+    function line(label, value, size=10.5){
+      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
+      const text = (label ? label + ' : ' : '') + (value || '—');
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach(l => { doc.text(l, marginX, y); addSpace(size+5); });
+    }
+
+    const badge = res.status==='eligible' ? 'Éligible' : res.status==='presque' ? 'Presque éligible' : 'Non éligible en l\'état';
+    const d = meta.date ? new Date(meta.date) : new Date();
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(0,132,255);
+    doc.text('Bâtipro — Rapport de qualification', marginX, y); addSpace(26);
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(120,120,120);
+    doc.text('Résultat : ' + badge + '  —  Test réalisé le ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), marginX, y); addSpace(24);
+
+    heading(res.title, 14);
+    addSpace(2);
+
+    heading('Titulaire');
+    line(null, meta.nom);
+    if (meta.email) line(null, meta.email);
+    addSpace(6);
+
+    heading('Détails du test');
+    line('Métier', res.metier.l);
+    line('Diplôme', res.diplome.l);
+    line('Expérience', res.exp + ' an(s)');
+    if (res.ueDiploma) line(null, 'Diplôme UE reconnu');
+    addSpace(6);
+
+    heading('Motifs de la décision');
+    (res.reasons || []).forEach(r => line(null, '• ' + r));
+    addSpace(6);
+
+    if (res.warnings && res.warnings.length){
+      heading('À retenir');
+      res.warnings.forEach(w => line(null, '• ' + w));
+      addSpace(6);
+    }
+
+    if (res.specifics && res.specifics.length){
+      heading(`Exigences spécifiques au métier « ${res.metier.l} »`);
+      res.specifics.forEach(s => {
+        doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(50,50,50);
+        doc.text(s.label, marginX, y); addSpace(14);
+        line(null, s.detail, 9.5);
+        addSpace(2);
+      });
+      addSpace(4);
+    }
+
+    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(140,140,140);
+    line(null, "Ce rapport a valeur d'auto-évaluation ; la Chambre de Métiers et de l'Artisanat validera formellement la qualification lors de l'immatriculation.", 8.5);
+
+    doc.save('batipro-rapport-qualification.pdf');
+  }
+  window.downloadQualifReportPdf = downloadQualifReportPdf;
+
+  // Ouvre la page de rapport dans un nouvel onglet (URL dédiée avec ?rapport=qualification).
+  function openQualifReport(){
+    const url = new URL(window.location.href);
+    url.search = '?rapport=qualification';
+    url.hash = '';
+    window.open(url.toString(), '_blank', 'noopener');
+  }
+  window.openQualifReport = openQualifReport;
+
+  function closeQualifReport(){
+    const page = document.getElementById('rapport-qualif-page');
+    if (page) page.classList.add('hidden');
+    document.body.style.overflow = '';
+    // Si l'onglet a été ouvert uniquement pour le rapport, on retire le
+    // paramètre d'URL pour retrouver le site normal sans le rouvrir.
+    const url = new URL(window.location.href);
+    url.search = '';
+    window.history.replaceState({}, '', url.toString());
+  }
+  window.closeQualifReport = closeQualifReport;
+
+  // Affiche la page de rapport plein écran, en récupérant le dernier test de
+  // qualification de l'utilisateur connecté (Supabase, avec repli localStorage).
+  async function showQualifReportPage(){
+    const page = document.getElementById('rapport-qualif-page');
+    const content = document.getElementById('rapport-qualif-content');
+    if (!page || !content) return;
+    page.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    content.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement du rapport…</p>';
+
+    if (!currentUser){
+      content.innerHTML = `
+        <p class="text-neutral-600 text-[14px]">Vous devez être connecté pour consulter votre rapport de qualification.</p>
+        <button onclick="closeQualifReport(); openAuth();" class="rapport-noprint mt-4 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white bg-brand">Se connecter</button>
+      `;
+      return;
+    }
+
+    const userId = currentUser.id || currentUser.user_id;
+    let submission = window.__lastQualifSubmission;
+
+    if (!submission){
+      const sb = window.__supabase;
+      if (sb && userId){
+        const { data, error } = await sb
+          .from('submissions')
+          .select('summary, payload, created_at')
+          .eq('user_id', userId)
+          .eq('type', 'qualif')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (!error && data && data.length){
+          const payload = data[0].payload || {};
+          submission = { summary: data[0].summary, date: data[0].created_at, res: payload._data || payload.data || null };
+        }
+      }
+      if (!submission){
+        const list = loadSubmissions().filter(s => s.type === 'qualif' && s.email === currentUser.email);
+        if (list.length){
+          const last = list[list.length - 1];
+          submission = { summary: last.summary, date: last.date, res: last.data || null };
+        }
+      }
+    }
+
+    if (submission && submission.res){
+      const meta = {
+        nom: `${currentUser.prenom} ${currentUser.nom}`.trim(),
+        email: currentUser.email,
+        date: submission.date,
+      };
+      // Réalimente les variables utilisées par downloadQualifReportPdf() pour
+      // qu'elle puisse générer le PDF sans repasser par Supabase.
+      window.__qualifReportRes = submission.res;
+      window.__qualifReportMeta = meta;
+      content.innerHTML = buildQualifReportHTML(submission.res, meta);
+    } else {
+      content.innerHTML = `<p class="text-neutral-600 text-[14px]">Aucun test de qualification trouvé pour ce compte. <button onclick="closeQualifReport(); openQualif();" class="rapport-noprint font-semibold text-brand">Passer le test</button></p>`;
+    }
+  }
+
+  // Vérifie au chargement si l'URL demande l'affichage direct du rapport
+  // (utilisé lorsque le rapport est ouvert dans un nouvel onglet).
+  function checkQualifReportRoute(){
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('rapport') === 'qualification'){
+      showQualifReportPage();
+    }
+  }
+
+  // Convention attendue côté fonction Supabase "create-portal-session" :
+  //   - reçoit juste le token d'auth de l'utilisateur (pas de body nécessaire)
+  //   - répond avec : { url: "https://billing.stripe.com/..." }
+  async function openBillingPortal(){
+    const sb = window.__supabase;
+    if (!sb){
+      showInlineError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+
+    const btn = document.getElementById('espace-manage-btn');
+    const originalHTML = btn ? btn.innerHTML : null;
+    if (btn){ btn.disabled = true; btn.textContent = 'Ouverture…'; }
+
+    try {
+      const { data, error } = await sb.functions.invoke('create-portal-session');
+
+      if (error) {
+        let detail = error.message;
+        try {
+          if (error.context && typeof error.context.json === 'function'){
+            const body = await error.context.clone().json();
+            if (body && body.error) detail = body.error;
+          }
+        } catch(_e){ /* corps non-JSON */ }
+        throw new Error(detail);
+      }
+
+      const url = data && data.url;
+      if (!url) throw new Error("Réponse inattendue du serveur (pas d'URL reçue).");
+
+      try {
+        window.top.location.href = url;
+      } catch(_e){
+        window.location.href = url;
+      }
+    } catch(e){
+      console.error('Erreur ouverture portail client :', e);
+      showInlineError("Impossible d'ouvrir la gestion d'abonnement pour le moment. (" + (e.message || e) + ")");
+      if (btn){ btn.disabled = false; btn.innerHTML = originalHTML; }
+    }
+  }
+
+  // Connexion via un fournisseur externe (Google / Microsoft) — nécessite que
+  // le provider correspondant soit activé côté projet Supabase (Auth > Providers).
+  async function oauthSignIn(provider){
+    const sb = window.__supabase;
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    try {
+      const { error } = await sb.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: window.location.href },
+      });
+      if (error) throw error;
+    } catch(e){
+      showInlineError("Connexion " + (provider === 'google' ? 'Google' : 'Microsoft') + " indisponible pour le moment. (" + (e.message || e) + ")");
+    }
+  }
+  window.oauthSignIn = oauthSignIn;
+
+  async function handleSignup(){
+    const prenom = document.getElementById('signup-prenom').value.trim();
+    const nom = document.getElementById('signup-nom').value.trim();
+    const email = document.getElementById('signup-email').value.trim().toLowerCase();
+    const password = document.getElementById('signup-password').value;
+
+    if (password.length < 8){
+      showAuthError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb){
+      showAuthError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password,
+      options: { data: { prenom, nom } },
+    });
+
+    if (error){
+      if (/already registered|already exists/i.test(error.message)) {
+        showAuthError("Un compte existe déjà avec cet email — connectez-vous plutôt.");
+      } else {
+        showAuthError("Erreur lors de la création du compte : " + error.message);
+      }
+      return;
+    }
+
+    // Enregistrement (best-effort) des infos dans la table "profiles", en plus
+    // des métadonnées Supabase Auth. Ne bloque jamais la création de compte :
+    // si ça échoue (colonne manquante, RLS, etc.), on continue quand même.
+    if (data.user){
+      try {
+        const { error: profileError } = await sb.from('profiles').insert({
+          user_id: data.user.id,
+          prenom,
+          nom,
+        });
+        if (profileError) console.warn('Insertion profiles échouée (compte créé quand même) :', profileError);
+      } catch(e){
+        console.warn('Exception insertion profiles (compte créé quand même) :', e);
+      }
+    }
+
+    if (!data.session){
+      // La confirmation par email est activée côté Supabase : pas de session
+      // immédiate, l'utilisateur doit cliquer sur le lien reçu par email.
+      showAuthError("Compte créé ! Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous.");
+      setAuthMode('login');
+      return;
+    }
+
+    currentUser = mapSupabaseUser(data.user);
+    updateAuthUI();
+    const fn = pendingAfterAuth || goToEspaceClient;
+    pendingAfterAuth = null;
+    closeAuth();
+    fn();
+  }
+
+  function togglePasswordVisibility(inputId, btn){
+    const input = document.getElementById(inputId);
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    btn.setAttribute('aria-label', isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    const svg = btn.querySelector('svg');
+    svg.innerHTML = isHidden
+      ? '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.53M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle>';
+  }
+
+  async function handleLogin(){
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value;
+    const sb = window.__supabase;
+    if (!sb){
+      showAuthError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
+    }
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error){
+      showAuthError("Email ou mot de passe incorrect.");
+      return;
+    }
+    currentUser = mapSupabaseUser(data.user);
+    updateAuthUI();
+    const fn = pendingAfterAuth || goToEspaceClient;
+    pendingAfterAuth = null;
+    closeAuth();
+    fn();
+  }
+
+  window.openAuth = openAuth;
+  window.closeAuth = closeAuth;
+  window.setAuthMode = setAuthMode;
+  window.handleSignup = handleSignup;
+  window.handleLogin = handleLogin;
+  window.handleForgotPassword = handleForgotPassword;
+  window.handleResetPassword = handleResetPassword;
+
+  // ---------- Paramètres du compte (email / mot de passe / téléphone) ----------
+  function setSettingsMsg(id, text, ok){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = ok ? '#10b981' : '#ef4444';
+  }
+
+  async function updateAccountEmail(){
+    const input = document.getElementById('settings-email');
+    const email = (input.value || '').trim();
+    if (!email || !email.includes('@')){
+      setSettingsMsg('settings-email-msg', 'Adresse email invalide.', false);
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb){
+      setSettingsMsg('settings-email-msg', 'Connexion indisponible, réessayez.', false);
+      return;
+    }
+    setSettingsMsg('settings-email-msg', 'Mise à jour…', true);
+    const { error } = await sb.auth.updateUser({ email });
+    if (error){
+      setSettingsMsg('settings-email-msg', 'Erreur : ' + error.message, false);
+      return;
+    }
+    setSettingsMsg('settings-email-msg', 'Email de confirmation envoyé à la nouvelle adresse.', true);
+  }
+  window.updateAccountEmail = updateAccountEmail;
+
+  async function updateAccountPassword(){
+    const oldInput = document.getElementById('settings-password-old');
+    const oldPassword = oldInput.value || '';
+
+    if (!oldPassword){
+      setSettingsMsg('settings-password-msg', 'Merci de saisir votre mot de passe actuel.', false);
+      return;
+    }
+    const sb = window.__supabase;
+    if (!sb || !currentUser){
+      setSettingsMsg('settings-password-msg', 'Connexion indisponible, réessayez.', false);
+      return;
+    }
+
+    setSettingsMsg('settings-password-msg', 'Vérification…', true);
+
+    // On revérifie l'ancien mot de passe avant d'envoyer le lien, pour
+    // s'assurer que c'est bien le titulaire du compte qui agit.
+    const { error: signInError } = await sb.auth.signInWithPassword({
+      email: currentUser.email,
+      password: oldPassword,
+    });
+    if (signInError){
+      setSettingsMsg('settings-password-msg', 'Mot de passe actuel incorrect.', false);
+      return;
+    }
+
+    // Envoi du lien de vérification par email : l'utilisateur choisira son
+    // nouveau mot de passe en cliquant dessus (même mécanisme que "mot de
+    // passe oublié" — voir handleForgotPassword / événement PASSWORD_RECOVERY).
+    const { error } = await sb.auth.resetPasswordForEmail(currentUser.email, {
+      redirectTo: window.location.origin + window.location.pathname,
+    });
+    if (error){
+      setSettingsMsg('settings-password-msg', 'Erreur : ' + error.message, false);
+      return;
+    }
+    oldInput.value = '';
+    setSettingsMsg('settings-password-msg', 'Email envoyé ! Cliquez sur le lien reçu pour choisir votre nouveau mot de passe.', true);
+  }
+  window.updateAccountPassword = updateAccountPassword;
+
+  async function updateAccountPhone(){
+    const input = document.getElementById('settings-telephone');
+    const telephone = (input.value || '').trim();
+    const sb = window.__supabase;
+    if (!sb){
+      setSettingsMsg('settings-telephone-msg', 'Connexion indisponible, réessayez.', false);
+      return;
+    }
+    setSettingsMsg('settings-telephone-msg', 'Mise à jour…', true);
+    const { error } = await sb.auth.updateUser({ data: { telephone } });
+    if (error){
+      setSettingsMsg('settings-telephone-msg', 'Erreur : ' + error.message, false);
+      return;
+    }
+    if (currentUser) currentUser.telephone = telephone;
+    setSettingsMsg('settings-telephone-msg', 'Numéro enregistré.', true);
+  }
+  window.updateAccountPhone = updateAccountPhone;
+  window.requireAuth = requireAuth;
+  window.logout = logout;
+  const sessionReady = restoreSession();
+  updateAuthUI();
+  sessionReady.then(checkQualifReportRoute).catch(checkQualifReportRoute);
+
+  // ---------- LEGAL MODAL ----------
+  const LEGAL_CONTENT = {
+    confidentialite: {
+      title: "Politique de confidentialité",
+      updated: "Dernière mise à jour : 4 juillet 2026",
+      html: `
+        <h4 class="font-semibold text-neutral-900">1. Qui sommes-nous</h4>
+        <p>Bâtipro édite ce site et l'outil en ligne du même nom, destiné à accompagner les artisans du bâtiment dans la création de leur entreprise. Le responsable de traitement est Bâtipro, éditeur du service.</p>
+        <h4 class="font-semibold text-neutral-900">2. Données collectées</h4>
+        <p>Selon votre usage du parcours, nous traitons : identité et coordonnées (nom, prénom, email, téléphone), informations professionnelles saisies dans les modules (métier, diplômes, expérience, statut envisagé), pièces justificatives que vous téléversez (pièce d'identité, justificatif de domicile, diplômes) et données techniques de connexion (adresse IP, journaux d'usage).</p>
+        <h4 class="font-semibold text-neutral-900">3. Finalités et bases légales</h4>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Fourniture du service et création de votre compte : exécution du contrat.</li>
+          <li>Génération de votre dossier d'immatriculation : exécution du contrat / consentement pour les pièces sensibles.</li>
+          <li>Amélioration du service et statistiques d'usage : intérêt légitime.</li>
+          <li>Communications relatives à votre dossier : exécution du contrat.</li>
+        </ul>
+        <h4 class="font-semibold text-neutral-900">4. Durée de conservation</h4>
+        <p>Les données de compte sont conservées le temps de la relation contractuelle. Les pièces justificatives et résultats de simulation sont conservés 10 ans lorsqu'ils sont liés à une garantie décennale, conformément aux obligations du secteur du bâtiment, puis supprimés ou anonymisés.</p>
+        <h4 class="font-semibold text-neutral-900">5. Destinataires</h4>
+        <p>Vos données ne sont transmises qu'aux prestataires nécessaires à la fourniture du service : hébergement et base de données (Supabase, Union européenne), hébergement du site (Vercel Inc., États-Unis), traitement des paiements (Stripe), et, le cas échéant, partenaire assurance ou expert-comptable que vous sollicitez explicitement. Vos données ne sont jamais vendues à des tiers. Le recours à des prestataires situés hors Union européenne (Vercel, Stripe) est encadré par les clauses contractuelles types de la Commission européenne ou un mécanisme équivalent garantissant un niveau de protection adéquat.</p>
+        <h4 class="font-semibold text-neutral-900">5bis. Transferts hors Union européenne</h4>
+        <p>Certains prestataires techniques (hébergement du site via Vercel, paiements via Stripe) sont établis aux États-Unis. Ces transferts sont encadrés par les clauses contractuelles types de la Commission européenne, conformément à l'article 46 du RGPD. Les données de compte et de dossier (Supabase) restent hébergées dans l'Union européenne.</p>
+        <h4 class="font-semibold text-neutral-900">6. Vos droits</h4>
+        <p>Conformément au RGPD et à la loi Informatique et Libertés, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de vos données. Vous pouvez également introduire une réclamation auprès de la CNIL. Pour exercer vos droits, contactez-nous via l'adresse indiquée dans votre espace compte.</p>
+        <h4 class="font-semibold text-neutral-900">7. Sécurité</h4>
+        <p>Les mots de passe sont hachés avant stockage et les échanges avec le site sont chiffrés (HTTPS). L'accès aux pièces justificatives est restreint aux seules personnes habilitées à traiter votre dossier.</p>
+        <h4 class="font-semibold text-neutral-900">8. Cookies et polices tierces</h4>
+<p>Le site utilise uniquement des cookies strictement nécessaires à son fonctionnement (session, préférences). Aucun outil de mesure d'audience ni cookie publicitaire n'est actif à ce jour. Certaines bibliothèques techniques (jsPDF via Cloudflare, Supabase JS via jsDelivr, Three.js via unpkg) sont chargées depuis des réseaux de diffusion de contenu (CDN) tiers afin d'assurer le bon fonctionnement du site, ce qui peut entraîner la transmission de votre adresse IP aux serveurs de ces fournisseurs, situés hors de l'Union européenne. Aucune donnée de compte ou de dossier n'est concernée par ces transferts techniques.</p>      `
+    },
+    cgu: {
+      title: "Conditions d'utilisation",
+      updated: "Dernière mise à jour : 4 juillet 2026",
+      html: `
+        <h4 class="font-semibold text-neutral-900">1. Objet</h4>
+        <p>Les présentes conditions générales d'utilisation (CGU) régissent l'accès et l'usage du site et de l'outil Bâtipro, qui propose un parcours d'orientation pour la création d'entreprises du bâtiment (test de qualification, simulateur de statut juridique, assistance au dossier d'immatriculation, seuils d'assurance de référence).</p>
+        <h4 class="font-semibold text-neutral-900">2. Nature du service — absence de conseil personnalisé</h4>
+        <p>Bâtipro fournit des informations et des pré-orientations automatisées à partir des réponses que vous saisissez. Les résultats affichés sont indicatifs et ne constituent ni un conseil juridique, ni un conseil fiscal, ni un conseil en assurance personnalisés. Ils ne remplacent pas l'avis d'un expert-comptable, d'un avocat, d'un courtier en assurance ou de la Chambre de Métiers et de l'Artisanat (CMA), seule habilitée à valider formellement votre immatriculation.</p>
+        <h4 class="font-semibold text-neutral-900">3. Création de compte</h4>
+        <p>L'accès à certains modules (test de qualification, simulateur, dossier) nécessite la création d'un compte avec une adresse email valide et un mot de passe. Vous êtes responsable de la confidentialité de vos identifiants et de toute activité réalisée depuis votre compte.</p>
+        <h4 class="font-semibold text-neutral-900">4. Exactitude des informations saisies</h4>
+        <p>Vous garantissez l'exactitude des informations que vous renseignez (diplômes, expérience, chiffre d'affaires envisagé, pièces justificatives). Bâtipro ne saurait être tenu responsable des conséquences d'informations inexactes ou incomplètes que vous auriez fournies.</p>
+        <h4 class="font-semibold text-neutral-900">5. Tarifs</h4>
+        <p>Le test de qualification et le simulateur de statut sont proposés gratuitement. La génération du dossier et les fonctionnalités avancées peuvent être soumises à un abonnement payant, dont les tarifs sont indiqués sur la page Tarifs et peuvent évoluer avec un préavis raisonnable.</p>
+        <h4 class="font-semibold text-neutral-900">6. Propriété intellectuelle</h4>
+        <p>L'ensemble des éléments du site (textes, structure, code, éléments graphiques) est protégé par le droit de la propriété intellectuelle. Toute reproduction non autorisée est interdite.</p>
+        <h4 class="font-semibold text-neutral-900">7. Responsabilité</h4>
+        <p>Bâtipro met tout en œuvre pour assurer la disponibilité et l'exactitude du service, sans garantie de résultat. Bâtipro ne peut être tenu responsable des décisions prises sur la seule base des résultats affichés par l'outil.</p>
+        <h4 class="font-semibold text-neutral-900">8. Résiliation</h4>
+        <p>Vous pouvez supprimer votre compte à tout moment. Bâtipro peut suspendre ou résilier un compte en cas d'usage frauduleux ou contraire aux présentes CGU.</p>
+        <h4 class="font-semibold text-neutral-900">9. Droit applicable</h4>
+        <p>Les présentes CGU sont soumises au droit français. Tout litige relève, à défaut de résolution amiable, des juridictions compétentes.</p>
+      `
+    },
+    dmca: {
+      title: "Politique DMCA",
+      updated: "Dernière mise à jour : 4 juillet 2026",
+      html: `
+        <h4 class="font-semibold text-neutral-900">1. Objet</h4>
+        <p>Bâtipro respecte les droits de propriété intellectuelle d'autrui et attend de ses utilisateurs qu'ils fassent de même. Cette politique décrit la procédure de notification et de retrait applicable en cas de contenu contrefaisant, inspirée du Digital Millennium Copyright Act (DMCA) et applicable dans le respect du droit français et européen.</p>
+        <h4 class="font-semibold text-neutral-900">2. Signaler un contenu contrefaisant</h4>
+        <p>Si vous estimez qu'un contenu hébergé ou accessible via Bâtipro porte atteinte à vos droits d'auteur, vous pouvez adresser une notification écrite comportant :</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>Votre identité et vos coordonnées, ainsi qu'un moyen de vous contacter ;</li>
+          <li>L'identification précise de l'œuvre protégée revendiquée ;</li>
+          <li>L'URL ou la localisation exacte du contenu litigieux sur le site ;</li>
+          <li>Une déclaration de bonne foi indiquant que l'usage n'est pas autorisé par le titulaire des droits ;</li>
+          <li>Une déclaration, sous peine de parjure, attestant l'exactitude des informations et votre qualité de titulaire des droits ou de mandataire habilité ;</li>
+          <li>Votre signature (physique ou électronique).</li>
+        </ul>
+        <h4 class="font-semibold text-neutral-900">3. Traitement de la notification</h4>
+        <p>Après réception d'une notification complète, Bâtipro examine la demande et peut retirer ou rendre inaccessible le contenu visé dans un délai raisonnable, sans que cela constitue une reconnaissance de responsabilité.</p>
+        <h4 class="font-semibold text-neutral-900">4. Contre-notification</h4>
+        <p>Si vous estimez qu'un contenu vous appartenant a été retiré à tort, vous pouvez adresser une contre-notification identifiant le contenu retiré et expliquant pourquoi son retrait serait une erreur. Bâtipro peut alors, selon les circonstances, rétablir le contenu.</p>
+        <h4 class="font-semibold text-neutral-900">5. Récidive</h4>
+        <p>Tout compte à l'origine de notifications répétées et fondées pour contrefaçon pourra être suspendu ou résilié.</p>
+        <h4 class="font-semibold text-neutral-900">6. Contact</h4>
+        <p>Les notifications DMCA sont à adresser via l'adresse de contact indiquée dans votre espace compte ou sur la page de contact du site.</p>
+      `
+    },
+    mentions: {
+      title: "Mentions légales",
+      updated: "Dernière mise à jour : 5 juillet 2026",
+      html: `
+        <h4 class="font-semibold text-neutral-900">1. Éditeur du site</h4>
+        <p>Le site Bâtipro est édité par : <strong>Osman Fauconnier</strong> — entrepreneur individuel.<br/>
+        SIRET : <span class="text-amber-600">[à compléter — n° SIRET]</span><br/>
+        Adresse du siège : <span class="text-amber-600">[à compléter]</span><br/>
+        Contact : <a href="mailto:osman874pro@gmail.com" class="underline">osman874pro@gmail.com</a></p>
+        <h4 class="font-semibold text-neutral-900">2. Directeur de la publication</h4>
+        <p>Osman Fauconnier.</p>
+        <h4 class="font-semibold text-neutral-900">3. Hébergement</h4>
+        <p>Le site est hébergé par : <strong>Vercel Inc.</strong>, 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis.<br/>
+        L'infrastructure applicative et les données (comptes, dossiers) sont hébergées par <strong>Supabase</strong> (Supabase Inc.), sur des serveurs situés dans l'Union européenne.</p>
+        <h4 class="font-semibold text-neutral-900">4. Propriété intellectuelle</h4>
+        <p>L'ensemble des contenus présents sur le site (textes, logo, structure, code source) est la propriété exclusive de l'éditeur, sauf mention contraire, et est protégé par le Code de la propriété intellectuelle.</p>
+        <h4 class="font-semibold text-neutral-900">5. Données personnelles</h4>
+        <p>Le traitement des données personnelles est détaillé dans la <button onclick="openLegal('confidentialite')" class="underline">politique de confidentialité</button> du site.</p>
+      `
+    },
+  };
+
+  function openLegal(key){
+    const data = LEGAL_CONTENT[key];
+    if (!data) return;
+    document.getElementById('legal-title').textContent = data.title;
+    document.getElementById('legal-updated').textContent = data.updated;
+    document.getElementById('legal-body').innerHTML = data.html;
+    const m = document.getElementById('legal-modal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    m.querySelector('.modal-panel').scrollTop = 0;
+  }
+  function closeLegal(){
+    const m = document.getElementById('legal-modal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+  window.openLegal = openLegal;
+  window.closeLegal = closeLegal;
+
+  // ---------- ADMIN DASHBOARD (créateur uniquement) ----------
+  // ⚠️ SÉCURITÉ : il n'y a plus AUCUN mot de passe ni email admin en dur
+  // dans ce fichier. Le statut admin est désormais vérifié côté serveur
+  // via la fonction RPC Supabase `is_admin()` (security definer), qui lit
+  // le rôle de l'utilisateur dans une table `profiles` protégée par RLS
+  // et non modifiable par l'utilisateur lui-même.
+  // Voir le script SQL fourni séparément pour créer cette fonction avant
+  // de remettre ce site en ligne — sans elle, le dashboard admin restera
+  // inaccessible (comportement volontaire, fail-closed).
+  const LS_SUBMISSIONS_KEY = 'batipro_submissions';
+  const LS_ADMIN_SESSION_KEY = 'batipro_admin_session'; // sessionStorage : expire à la fermeture de l'onglet
+
+  // Échappe une chaîne avant insertion dans du HTML via innerHTML, pour
+  // empêcher toute injection (XSS) à partir d'un champ texte libre saisi
+  // par un utilisateur (nom, prénom, nom de client sur un devis, nom de
+  // fichier uploadé...). À utiliser systématiquement dès qu'une valeur
+  // provenant de l'utilisateur (même indirectement, via Supabase) est
+  // injectée dans un template `innerHTML = \`...\``.
+  function escapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+  window.escapeHtml = escapeHtml;
+
+  function loadSubmissions(){
+    try {
+      const raw = localStorage.getItem(LS_SUBMISSIONS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e){ return []; }
+  }
+  function saveSubmissions(list){
+    try { localStorage.setItem(LS_SUBMISSIONS_KEY, JSON.stringify(list)); } catch(e){}
+  }
+  // Types autorisés côté base (contrainte CHECK sur `submissions.type`).
+  const ALLOWED_SUBMISSION_TYPES = ['qualif','statut','inpi','assurance','devis'];
+
+  // Enregistre une soumission de module, rattachée au compte connecté si présent.
+  // 1) Insert dans Supabase (table `submissions`) si le client est configuré.
+  // 2) Fallback localStorage si l'insert échoue ou si Supabase n'est pas dispo,
+  //    pour ne pas perdre les données utilisateur.
+  function recordSubmission(type, summary, data){
+    if (!ALLOWED_SUBMISSION_TYPES.includes(type)) {
+      console.warn('recordSubmission: type invalide, ignoré:', type);
+      return;
+    }
+    const entry = {
+      date: new Date().toISOString(),
+      email: currentUser ? currentUser.email : null,
+      nom: currentUser ? `${currentUser.prenom} ${currentUser.nom}` : 'Non connecté',
+      type,
+      summary,
+      data,
+    };
+
+    const persistLocal = () => {
+      const list = loadSubmissions();
+      list.push(entry);
+      saveSubmissions(list);
+    };
+
+    const sb = window.__supabase;
+    if (!sb) { persistLocal(); return; }
+
+    const userId = (currentUser && (currentUser.id || currentUser.user_id)) || null;
+    const row = {
+      user_id: userId,
+      type,           // 'qualif' | 'statut' | 'inpi' | 'assurance' | 'devis'
+      summary,
+      payload: { ...entry, ...(data && typeof data === 'object' ? {} : {}) , _data: data },
+    };
+
+    sb.from('submissions').insert(row).then(({ error }) => {
+      if (error) {
+        console.warn('Supabase insert submissions échoué, fallback localStorage:', error);
+        persistLocal();
+      }
+    }).catch(err => {
+      console.warn('Supabase insert submissions exception, fallback localStorage:', err);
+      persistLocal();
+    });
+  }
+
+  // Vérifie côté serveur (RPC Supabase `is_admin`, security definer) si
+  // l'utilisateur connecté a le rôle admin en base. Impossible à falsifier
+  // depuis le navigateur : la réponse dépend de la session Supabase réelle
+  // et du contenu de la table `profiles`, protégée par RLS.
+  async function checkIsAdminServerSide(){
+    const sb = window.__supabase;
+    if (!sb || !currentUser) return false;
+    try {
+      const { data, error } = await sb.rpc('is_admin');
+      if (error) { console.warn('is_admin RPC error:', error); return false; }
+      return data === true;
+    } catch(e){
+      console.warn('is_admin RPC exception:', e);
+      return false;
+    }
+  }
+
+  async function openAdmin(){
+    const m = document.getElementById('admin-modal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+
+    const alreadyAuthed = sessionStorage.getItem(LS_ADMIN_SESSION_KEY) === 'ok';
+    const isAuthed = alreadyAuthed || await checkIsAdminServerSide();
+    if (isAuthed) sessionStorage.setItem(LS_ADMIN_SESSION_KEY, 'ok');
+
+    document.getElementById('admin-login').classList.toggle('hidden', isAuthed);
+    document.getElementById('admin-dashboard').classList.toggle('hidden', !isAuthed);
+    document.getElementById('admin-login-error').classList.toggle('hidden', isAuthed);
+    if (!isAuthed) {
+      document.getElementById('admin-login-error').textContent = "Accès refusé. Connecte-toi avec un compte administrateur.";
+      document.getElementById('admin-login-error').classList.remove('hidden');
+    }
+    if (isAuthed) await renderAdminDashboard();
+  }
+
+  // ⚠️ SUPPRIMÉ : grantMyProAccess() permettait à N'IMPORTE QUEL utilisateur
+  // connecté de s'auto-attribuer l'accès Pro gratuitement en appelant cette
+  // fonction depuis la console du navigateur (elle était exposée sur window).
+  // L'activation d'un accès Pro doit être déclenchée UNIQUEMENT côté serveur,
+  // par exemple via un webhook Stripe déclenché après paiement confirmé, qui
+  // écrit dans `entitlements` avec la clé service_role (jamais avec la clé
+  // anon utilisée par le navigateur). Voir le script SQL fourni séparément
+  // pour verrouiller les policies RLS de la table `entitlements`.
+  async function grantMyProAccess(){
+    showInlineError("L'activation de l'accès Pro se fait automatiquement après paiement confirmé, pas depuis ce dashboard.");
+  }
+  function closeAdmin(){
+    const m = document.getElementById('admin-modal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow = '';
+    document.getElementById('admin-password').value = '';
+    document.getElementById('admin-login-error').classList.add('hidden');
+  }
+  // Le formulaire "mot de passe admin" n'est plus utilisé : l'accès admin
+  // est désormais vérifié côté serveur (voir openAdmin / checkIsAdminServerSide).
+  // Fonction conservée uniquement pour ne pas casser l'ancien onsubmit du
+  // formulaire HTML ; elle relance simplement la vérification serveur.
+  async function checkAdminPassword(){
+    document.getElementById('admin-login-error').classList.add('hidden');
+    await openAdmin();
+  }
+  // Déconnexion du dashboard admin : efface la session admin (le mot de passe
+  // sera de nouveau demandé) et referme le dashboard.
+  function logoutAdmin(){
+    sessionStorage.removeItem(LS_ADMIN_SESSION_KEY);
+    document.getElementById('admin-dashboard').classList.add('hidden');
+    document.getElementById('admin-login').classList.remove('hidden');
+    document.getElementById('admin-password').value = '';
+    closeAdmin();
+  }
+
+  async function renderAdminDashboard(){
+    // Les comptes utilisateurs sont désormais gérés par Supabase Auth (et non
+    // plus stockés en localStorage) : consultez Supabase → Authentication →
+    // Users pour la liste réelle des comptes. On ne peut pas la lister ici en
+    // toute sécurité sans exposer une clé secrète côté navigateur.
+    const accounts = [];
+    let submissions = [];
+const sb = window.__supabase;
+if (sb) {
+  const { data, error } = await sb.from('submissions').select('*').order('created_at', { ascending: false });
+  if (error) {
+    console.warn('renderAdminDashboard: lecture Supabase échouée, fallback localStorage:', error);
+    submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
+  } else {
+    submissions = (data || []).map(row => ({
+      date: row.created_at,
+      email: row.payload?.email || null,
+      nom: row.payload?.nom || 'Inconnu',
+      type: row.type,
+      summary: row.summary,
+    }));
+  }
+} else {
+  submissions = loadSubmissions().sort((a,b)=> new Date(b.date) - new Date(a.date));
 }
 
-function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+    // Bloc "Mon accès" : montre le compte actuellement connecté sur le site
+    // (celui qui recevra l'accès Pro si on clique sur le bouton).
+    const infoEl = document.getElementById('admin-mon-compte-info');
+    const statutEl = document.getElementById('admin-mon-compte-statut');
+    if (currentUser){
+      infoEl.textContent = `Connecté en tant que ${currentUser.prenom} ${currentUser.nom} (${currentUser.email})`;
+      statutEl.textContent = '';
+    } else {
+      infoEl.textContent = "Aucun compte connecté sur le site pour l'instant.";
+      statutEl.textContent = 'Connecte-toi d\'abord avec ton compte, puis reviens ici.';
+      statutEl.style.color = '#b91c1c';
+    }
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-    </QueryClientProvider>
-  );
-}
+    const byType = { qualif:0, statut:0, inpi:0, assurance:0 };
+    submissions.forEach(s=>{ if (byType[s.type]!==undefined) byType[s.type]++; });
+
+    const statCards = [
+      { label:'Comptes créés', value: accounts.length, icon:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`, tint:'#1D5FA3' },
+      { label:'Tests de qualification', value: byType.qualif, icon:`<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>`, tint:'#0E9F6E' },
+      { label:'Dossiers INPI', value: byType.inpi, icon:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>`, tint:'#7C3AED' },
+      { label:'Simulations assurance', value: byType.assurance, icon:`<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/>`, tint:'#FF6A13' },
+    ];
+    document.getElementById('admin-stats').innerHTML = statCards.map(c => `
+      <div class="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full opacity-[0.08] transition group-hover:opacity-[0.14]" style="background:${c.tint}"></div>
+        <div class="relative flex items-center justify-between">
+          <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">${c.label}</div>
+          <div class="grid h-8 w-8 shrink-0 place-items-center rounded-[10px]" style="background:${c.tint}1a;color:${c.tint}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${c.icon}</svg>
+          </div>
+        </div>
+        <div class="relative mt-2 font-display text-3xl font-bold text-neutral-900">${c.value}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('admin-accounts-body').innerHTML =
+      `<tr><td class="px-4 py-4 text-neutral-400" colspan="3">Les comptes sont désormais gérés par Supabase — voir Authentication → Users dans le dashboard Supabase.</td></tr>`;
+
+    const typeLabel = { qualif:'Test de qualification', statut:'Simulateur de statut', inpi:'Dossier INPI', assurance:'Assurance décennale' };
+    const typeTint = { qualif:'#0E9F6E', statut:'#1D5FA3', inpi:'#7C3AED', assurance:'#FF6A13' };
+    // s.nom et s.summary contiennent du texte saisi librement par les
+    // utilisateurs (prénom/nom d'inscription, nom du client sur un devis...).
+    // On échappe systématiquement avant injection dans le DOM admin pour
+    // empêcher un XSS stocké (ex: nom de client "<img src=x onerror=...>")
+    // qui s'exécuterait dans la session de l'administrateur.
+    document.getElementById('admin-submissions-body').innerHTML = submissions.length ? submissions.map(s=>`
+      <tr class="transition hover:bg-neutral-50">
+        <td class="whitespace-nowrap px-4 py-3 text-neutral-500">${escapeHtml(new Date(s.date).toLocaleString('fr-FR'))}</td>
+        <td class="px-4 py-3 font-medium text-neutral-900">${escapeHtml(s.nom)}</td>
+        <td class="px-4 py-3">
+          <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold" style="background:${(typeTint[s.type]||'#525252')}1a;color:${typeTint[s.type]||'#525252'}">
+            <span class="h-1.5 w-1.5 rounded-full" style="background:${typeTint[s.type]||'#525252'}"></span>
+            ${escapeHtml(typeLabel[s.type] || s.type)}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-neutral-600">${escapeHtml(s.summary)}</td>
+      </tr>
+    `).join('') : `<tr><td class="px-4 py-4 text-neutral-400" colspan="4">Aucune soumission pour l'instant.</td></tr>`;
+  }
+
+  function exportAdminData(){
+    // Les comptes utilisateurs vivent maintenant dans Supabase Auth (plus en
+    // localStorage) : seules les soumissions non-synchronisées (fallback
+    // local) restent exportables depuis ce navigateur.
+    const payload = { exportedAt: new Date().toISOString(), submissions: loadSubmissions() };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'batipro-donnees.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+async function resetAdminData(){    if (!confirm('Supprimer définitivement les soumissions stockées en fallback sur ce navigateur ? Cette action est irréversible. (Les comptes utilisateurs, gérés par Supabase, ne sont pas affectés.)')) return;
+    localStorage.removeItem(LS_SUBMISSIONS_KEY);
+    await renderAdminDashboard();
+  }
+
+  window.openAdmin = openAdmin;
+  window.closeAdmin = closeAdmin;
+  window.checkAdminPassword = checkAdminPassword;
+  window.exportAdminData = exportAdminData;
+  window.resetAdminData = resetAdminData;
+  window.logoutAdmin = logoutAdmin;
+
+  // Accès discret réservé au créateur : raccourci clavier Ctrl+Alt+A,
+  // ou ouvrir le site avec #admin à la fin de l'URL.
+  window.addEventListener('keydown', e=>{
+    if (e.ctrlKey && e.altKey && e.key.toLowerCase()==='a'){ e.preventDefault(); openAdmin(); }
+  });
+  if (window.location.hash === '#admin') sessionReady.then(openAdmin);
+
+  // ---------- QUALIFICATION MODAL ----------
+  // Brouillon du test de qualification : enregistré dans localStorage (donc
+  // conservé même si l'utilisateur quitte le site, ferme l'onglet ou éteint
+  // son ordinateur) et rattaché à son compte, pour reprendre là où il s'était
+  // arrêté. Effacé automatiquement une fois le test validé.
+  // (clé LS_QUALIF_DRAFT_KEY déclarée plus haut, pour
+  // être disponible dès le tout premier rendu de la barre de navigation)
+
+  function loadQualifDrafts(){
+    try {
+      const raw = localStorage.getItem(LS_QUALIF_DRAFT_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch(e){ return {}; }
+  }
+  function saveQualifDrafts(drafts){
+    try { localStorage.setItem(LS_QUALIF_DRAFT_KEY, JSON.stringify(drafts)); } catch(e){}
+  }
+  function saveQualifDraft(){
+    if (!currentUser) return; // le test nécessite un compte, mais on protège quand même l'appel
+    const modal = document.getElementById('qualif-modal');
+    if (!modal || modal.classList.contains('hidden')) return;
+
+    // Ne sauvegarde que si on est vraiment sur le formulaire (pas sur l'écran
+    // de résultat/récapitulatif) : sinon, fermer la fenêtre après avoir
+    // terminé ou réinitialisé le test recréerait un faux brouillon à partir
+    // des valeurs par défaut encore présentes dans les champs cachés.
+    const formWrap = document.getElementById('qualif-form-wrap');
+    if (!formWrap || formWrap.classList.contains('hidden')) return;
+
+    const diplomeEl = document.querySelector('input[name="diplome"]:checked');
+    const metierEl = document.getElementById('metier');
+    const expEl = document.getElementById('experience');
+    const ueEl = document.getElementById('ueDiploma');
+
+    const metier = metierEl ? metierEl.value : '';
+    const experience = expEl ? expEl.value : '0';
+    const ueDiploma = ueEl ? ueEl.checked : false;
+
+    // Ne sauvegarde que si l'utilisateur a réellement commencé à répondre :
+    // un métier choisi, une expérience non nulle, ou la case UE cochée.
+    // Sinon (formulaire encore vierge à ses valeurs par défaut), pas de
+    // brouillon à créer.
+    const hasRealProgress = !!metier || Number(experience) > 0 || ueDiploma;
+    if (!hasRealProgress) { clearQualifDraft(); return; }
+
+    const draft = {
+      metier,
+      diplome: diplomeEl ? diplomeEl.value : '',
+      experience,
+      ueDiploma,
+      savedAt: new Date().toISOString(),
+    };
+    const drafts = loadQualifDrafts();
+    drafts[currentUser.email] = draft;
+    saveQualifDrafts(drafts);
+    if (typeof updateAuthUI === 'function') updateAuthUI();
+  }
+  function getQualifDraft(){
+    if (!currentUser) return null;
+    const drafts = loadQualifDrafts();
+    return drafts[currentUser.email] || null;
+  }
+  function clearQualifDraft(){
+    if (!currentUser) return;
+    const drafts = loadQualifDrafts();
+    delete drafts[currentUser.email];
+    saveQualifDrafts(drafts);
+  }
+  function applyQualifDraft(draft){
+    if (!draft) return;
+    const metierEl = document.getElementById('metier');
+    if (metierEl && draft.metier) metierEl.value = draft.metier;
+    if (draft.diplome){
+      const radio = document.querySelector(`input[name="diplome"][value="${draft.diplome}"]`);
+      if (radio) radio.checked = true;
+    }
+    const expEl = document.getElementById('experience');
+    if (expEl && draft.experience != null){
+      expEl.value = draft.experience;
+      onExpChange(expEl);
+    }
+    const ueEl = document.getElementById('ueDiploma');
+    if (ueEl) ueEl.checked = !!draft.ueDiploma;
+  }
+  function discardQualifDraft(){
+    if (!confirm('Voulez-vous vraiment effacer vos réponses et repartir de zéro ? Cette action est irréversible.')) return;
+    clearQualifDraft();
+    document.getElementById('qualif-draft-banner').classList.add('hidden');
+    document.getElementById('qualif-draft-banner').classList.remove('flex');
+    // Réinitialise le formulaire à ses valeurs par défaut
+    const metierEl = document.getElementById('metier');
+    if (metierEl) metierEl.value = '';
+    const firstDiplome = document.querySelector('input[name="diplome"]');
+    if (firstDiplome) firstDiplome.checked = true;
+    const expEl = document.getElementById('experience');
+    if (expEl){ expEl.value = 0; onExpChange(expEl); }
+    const ueEl = document.getElementById('ueDiploma');
+    if (ueEl) ueEl.checked = false;
+    if (typeof updateAuthUI === 'function') updateAuthUI();
+  }
+  window.saveQualifDraft = saveQualifDraft;
+  window.discardQualifDraft = discardQualifDraft;
+
+  function openQualif(){
+    requireAuth(openQualifModal);
+  }
+  function openQualifModal(){
+    const m = document.getElementById('qualif-modal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow='hidden';
+    document.getElementById('qualif-form-wrap').classList.remove('hidden');
+    document.getElementById('qualif-result').classList.add('hidden');
+
+    const banner = document.getElementById('qualif-draft-banner');
+    const draft = getQualifDraft();
+    if (draft){
+      applyQualifDraft(draft);
+      const d = new Date(draft.savedAt);
+      document.getElementById('qualif-draft-text').textContent = `Vos réponses ont été restaurées automatiquement (test commencé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}). Vous pouvez continuer directement où vous en étiez.`;
+      banner.classList.remove('hidden');
+      banner.classList.add('flex');
+    } else {
+      banner.classList.add('hidden');
+      banner.classList.remove('flex');
+    }
+  }
+  function closeQualif(){
+    saveQualifDraft(); // conserve la progression même si l'utilisateur ferme sans valider
+    const m = document.getElementById('qualif-modal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow='';
+  }
+  // Filet de sécurité : sauvegarde aussi si l'utilisateur ferme l'onglet /
+  // le navigateur ou quitte le site pendant qu'il remplit le test.
+  window.addEventListener('pagehide', saveQualifDraft);
+  window.addEventListener('beforeunload', saveQualifDraft);
+  window.openQualif = openQualif;
+  window.openQualifModal = openQualifModal;
+  window.closeQualif = closeQualif;
+  window.scrollToId = scrollToId;
+  window.toggleMenu = toggleMenu;
+  window.onExpChange = onExpChange;
+
+  // Core algorithm: Loi Raffarin
+  function evaluateQualif({ metier, diplome, experience, ueDiploma }){
+    const m = METIERS.find(x=>x.v===metier);
+    const d = DIPLOMES.find(x=>x.v===diplome);
+    const exp = parseInt(experience||0, 10);
+    const isReg = m.reglemente;
+
+    let status, title, color, reasons=[], warnings=[], next="";
+
+    if (!isReg) {
+      status = "eligible";
+      title = "Vous pouvez immatriculer votre entreprise";
+      reasons.push(`Le métier « ${m.l} » n'est pas une activité réglementée au sens du Code de l'artisanat (art. L.121-1).`);
+      reasons.push("Aucune obligation de diplôme ou d'expérience pour l'immatriculation.");
+      warnings.push("Une assurance responsabilité civile professionnelle (RC Pro) reste fortement recommandée. Pour tout travaux relevant du bâtiment, la garantie décennale est obligatoire.");
+      next = "Passer à l'étape suivante : simulateur de statut";
+    } else {
+      const okDiploma = d.niveau >= 3;
+      const okExp = exp >= 3;
+      const okUe = !!ueDiploma;
+
+      if (okDiploma || okExp || okUe) {
+        status = "eligible";
+        title = "Vous êtes qualifié pour ouvrir votre entreprise";
+        if (okDiploma) reasons.push(`Diplôme validant : ${d.l} (niveau ${d.niveau} ou équivalent).`);
+        if (okExp) reasons.push(`${exp} années d'expérience effective dans le métier (seuil légal : 3 ans).`);
+        if (okUe) reasons.push("Diplôme équivalent obtenu dans un État membre de l'UE / EEE (art. R.123-30 CDC).");
+        warnings.push("La Chambre de Métiers et de l'Artisanat (CMA) validera formellement votre qualification lors de l'immatriculation. Préparez vos justificatifs (diplôme, contrats de travail, fiches de paie).");
+        next = "Passer à l'étape suivante : simulateur de statut";
+      } else if (exp >= 1 && exp < 3) {
+        status = "presque";
+        title = "Presque qualifié — il vous manque peu";
+        reasons.push(`Le métier « ${m.l} » est réglementé : diplôme (CAP/BEP minimum) OU 3 ans d'expérience requis.`);
+        reasons.push(`Vous cumulez ${exp} an(s) d'expérience effective : il vous en manque ${3-exp}.`);
+        warnings.push("Alternative : passer un CAP / BEP en candidat libre (VAE possible en cumulant votre expérience) pour valider immédiatement la qualification.");
+        next = "Voir les alternatives disponibles";
+      } else {
+        status = "non";
+        title = "Vous ne pouvez pas immatriculer en l'état";
+        reasons.push(`Le métier « ${m.l} » est une activité réglementée par le Code de l'artisanat (art. L.121-1, ex-loi Raffarin).`);
+        reasons.push("Aucune des trois conditions n'est remplie : ni diplôme CAP/BEP+, ni 3 ans d'expérience, ni diplôme UE équivalent.");
+        warnings.push("Options : (1) passer un CAP/BEP dans le métier — souvent 1 à 2 ans en candidat libre ; (2) cumuler 3 ans d'expérience salariée avant d'immatriculer ; (3) faire valider un diplôme UE équivalent auprès de la CMA.");
+        next = "Voir les parcours de qualification";
+      }
+    }
+
+    // Exigences spécifiques au métier, en plus de la qualification CAP/BEP/expérience.
+    const specifics = [ ...(EXIGENCES_METIER[metier] || []), EXIGENCE_TRANSVERSALE ];
+
+    return { status, title, reasons, warnings, next, metier: m, diplome: d, exp, ueDiploma:!!ueDiploma, specifics };
+  }
+
+  function submitQualif(){
+    const metier = document.getElementById('metier').value;
+    if (!metier){
+      showInlineError('Merci de choisir votre métier avant de vérifier votre qualification.');
+      return;
+    }
+    const diplome = document.querySelector('input[name="diplome"]:checked').value;
+    const experience = document.getElementById('experience').value;
+    const ueDiploma = document.getElementById('ueDiploma').checked;
+    const res = evaluateQualif({ metier, diplome, experience, ueDiploma });
+    window.__qualifRes = res;
+    recordSubmission('qualif', `${res.metier.l} — ${res.status==='eligible'?'Éligible':res.status==='presque'?'Presque éligible':'Non éligible'} (${res.exp} an(s) d'exp.)`, res);
+    if (typeof updateCtaBottomButton === 'function') updateCtaBottomButton();
+    clearQualifDraft();
+    updateAuthUI();
+
+    const color = res.status==='eligible' ? '#10b981' : res.status==='presque' ? '#f59e0b' : '#ef4444';
+    const bg = res.status==='eligible' ? 'rgba(16,185,129,.08)' : res.status==='presque' ? 'rgba(245,158,11,.08)' : 'rgba(239,68,68,.08)';
+    const badge = res.status==='eligible' ? 'Éligible' : res.status==='presque' ? 'Presque éligible' : 'Non éligible en l\'état';
+    const iconName = res.status==='eligible' ? 'check' : 'alert';
+
+    document.getElementById('qualif-form-wrap').classList.add('hidden');
+    const wrap = document.getElementById('qualif-result');
+    wrap.classList.remove('hidden');
+    wrap.innerHTML = `
+      <div class="modal-panel">
+        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:${bg};color:${color}">Résultat — ${badge}</span>
+        <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">${res.title}</h3>
+        <p class="mt-2 text-[14px] text-neutral-600">Métier : <b>${res.metier.l}</b> · Diplôme : <b>${res.diplome.l}</b> · Expérience : <b>${res.exp} an(s)</b>${res.ueDiploma?' · <b>Diplôme UE reconnu</b>':''}</p>
+
+        <div class="mt-6 rounded-2xl border p-6" style="border-color:${color}30;background:${bg}">
+          <div class="flex items-start gap-3">
+            <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full" style="background:${color};color:#fff">${icon(iconName,'h-5 w-5')}</div>
+            <div>
+              <h4 class="font-semibold text-neutral-900">Motifs de la décision</h4>
+              <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-700 list-disc list-inside">
+                ${res.reasons.map(r=>`<li>${r}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        ${res.warnings.length?`
+        <div class="mt-4 rounded-2xl border border-neutral-200 bg-white p-5">
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">À retenir</h4>
+          <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-700 list-disc list-inside">
+            ${res.warnings.map(w=>`<li>${w}</li>`).join('')}
+          </ul>
+        </div>`:''}
+
+        ${res.specifics && res.specifics.length ? `
+        <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-warning">Exigences spécifiques au métier « ${res.metier.l} »</h4>
+          <p class="mt-1 text-[12px] text-neutral-600">Ces obligations s'ajoutent à la qualification et à l'immatriculation — elles ne sont ni remplacées ni couvertes par le diplôme ou l'expérience seuls.</p>
+          <ul class="mt-3 space-y-3 text-[14px] text-neutral-800">
+            ${res.specifics.map(s=>`<li class="flex flex-col rounded-xl border border-black/5 bg-white p-3"><span class="font-semibold">${s.label}</span><span class="text-[12px] text-neutral-600 mt-0.5">${s.detail}</span></li>`).join('')}
+          </ul>
+        </div>` : ''}
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button onclick="closeQualif(); goToEspaceClient();" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
+            <span class="text-[15px] font-semibold">Voir mon orientation dans mon espace</span>
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
+          </button>
+          ${res.status==='eligible' ? `
+            <button onclick="closeQualif(); openStatut();" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">${res.next}</button>` : `
+            <button onclick="resetQualif()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Recommencer le test</button>`}
+          <button onclick="resetQualif()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier mes réponses</button>
+        </div>
+
+        <p class="mt-6 text-[12px] text-neutral-500">Résultat horodaté : ${new Date().toLocaleString('fr-FR')} — conservé pour traçabilité conformément au cahier des charges (§4).</p>
+      </div>
+    `;
+    wrap.scrollTop = 0;
+  }
+  window.submitQualif = submitQualif;
+  window.resetQualif = function(){
+    document.getElementById('qualif-result').classList.add('hidden');
+    document.getElementById('qualif-form-wrap').classList.remove('hidden');
+  };
+
+  // ---------- STATUT (SIMULATEUR) MODAL ----------
+  const STATUT_GROUPS = ['ca','associes','patrimoine','social','tva'];
+  let statutAnswered = new Set();
+
+  function renderStatutProgress(){
+    const label = document.getElementById('statut-step-label');
+    const pct = document.getElementById('statut-step-pct');
+    const bar = document.getElementById('statut-progress');
+    if (!label || !pct || !bar) return;
+    const n = statutAnswered.size;
+    label.textContent = `${n} question${n>1?'s':''} sur ${STATUT_GROUPS.length} confirmée${n>1?'s':''}`;
+    const p = Math.round((n/STATUT_GROUPS.length)*100);
+    pct.textContent = `${p}%`;
+    bar.style.width = `${p}%`;
+  }
+  function resetStatutProgress(){
+    statutAnswered = new Set();
+    renderStatutProgress();
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    const form = document.getElementById('statut-form');
+    if (!form) return;
+    form.addEventListener('change', (e)=>{
+      const name = e.target && e.target.name;
+      if (STATUT_GROUPS.includes(name)){
+        statutAnswered.add(name);
+        renderStatutProgress();
+      }
+    });
+    renderStatutProgress();
+  });
+
+  function openStatut(){
+    const m = document.getElementById('statut-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+    document.body.style.overflow='hidden';
+    document.getElementById('statut-form-wrap').classList.remove('hidden');
+    document.getElementById('statut-result').classList.add('hidden');
+    resetStatutProgress();
+  }
+  function closeStatut(){
+    const m = document.getElementById('statut-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
+    document.body.style.overflow='';
+  }
+  window.openStatut = openStatut;
+  window.closeStatut = closeStatut;
+
+  // Scoring : Micro / EI / SASU
+  function evaluateStatut({ ca, associes, patrimoine, social, tva }){
+    let scores = { micro: 0, ei: 0, sasu: 0 };
+    const reasons = { micro: [], ei: [], sasu: [] };
+
+    // Associés : coupe court, seule la SASU/SAS convient
+    if (associes === 'oui') {
+      scores.sasu += 6;
+      reasons.sasu.push("Vous souhaitez vous associer : la SASU se transforme naturellement en SAS avec plusieurs associés.");
+      scores.micro -= 10; reasons.micro.push("La micro-entreprise est réservée à un entrepreneur individuel (impossible à plusieurs).");
+      scores.ei -= 10; reasons.ei.push("L'EI ne permet pas d'accueillir des associés.");
+    }
+
+    // CA
+    if (ca === 'lt40') { scores.micro += 4; reasons.micro.push("CA prévisionnel bas : la micro simplifie au maximum démarches et cotisations."); scores.ei += 1; }
+    if (ca === '40to83') { scores.micro += 3; reasons.micro.push("CA sous le plafond micro BIC prestations (83 600 €)."); scores.ei += 2; }
+    if (ca === '83to203') { scores.ei += 3; reasons.ei.push("CA proche/au-dessus du plafond micro services : l'EI reste souple sans limite de CA."); scores.sasu += 2; scores.micro -= 3; reasons.micro.push("Risque de dépasser le plafond micro services (83 600 €)."); }
+    if (ca === 'gt188') { scores.sasu += 4; reasons.sasu.push("CA élevé : la SASU permet d'optimiser la rémunération (salaire + dividendes) et de piloter la fiscalité."); scores.ei += 2; scores.micro -= 6; reasons.micro.push("CA au-delà des plafonds micro : régime inadapté."); }
+
+    // Patrimoine
+    if (patrimoine === 'oui') {
+      scores.sasu += 2; reasons.sasu.push("Responsabilité limitée aux apports : patrimoine personnel bien protégé.");
+      scores.ei += 2; reasons.ei.push("Depuis 2022, le patrimoine personnel est séparé de l'EI de plein droit.");
+      scores.micro += 1; reasons.micro.push("La micro est une forme d'EI : même séparation patrimoniale depuis 2022.");
+    }
+
+    // Social
+    if (social === 'tns') { scores.micro += 2; scores.ei += 2; reasons.ei.push("Régime TNS choisi : cotisations réduites, cohérent avec Micro/EI."); scores.sasu -= 2; }
+    if (social === 'assimile') { scores.sasu += 4; reasons.sasu.push("Vous voulez le régime assimilé-salarié : seule la SASU le permet."); scores.micro -= 3; scores.ei -= 3; }
+
+    // TVA
+    if (tva === 'oui') {
+      scores.ei += 2; reasons.ei.push("Vous récupérerez la TVA sur vos matériaux (impossible en franchise micro).");
+      scores.sasu += 2; reasons.sasu.push("TVA récupérable dès l'immatriculation.");
+      scores.micro -= 3; reasons.micro.push("Franchise en base : ni facturation ni récupération de TVA sous les seuils.");
+    } else {
+      scores.micro += 2; reasons.micro.push("Peu d'achats : la franchise de TVA reste avantageuse.");
+    }
+
+    // Winner
+    const entries = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+    const winner = entries[0][0];
+    const gap = entries[0][1] - entries[1][1];
+    const total = Math.max(1, entries[0][1] + Math.abs(entries[1][1]) + Math.abs(entries[2][1]));
+    let confidence = Math.max(35, Math.min(96, Math.round(60 + gap * 8)));
+
+    const labels = { micro: 'Micro-entreprise', ei: 'Entreprise Individuelle (EI)', sasu: 'SASU' };
+    const subs = {
+      micro: "Régime simplifié : cotisations sur le CA, franchise de TVA, comptabilité allégée.",
+      ei: "Structure souple sans capital, patrimoine séparé, imposition IR (option IS possible).",
+      sasu: "Société par actions unipersonnelle : dirigeant assimilé-salarié, IS par défaut, image pro."
+    };
+
+    const needsExpert = gap <= 1 || (winner === 'sasu' && ca === 'lt40') || (winner === 'micro' && ca === 'gt188');
+
+    return { winner, label: labels[winner], sub: subs[winner], confidence, scores, reasons: reasons[winner], all: reasons, needsExpert };
+  }
+
+  function submitStatut(){
+    const ca = document.querySelector('input[name="ca"]:checked').value;
+    const associes = document.querySelector('input[name="associes"]:checked').value;
+    const patrimoine = document.querySelector('input[name="patrimoine"]:checked').value;
+    const social = document.querySelector('input[name="social"]:checked').value;
+    const tva = document.querySelector('input[name="tva"]:checked').value;
+
+    const res = evaluateStatut({ ca, associes, patrimoine, social, tva });
+    window.__statutRes = res;
+    recordSubmission('statut', `${res.label} recommandé (confiance ${res.confidence}%)${res.needsExpert?' — validation experte suggérée':''}`, res);
+
+    document.getElementById('statut-form-wrap').classList.add('hidden');
+    const wrap = document.getElementById('statut-result');
+    wrap.classList.remove('hidden');
+
+    const color = res.confidence >= 75 ? '#10b981' : res.confidence >= 55 ? '#0084FF' : '#f59e0b';
+    const bg = res.confidence >= 75 ? 'rgba(16,185,129,.08)' : res.confidence >= 55 ? 'rgba(29,95,163,.08)' : 'rgba(245,158,11,.08)';
+
+    const others = Object.entries(res.scores)
+      .filter(([k])=>k!==res.winner)
+      .sort((a,b)=>b[1]-a[1]);
+    const otherLabels = { micro:'Micro-entreprise', ei:'EI', sasu:'SASU' };
+
+    wrap.innerHTML = `
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:${bg};color:${color}">Pré-orientation — Module 2/5</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Statut recommandé : ${res.label}</h3>
+      <p class="mt-2 text-[14px] text-neutral-600">${res.sub}</p>
+
+      <div class="mt-6 rounded-2xl border p-6" style="border-color:${color}30;background:${bg}">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <div class="text-[12px] font-semibold uppercase tracking-wide" style="color:${color}">Niveau de confiance</div>
+            <div class="mt-1 font-display text-3xl font-bold" style="color:${color}">${res.confidence}%</div>
+          </div>
+          <div class="h-16 w-16 shrink-0">
+            <svg viewBox="0 0 36 36" class="h-full w-full">
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="${color}20" stroke-width="3"/>
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="${res.confidence}, 100" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <h4 class="mt-6 font-semibold text-neutral-900">Pourquoi ce statut ?</h4>
+        <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-700 list-disc list-inside">
+          ${res.reasons.map(r=>`<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="mt-5">
+        <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Autres statuts envisagés</h4>
+        <p class="mt-1 text-[13px] text-neutral-500">Si ${res.label} ne vous convient pas, ${otherLabels[others[0][0]]} est l'alternative la plus adaptée à votre situation.</p>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          ${others.map(([k,v], i)=>`
+            <div class="relative rounded-2xl border p-4" style="${i===0 ? 'border-color:rgba(29,95,163,.3);background:rgba(29,95,163,.05)' : 'border-color:#e5e5e5;background:#fff'}">
+              ${i===0 ? `<span class="absolute -top-2.5 left-4 rounded-full px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-white" style="background:var(--brand)">Meilleure alternative</span>` : ''}
+              <div class="flex items-center justify-between">
+                <div class="text-[13px] font-semibold text-neutral-900">${otherLabels[k]}</div>
+                <div class="text-[12px] text-neutral-500">Score ${v}</div>
+              </div>
+              <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                <div class="h-full rounded-full" style="width:${Math.max(4, Math.min(100, (v+6)*7))}%;background:${i===0 ? 'var(--brand)' : '#0a0a0a'}"></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      ${res.needsExpert ? `
+      <div class="mt-4 rounded-2xl border p-5" style="border-color:#f59e0b30;background:rgba(245,158,11,.08)">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-warning">Validation experte recommandée</h4>
+        <p class="mt-2 text-[14px] text-neutral-700">Vos réponses sont proches entre plusieurs statuts. Nous vous conseillons un échange avec un expert-comptable partenaire avant l'immatriculation.</p>
+      </div>` : ''}
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button id="statut-inpi-btn" onclick="goToInpiGated()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
+          <span class="text-[15px] font-semibold">Passer à l'étape suivante : dossier INPI</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
+        </button>
+        <button onclick="resetStatut()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier mes réponses</button>
+      </div>
+
+      <div id="statut-inpi-paywall" class="mt-4 hidden rounded-2xl border p-5" style="border-color:rgba(29,95,163,.25); background:rgba(29,95,163,.05)">
+        <div class="flex items-center gap-2 text-[13px] font-semibold text-brand">
+          ${icon('lock','h-4 w-4')} Étape réservée au Pack Lancement
+        </div>
+        <p class="mt-2 text-[14px] text-neutral-700">La génération du dossier INPI fait partie du <b>Pack Lancement (89 €, paiement unique)</b>. Achetez-le pour continuer votre immatriculation.</p>
+        <button onclick="handlePricingClick('dossier')" class="btn-primary group mt-4 inline-flex items-center gap-3 rounded-[14px] py-3 pl-5 pr-2 text-white transition-transform hover:scale-[1.02]">
+          <span class="text-[14px] font-semibold">Acheter le pack — 89 €</span>
+          <span class="grid h-7 w-7 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-3.5 w-3.5')}</span>
+        </button>
+      </div>
+
+      <p class="mt-6 text-[12px] text-neutral-500">Pré-orientation horodatée : ${new Date().toLocaleString('fr-FR')} — non contractuelle. Une validation experte est effectuée avant génération du dossier INPI (§4).</p>
+    `;
+    wrap.scrollTop = 0;
+  }
+  window.submitStatut = submitStatut;
+  window.resetStatut = function(){
+    document.getElementById('statut-result').classList.add('hidden');
+    document.getElementById('statut-form-wrap').classList.remove('hidden');
+    resetStatutProgress();
+  };
+
+  // ---------- INPI (DOSSIER) MODAL ----------
+  let inpiStep = 1;
+  const INPI_STEPS = 4;
+  const INPI_LABELS = { 1:'Identité', 2:'Entreprise', 3:'Adresse', 4:'Pièces & options' };
+  const REQUIRED_DOCS = []; // TEST: obligation désactivée temporairement (était ['cni','domicile','qualif'])
+  window.__docFiles = window.__docFiles || {};
+
+  function humanSize(bytes){
+    if (bytes < 1024) return bytes + ' o';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' Ko';
+    return (bytes/1024/1024).toFixed(1) + ' Mo';
+  }
+
+  function handleDocUpload(evt, key){
+    const file = evt.target.files[0];
+    if (!file) return;
+    const isImg = file.type.startsWith('image/');
+    const reader = new FileReader();
+    reader.onload = function(e){
+      window.__docFiles[key] = { name: file.name, size: file.size, type: file.type, dataUrl: isImg ? e.target.result : null };
+      renderDocPreview(key);
+      clearDocError(key);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeDoc(key){
+    window.__docFiles[key] = null;
+    const input = document.getElementById('doc-' + key + '-input');
+    if (input) input.value = '';
+    renderDocPreview(key);
+  }
+
+  function renderDocPreview(key){
+    const data = window.__docFiles[key];
+    const preview = document.getElementById('doc-' + key + '-preview');
+    const status = document.getElementById('doc-' + key + '-status');
+    if (!preview || !status) return;
+    if (!data){
+      preview.classList.add('hidden');
+      preview.innerHTML = '';
+      status.textContent = 'Ajouter un fichier →';
+      status.style.color = 'var(--brand)';
+      return;
+    }
+    status.textContent = '✓ Fichier ajouté';
+    status.style.color = '#10b981';
+    preview.classList.remove('hidden');
+    preview.innerHTML = `
+      <div class="flex items-center gap-3 rounded-lg border border-black/10 bg-neutral-50 p-2">
+        ${data.dataUrl
+          ? `<img src="${data.dataUrl}" class="h-12 w-12 shrink-0 rounded-md border border-black/10 object-cover" alt="Aperçu ${escapeHtml(data.name)}">`
+          : `<div class="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-neutral-200 text-[10px] font-bold text-neutral-500">PDF</div>`}
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-[13px] font-medium text-neutral-800">${escapeHtml(data.name)}</p>
+          <p class="text-[12px] text-neutral-500">${humanSize(data.size)}</p>
+        </div>
+        <button type="button" onclick="removeDoc('${key}')" class="shrink-0 rounded-full p-1.5 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-700" aria-label="Supprimer le fichier">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+        </button>
+      </div>`;
+  }
+
+  function clearDocError(key){
+    const card = document.querySelector(`[data-doc-card="${key}"]`);
+    if (card){ card.classList.remove('border-red-400','ring-2','ring-red-200'); card.classList.add('border-black/10'); }
+    const stillMissing = REQUIRED_DOCS.some(k => !window.__docFiles[k]);
+    const errEl = document.getElementById('inpi-docs-error');
+    if (!stillMissing && errEl) errEl.classList.add('hidden');
+  }
+
+  window.handleDocUpload = handleDocUpload;
+  window.removeDoc = removeDoc;
+
+  function renderInpiStep(){
+    document.querySelectorAll('[data-inpi-step]').forEach(s=>{
+      s.classList.toggle('hidden', Number(s.dataset.inpiStep) !== inpiStep);
+    });
+    document.getElementById('inpi-step-label').textContent = `Étape ${inpiStep} sur ${INPI_STEPS} — ${INPI_LABELS[inpiStep]}`;
+    const pct = Math.round((inpiStep/INPI_STEPS)*100);
+    document.getElementById('inpi-step-pct').textContent = pct + '%';
+    document.getElementById('inpi-progress').style.width = pct + '%';
+    document.getElementById('inpi-prev').classList.toggle('hidden', inpiStep===1);
+    document.getElementById('inpi-next').classList.toggle('hidden', inpiStep===INPI_STEPS);
+    document.getElementById('inpi-submit').classList.toggle('hidden', inpiStep!==INPI_STEPS);
+    document.querySelector('#inpi-modal .modal-panel').scrollTop = 0;
+  }
+
+  function validateInpiStep(){
+    const section = document.querySelector(`[data-inpi-step="${inpiStep}"]`);
+    const inputs = section.querySelectorAll('input, select, textarea');
+    for (const el of inputs){
+      if (!el.checkValidity()){ el.reportValidity(); return false; }
+    }
+    if (inpiStep === 4){
+      const missingReq = REQUIRED_DOCS.filter(k => !window.__docFiles[k]);
+      document.querySelectorAll('[data-doc-card]').forEach(card => {
+        const k = card.dataset.docCard;
+        const isMissing = missingReq.includes(k);
+        card.classList.toggle('border-red-400', isMissing);
+        card.classList.toggle('ring-2', isMissing);
+        card.classList.toggle('ring-red-200', isMissing);
+      });
+      const errEl = document.getElementById('inpi-docs-error');
+      if (missingReq.length){
+        if (errEl){
+          errEl.classList.remove('hidden');
+          errEl.scrollIntoView({ behavior:'smooth', block:'center' });
+        }
+        return false;
+      } else if (errEl){
+        errEl.classList.add('hidden');
+      }
+    }
+    return true;
+  }
+
+  // Sécurité : re-vérifie l'accès (Pack Lancement "dossier" ou abonnement "pro")
+  // AVANT d'ouvrir le générateur de dossier INPI depuis "Mon espace", quelle
+  // que soit la raison pour laquelle le bouton "Créer mon dossier INPI" a pu
+  // s'afficher côté client. Empêche toute création de dossier par un compte
+  // qui n'a pas payé le pack.
+  async function openInpiFromEspace(){
+    if (!currentUser){ requireAuth(openInpiFromEspace); return; }
+    const sb = window.__supabase;
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    const btn = document.getElementById('espace-inpi-creer-btn');
+    if (btn) btn.disabled = true;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (btn) btn.disabled = false;
+    if (error){
+      console.error('Erreur vérification entitlements :', error);
+      showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
+      return;
+    }
+    const hasAccess = (data || []).some(e => e.product_key === 'dossier' || e.product_key === 'pro');
+    if (hasAccess){
+      openInpi();
+    } else {
+      // Remet l'affichage de la carte en cohérence avec la réalité de l'accès
+      // (au cas où le bouton "Créer" était affiché à tort) et propose l'achat.
+      const creerBtn = document.getElementById('espace-inpi-creer-btn');
+      const acheterBtn = document.getElementById('espace-inpi-acheter-btn');
+      if (creerBtn) creerBtn.classList.add('hidden');
+      if (acheterBtn) acheterBtn.classList.remove('hidden');
+      showInlineError("La création du dossier INPI est incluse dans le Pack Lancement (89 €). Achetez le pack pour continuer.");
+    }
+  }
+  window.openInpiFromEspace = openInpiFromEspace;
+
+  function openInpi(){
+    const m = document.getElementById('inpi-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('inpi-form-wrap').classList.remove('hidden');
+    document.getElementById('inpi-result').classList.add('hidden');
+    inpiStep = 1;
+    // Pré-remplir la forme depuis le résultat du simulateur
+    const map = { micro:'micro', ei:'ei', sasu:'sasu' };
+    if (window.__statutRes && map[window.__statutRes.winner]){
+      const sel = document.querySelector('select[name="forme"]');
+      if (sel) sel.value = map[window.__statutRes.winner];
+    }
+    // Pré-remplir email / prénom / nom depuis le compte connecté : on ne redemande jamais
+    // l'email, il servira pour l'email de validation du dossier.
+    if (currentUser){
+      const emailInput = document.querySelector('#inpi-modal input[name="email"]');
+      if (emailInput){ emailInput.value = currentUser.email; emailInput.readOnly = true; emailInput.classList.add('bg-neutral-50','text-neutral-500'); }
+      const prenomInput = document.querySelector('#inpi-modal input[name="prenom"]');
+      if (prenomInput && !prenomInput.value) prenomInput.value = currentUser.prenom;
+      const nomInput = document.querySelector('#inpi-modal input[name="nom"]');
+      if (nomInput && !nomInput.value) nomInput.value = currentUser.nom;
+    }
+    renderInpiStep();
+  }
+  function closeInpi(){
+    const m = document.getElementById('inpi-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+  function inpiNext(){ if (!validateInpiStep()) return; if (inpiStep < INPI_STEPS){ inpiStep++; renderInpiStep(); } }
+  function inpiPrev(){ if (inpiStep > 1){ inpiStep--; renderInpiStep(); } }
+  window.openInpi = openInpi;
+  window.closeInpi = closeInpi;
+  window.inpiNext = inpiNext;
+  window.inpiPrev = inpiPrev;
+
+  function readInpiForm(){
+    const f = document.getElementById('inpi-form');
+    const fd = new FormData(f);
+    const data = {};
+    for (const [k,v] of fd.entries()){
+      if (k.startsWith('doc-')) continue; // fichiers gérés via window.__docFiles
+      data[k] = v;
+    }
+    data.doc = Object.keys(window.__docFiles || {}).filter(k => window.__docFiles[k]);
+    data.doc.push('ncnf'); // générée automatiquement, toujours présente
+    data.acre = f.querySelector('input[name="acre"]').checked;
+    data.honneur = f.querySelector('input[name="honneur"]').checked;
+    return data;
+  }
+
+  const FORME_LABEL = { micro:'Micro-entreprise', ei:'Entreprise Individuelle (EI)', sasu:'SASU' };
+  const DOC_LABEL = { cni:"Pièce d'identité", domicile:'Justificatif de domicile', qualif:'Justificatif de qualification', ncnf:'Déclaration de non-condamnation', conjoint:"Attestation d'information du conjoint" };
+
+  function submitInpi(){
+    if (!validateInpiStep()) return;
+    const d = readInpiForm();
+    window.__inpiData = d;
+
+    // Numéro de dossier fictif
+    const ref = 'BP-' + Date.now().toString(36).toUpperCase().slice(-6) + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
+    window.__inpiRef = ref;
+    const missing = REQUIRED_DOCS.filter(k => !(d.doc || []).includes(k));
+    recordSubmission('inpi', `Dossier ${ref} — ${d.denomination || d.nom || 'sans dénomination'} (${FORME_LABEL[d.forme] || d.forme})${missing.length?' — pièces manquantes':''}`, { ref, ...d });
+
+    document.getElementById('inpi-form-wrap').classList.add('hidden');
+    const wrap = document.getElementById('inpi-result');
+    wrap.classList.remove('hidden');
+
+    wrap.innerHTML = `
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(16,185,129,.08);color:#10b981">Dossier prêt — Module 3/5</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Votre dossier INPI est constitué</h3>
+      <p class="mt-2 text-[14px] text-neutral-600">Référence interne : <b class="font-mono">${ref}</b> · Horodaté ${new Date().toLocaleString('fr-FR')}</p>
+
+      <div class="mt-4 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+        <div class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-500 text-white">${icon('check','h-4 w-4')}</div>
+        <div>
+          <p class="text-[14px] font-semibold text-emerald-900">Email de validation envoyé</p>
+          <p class="mt-0.5 text-[13px] text-emerald-800">Un email de confirmation pour le dossier <b class="font-mono">${ref}</b> a été envoyé à <b>${escapeHtml(d.email)}</b> — l'adresse associée à votre compte Bâtipro. Vous n'avez rien d'autre à saisir.</p>
+        </div>
+      </div>
+
+      <div class="mt-4 grid gap-4 md:grid-cols-2">
+        <div class="rounded-2xl border border-black/10 p-5">
+          <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Déclarant</h4>
+          <p class="mt-2 text-[14px] text-neutral-800"><b>${escapeHtml(d.civ)} ${escapeHtml(d.prenom)} ${escapeHtml(d.nom)}</b><br>
+          Né(e) le ${escapeHtml(d.ddn)} à ${escapeHtml(d.villeNaissance)} (${escapeHtml(d.paysNaissance)})<br>
+          Nationalité : ${escapeHtml(d.nationalite)}<br>
+          ${escapeHtml(d.email)} · ${escapeHtml(d.tel)}</p>
+        </div>
+        <div class="rounded-2xl border border-black/10 p-5">
+          <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Entreprise</h4>
+          <p class="mt-2 text-[14px] text-neutral-800"><b>${escapeHtml(d.denomination)}</b><br>
+          Forme : ${escapeHtml(FORME_LABEL[d.forme] || d.forme)}<br>
+          Code APE : <span class="font-mono">${escapeHtml(d.ape)}</span><br>
+          Début : ${escapeHtml(d.debut)}</p>
+          <p class="mt-2 text-[13px] text-neutral-600">${escapeHtml(d.activite)}</p>
+        </div>
+        <div class="rounded-2xl border border-black/10 p-5">
+          <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Siège social</h4>
+          <p class="mt-2 text-[14px] text-neutral-800">${escapeHtml(d.adresse)}<br>${escapeHtml(d.cp)} ${escapeHtml(d.ville)}<br>
+          <span class="text-[13px] text-neutral-500">Local : ${escapeHtml(d.local)}</span></p>
+        </div>
+        <div class="rounded-2xl border border-black/10 p-5">
+          <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Options</h4>
+          <ul class="mt-2 space-y-1 text-[14px] text-neutral-800">
+            <li>${d.acre ? '✓ ACRE demandée' : '— ACRE non demandée'}</li>
+            <li>${d.honneur ? '✓ Déclaration sur l\'honneur signée' : '— Non signée'}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-4 rounded-2xl border border-black/10 p-5">
+        <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Pièces justificatives</h4>
+        <ul class="mt-2 grid gap-1.5 sm:grid-cols-2 text-[14px]">
+          ${Object.entries(DOC_LABEL).map(([k,l])=>{
+            const ok = (d.doc || []).includes(k);
+            return `<li class="flex items-center gap-2 ${ok?'text-neutral-800':'text-neutral-500'}"><span class="grid h-5 w-5 place-items-center rounded-full text-[11px] font-bold" style="background:${ok?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)'};color:${ok?'#10b981':'#b45309'}">${ok?'✓':'!'}</span>${l}</li>`;
+          }).join('')}
+        </ul>
+        ${missing.length ? `<p class="mt-3 text-[13px] text-warning">À téléverser avant transmission : ${missing.map(k=>DOC_LABEL[k]).join(', ')}.</p>` : ''}
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button onclick="downloadInpiPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
+          <span class="text-[15px] font-semibold">Télécharger le dossier (PDF)</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
+        </button>
+        <button onclick="closeInpi(); goToAssurGated();" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02]">
+          <span class="text-[15px] font-semibold">Passer à l'assurance décennale</span>
+        </button>
+
+        <button onclick="resetInpi()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier mes réponses</button>
+      </div>
+
+      <p class="mt-6 text-[12px] text-neutral-500">Ce récapitulatif alimente le formulaire du Guichet unique INPI. La transmission finale s'effectue après signature électronique (§5).</p>
+    `;
+    wrap.scrollTop = 0;
+  }
+
+  function downloadInpiPdf(){
+    const d = window.__inpiData || {};
+    const ref = window.__inpiRef || '—';
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'pt', format:'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginX = 48;
+    const maxWidth = pageWidth - marginX*2;
+    let y = 56;
+
+    function addSpace(h){ y += h; if (y > 780){ doc.addPage(); y = 56; } }
+    function heading(text, size=12.5){
+      doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20,20,20);
+      doc.text(text, marginX, y); addSpace(size+8);
+    }
+    function line(label, value, size=10.5){
+      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
+      const text = (label ? label + ' : ' : '') + (value || '—');
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach(l => { doc.text(l, marginX, y); addSpace(size+5); });
+    }
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(0,132,255);
+    doc.text('Bâtipro — Dossier INPI', marginX, y); addSpace(26);
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(120,120,120);
+    doc.text('Référence interne : ' + ref + '  —  Horodaté ' + new Date().toLocaleString('fr-FR'), marginX, y); addSpace(24);
+
+    heading('Déclarant');
+    line(null, `${d.civ||''} ${d.prenom||''} ${d.nom||''}`.trim());
+    line('Né(e) le', `${d.ddn||'—'} à ${d.villeNaissance||'—'} (${d.paysNaissance||'—'})`);
+    line('Nationalité', d.nationalite);
+    line('Contact', `${d.email||'—'} · ${d.tel||'—'}`);
+    addSpace(6);
+
+    heading('Entreprise');
+    line(null, d.denomination);
+    line('Forme', FORME_LABEL[d.forme] || d.forme);
+    line('Code APE', d.ape);
+    line('Début d\'activité', d.debut);
+    if (d.activite){ addSpace(2); line(null, d.activite, 9.5); }
+    addSpace(6);
+
+    heading('Siège social');
+    line(null, d.adresse);
+    line(null, `${d.cp||''} ${d.ville||''}`.trim());
+    line('Local', d.local);
+    addSpace(6);
+
+    heading('Options');
+    line(null, d.acre ? '✓ ACRE demandée' : '— ACRE non demandée');
+    line(null, d.honneur ? '✓ Déclaration sur l\'honneur signée' : '— Non signée');
+    addSpace(6);
+
+    heading('Pièces justificatives');
+    Object.entries(DOC_LABEL).forEach(([k,l])=>{
+      const ok = (d.doc || []).includes(k);
+      line(null, (ok ? '✓ ' : '! ') + l);
+    });
+    const missing = Object.keys(DOC_LABEL).filter(k => REQUIRED_DOCS.includes(k) && !(d.doc||[]).includes(k));
+    if (missing.length){
+      addSpace(4);
+      doc.setTextColor(180,83,9);
+      line(null, 'À téléverser avant transmission : ' + missing.map(k=>DOC_LABEL[k]).join(', ') + '.', 9.5);
+      doc.setTextColor(50,50,50);
+    }
+
+    addSpace(10);
+    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(140,140,140);
+    line(null, "Ce récapitulatif alimente le formulaire du Guichet unique INPI. La transmission finale s'effectue après signature électronique.", 8.5);
+
+    doc.save('batipro-dossier-inpi.pdf');
+  }
+
+  window.submitInpi = submitInpi;
+  window.downloadInpiPdf = downloadInpiPdf;
+  window.resetInpi = function(){
+    document.getElementById('inpi-result').classList.add('hidden');
+    document.getElementById('inpi-form-wrap').classList.remove('hidden');
+    inpiStep = 1; renderInpiStep();
+  };
+
+  // ---------- ASSURANCE DÉCENNALE MODAL ----------
+  // Risque métier: 1 (léger) → 5 (majeur)
+  const ASSUR_RISK = {
+    electricien:4, plombier:3, macon:5, charpentier:5, couvreur:5, menuisier:2,
+    serrurier:2, platrier:2, etancheur:5, ramoneur:2, peintre:1, carreleur:2,
+    solier:1, autre:2
+  };
+  // Seuils de garantie (k€) par niveau de risque
+  const ASSUR_DEC_BASE = { 1:500, 2:800, 3:1200, 4:1500, 5:2000 };
+  const ASSUR_RC_BASE  = { 1:300, 2:500, 3:750,  4:1000, 5:1500 };
+
+  function openAssur(){
+    const sel = document.getElementById('assur-metier');
+    sel.innerHTML = METIERS.map(m=>`<option value="${m.v}">${m.l}</option>`).join('');
+    const pre = window.__qualifRes && window.__qualifRes.metier && window.__qualifRes.metier.v;
+    if (pre) sel.value = pre;
+    document.getElementById('assur-form-wrap').classList.remove('hidden');
+    document.getElementById('assur-result').classList.add('hidden');
+    const m = document.getElementById('assur-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+    document.body.style.overflow='hidden';
+  }
+  function closeAssur(){
+    const m = document.getElementById('assur-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
+    document.body.style.overflow='';
+  }
+  window.openAssur = openAssur;
+  window.closeAssur = closeAssur;
+
+  function evaluateAssur({ metier, ca, effectif, sinistre, risks }){
+    const m = METIERS.find(x=>x.v===metier) || METIERS[0];
+    let risk = ASSUR_RISK[metier] || 2;
+    // Ajustements
+    const caMult = { 'lt50':1, '50-150':1.15, '150-500':1.4, 'gt500':1.7 }[ca] || 1;
+    const effMult = { '0':1, '1-2':1.2, '3-5':1.5, '6+':1.9 }[effectif] || 1;
+    const sinAdd = { '0':0, '1':1, '2+':2 }[sinistre] || 0;
+    const riskBoost = risks.includes('grande-hauteur') ? 1 : 0;
+    const erpBoost  = risks.includes('erp') ? 1 : 0;
+    const stBoost   = risks.includes('sous-traitance') ? 1 : 0;
+    const amiante   = risks.includes('amiante');
+
+    let adjRisk = Math.max(1, Math.min(5, risk + Math.floor((riskBoost+erpBoost)/1.5)));
+    // Garantie recommandée
+    const decMin = Math.round(ASSUR_DEC_BASE[adjRisk] * caMult);
+    const rcMin  = Math.round(ASSUR_RC_BASE[adjRisk]  * caMult);
+
+    // Prime annuelle estimée (fourchette, ordre de grandeur marché)
+    // Base 1,2% à 3,5% du CA médian de la tranche selon risque
+    const caMedian = { 'lt50':30, '50-150':100, '150-500':300, 'gt500':700 }[ca] || 30; // k€
+    const rateLow  = 0.008 + adjRisk*0.004;
+    const rateHigh = 0.015 + adjRisk*0.008;
+    let primeLow  = Math.round(caMedian*1000*rateLow  * effMult * (1+0.15*sinAdd) / 50)*50;
+    let primeHigh = Math.round(caMedian*1000*rateHigh * effMult * (1+0.25*sinAdd) / 50)*50;
+    primeLow  = Math.max(primeLow,  600 + adjRisk*150);
+    primeHigh = Math.max(primeHigh, primeLow + 400);
+
+    const reasons = [];
+    reasons.push(`Métier « ${m.l} » — niveau de risque technique : ${adjRisk}/5.`);
+    reasons.push(`CA prévisionnel et effectif appliqués (×${(caMult*effMult).toFixed(2)}).`);
+    if (sinAdd) reasons.push(`Historique de sinistralité déclaré : majoration appliquée.`);
+    if (riskBoost) reasons.push(`Travaux en grande hauteur : exposition renforcée.`);
+    if (erpBoost)  reasons.push(`Chantiers ERP / tertiaire : dommages potentiels aggravés.`);
+    if (stBoost)   reasons.push(`Sous-traitance : extension « responsabilité du fait des sous-traitants » recommandée.`);
+
+    const warnings = [];
+    warnings.push("La garantie décennale est <b>obligatoire</b> avant toute ouverture de chantier (art. L.241-1 C. assur., loi Spinetta).");
+    warnings.push("L'attestation d'assurance doit mentionner <b>précisément les activités déclarées</b> — toute activité non listée n'est pas couverte.");
+    if (amiante) warnings.push("Amiante / plomb : sous-section 3 ou 4 requise + assurance spécifique — la décennale standard ne couvre pas ces risques.");
+    if (stBoost) warnings.push("Vérifiez que vos sous-traitants disposent eux-mêmes d'une décennale en cours de validité (à archiver 10 ans).");
+
+    const guarantees = [
+      { l:"Garantie décennale (dommages à l'ouvrage)", v:`≥ ${decMin.toLocaleString('fr-FR')} k€ par sinistre`, note:"Illimitée pour les dommages compromettant la solidité de l'ouvrage." },
+      { l:"RC Pro (dommages corporels/matériels/immatériels)", v:`≥ ${rcMin.toLocaleString('fr-FR')} k€ par sinistre`, note:"Couvre les dommages causés aux tiers pendant les travaux." },
+      { l:"Garantie de parfait achèvement", v:"1 an après réception", note:"Réparation des désordres signalés à la réception." },
+      { l:"Garantie de bon fonctionnement (biennale)", v:"2 ans après réception", note:"Équipements dissociables (volets, robinetterie, chaudière…)." },
+    ];
+
+    return { metier:m, adjRisk, decMin, rcMin, primeLow, primeHigh, reasons, warnings, guarantees, amiante };
+  }
+
+  function submitAssur(){
+    const metier = document.getElementById('assur-metier').value;
+    const ca = document.querySelector('input[name="assur-ca"]:checked').value;
+    const effectif = document.getElementById('assur-effectif').value;
+    const sinistre = document.getElementById('assur-sinistre').value;
+    const risks = Array.from(document.querySelectorAll('input[name="assur-risk"]:checked')).map(c=>c.value);
+    const res = evaluateAssur({ metier, ca, effectif, sinistre, risks });
+    window.__assurRes = res;
+    recordSubmission('assurance', `${res.metier.l} — décennale ≥ ${res.decMin.toLocaleString('fr-FR')} k€, RC Pro ≥ ${res.rcMin.toLocaleString('fr-FR')} k€ (risque ${res.adjRisk}/5)`, res);
+
+    document.getElementById('assur-form-wrap').classList.add('hidden');
+    const wrap = document.getElementById('assur-result');
+    wrap.classList.remove('hidden');
+    const riskColor = res.adjRisk >= 4 ? '#ef4444' : res.adjRisk === 3 ? '#f59e0b' : '#10b981';
+    const riskBg    = res.adjRisk >= 4 ? 'rgba(239,68,68,.08)' : res.adjRisk === 3 ? 'rgba(245,158,11,.08)' : 'rgba(16,185,129,.08)';
+
+    wrap.innerHTML = `
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:${riskBg};color:${riskColor}">Recommandation — Module 4/5</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Vos seuils de garantie</h3>
+      <p class="mt-2 text-[14px] text-neutral-600">Métier : <b>${res.metier.l}</b> · Niveau de risque : <b>${res.adjRisk}/5</b></p>
+
+      <div class="mt-6 grid gap-4 sm:grid-cols-2">
+        <div class="rounded-2xl border p-6" style="border-color:${riskColor}30;background:${riskBg}">
+          <div class="text-[12px] font-semibold uppercase tracking-wide" style="color:${riskColor}">Décennale — plafond conseillé</div>
+          <div class="mt-1 font-display text-3xl font-bold">${res.decMin.toLocaleString('fr-FR')} k€</div>
+          <p class="mt-1 text-[12px] text-neutral-600">Par sinistre / année d'assurance.</p>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-6">
+          <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">RC Pro — plafond conseillé</div>
+          <div class="mt-1 font-display text-3xl font-bold">${res.rcMin.toLocaleString('fr-FR')} k€</div>
+          <p class="mt-1 text-[12px] text-neutral-600">Dommages aux tiers pendant chantier.</p>
+        </div>
+      </div>
+
+      <div class="mt-4 rounded-2xl border border-neutral-200 bg-white p-6">
+        <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Prime annuelle estimée</div>
+        <div class="mt-1 font-display text-2xl font-bold">${res.primeLow.toLocaleString('fr-FR')} € – ${res.primeHigh.toLocaleString('fr-FR')} € / an</div>
+        <p class="mt-1 text-[12px] text-neutral-500">Ordre de grandeur marché — un devis nominatif reste indispensable.</p>
+      </div>
+
+      <div class="mt-6 rounded-2xl border border-neutral-200 bg-white p-5">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Motifs du calcul</h4>
+        <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-700 list-disc list-inside">
+          ${res.reasons.map(r=>`<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-warning">Points de vigilance</h4>
+        <ul class="mt-2 space-y-1.5 text-[14px] text-neutral-800 list-disc list-inside">
+          ${res.warnings.map(w=>`<li>${w}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="mt-4 rounded-2xl border border-neutral-200 bg-white p-5">
+        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Garanties de référence bâtiment</h4>
+        <ul class="mt-3 space-y-3 text-[14px] text-neutral-800">
+          ${res.guarantees.map(g=>`<li class="flex flex-col rounded-xl border border-black/5 bg-neutral-50 p-3"><span class="font-semibold">${g.l} <span class="ml-1 text-neutral-500 text-[12px] font-normal">— ${g.v}</span></span><span class="text-[12px] text-neutral-600 mt-0.5">${g.note}</span></li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button onclick="downloadAssurPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
+          <span class="text-[15px] font-semibold">Télécharger la synthèse (PDF)</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
+        </button>
+        <button id="assur-devis-btn" onclick="goToDevisGated()" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait">
+          <span class="text-[15px] font-semibold">Passer au devis conforme</span>
+        </button>
+        <button onclick="resetAssur()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier mes réponses</button>
+      </div>
+
+      <div id="assur-devis-paywall" class="mt-4 hidden rounded-2xl border p-5" style="border-color:rgba(255,128,30,.35); background:rgba(255,128,30,.06)">
+        <p class="text-[14px] font-semibold text-neutral-900">Éditeur de devis conforme — réservé à l'abonnement Pro</p>
+        <p class="mt-2 text-[14px] text-neutral-700">La génération de devis conformes fait partie de l'abonnement <b>Pro (19 €/mois)</b>. Le Pack Lancement (89 €) ne l'inclut pas. Passez Pro pour continuer.</p>
+        <button onclick="handlePricingClick('pro')" class="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02]" style="background:rgba(255,128,30,.92)">Activer l'éditeur de devis — 19 €/mois</button>
+      </div>
+
+      <p class="mt-6 text-[12px] text-neutral-500">Recommandation horodatée : ${new Date().toLocaleString('fr-FR')} — indicative, non contractuelle. Les seuils réels dépendent du contrat souscrit.</p>
+    `;
+    wrap.scrollTop = 0;
+  }
+
+  function downloadAssurPdf(){
+    const res = window.__assurRes || {};
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'pt', format:'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginX = 48;
+    const maxWidth = pageWidth - marginX*2;
+    let y = 56;
+
+    function addSpace(h){ y += h; if (y > 780){ doc.addPage(); y = 56; } }
+    function heading(text, size=14){
+      doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20,20,20);
+      doc.text(text, marginX, y); addSpace(size+10);
+    }
+    function paragraph(text, size=10.5){
+      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach(line => { doc.text(line, marginX, y); addSpace(size+4); });
+    }
+    function bulletList(items, size=10.5){
+      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
+      items.forEach(item=>{
+        const plain = String(item).replace(/<[^>]+>/g,'');
+        const lines = doc.splitTextToSize('•  '+plain, maxWidth-10);
+        lines.forEach((line,i)=>{ doc.text(line, marginX + (i===0?0:14), y); addSpace(size+5); });
+      });
+    }
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(0,132,255);
+    doc.text('Bâtipro — Synthèse assurance décennale', marginX, y); addSpace(28);
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(120,120,120);
+    doc.text('Généré le ' + new Date().toLocaleString('fr-FR'), marginX, y); addSpace(24);
+
+    if (res.primeLow != null && res.primeHigh != null){
+      heading('Prime indicative estimée');
+      paragraph(res.primeLow.toLocaleString('fr-FR') + ' € – ' + res.primeHigh.toLocaleString('fr-FR') + ' € / an');
+      paragraph('Ordre de grandeur marché — un devis nominatif reste indispensable.', 9.5);
+      addSpace(6);
+    }
+
+    if (res.reasons && res.reasons.length){
+      heading('Motifs du calcul', 12.5);
+      bulletList(res.reasons);
+      addSpace(6);
+    }
+
+    if (res.warnings && res.warnings.length){
+      heading('Points de vigilance', 12.5);
+      bulletList(res.warnings);
+      addSpace(6);
+    }
+
+    if (res.guarantees && res.guarantees.length){
+      heading('Garanties de référence bâtiment', 12.5);
+      res.guarantees.forEach(g=>{
+        doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(20,20,20);
+        doc.text(String(g.l).replace(/<[^>]+>/g,'') + '  —  ' + String(g.v).replace(/<[^>]+>/g,''), marginX, y);
+        addSpace(14);
+        paragraph(String(g.note).replace(/<[^>]+>/g,''), 9.5);
+        addSpace(4);
+      });
+    }
+
+    addSpace(10);
+    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(140,140,140);
+    paragraph('Recommandation horodatée — indicative, non contractuelle. Les seuils réels dépendent du contrat souscrit.', 8.5);
+
+    doc.save('batipro-assurance.pdf');
+  }
+  window.submitAssur = submitAssur;
+  window.downloadAssurPdf = downloadAssurPdf;
+  window.resetAssur = function(){
+    document.getElementById('assur-result').classList.add('hidden');
+    document.getElementById('assur-form-wrap').classList.remove('hidden');
+  };
+
+  // =====================================================================
+  //  MODULE 5/5 — PREMIER DEVIS CONFORME
+  // =====================================================================
+  const DEVIS_LS_KEY = 'batipro.devis.draft.v1';
+  const TVA_RATES = [
+    { v: 0,   l: 'Exonérée / Franchise' },
+    { v: 5.5, l: '5,5 % — Rénovation énergétique' },
+    { v: 10,  l: '10 % — Rénovation logement > 2 ans' },
+    { v: 20,  l: '20 % — Taux normal' },
+  ];
+  const TVA_BY_NATURE = { reno: 10, energie: 5.5, neuf: 20, autre: 20 };
+
+  function fmtEUR(n){ return (Number(n)||0).toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' €'; }
+
+  function defaultDevisLines(){
+    return [
+      { d:'Dépose de l\'ancien équipement et évacuation', u:'forfait', q:1, pu:180, tva:10 },
+      { d:'Fourniture et pose (main d\'œuvre)',            u:'h',       q:16, pu:55, tva:10 },
+      { d:'Matériaux et fournitures',                      u:'forfait', q:1, pu:640, tva:10 },
+    ];
+  }
+
+  function renderDevisLines(lines){
+    const tbody = document.getElementById('devis-lines');
+    tbody.innerHTML = lines.map((L,i)=>`
+      <tr class="border-t border-neutral-100 align-top">
+        <td class="py-2 pr-2"><input data-i="${i}" data-k="d" value="${(L.d||'').replace(/"/g,'&quot;')}" class="w-full rounded-[10px] border border-black/10 bg-white px-2 py-2 text-[13px]" placeholder="Désignation"></td>
+        <td class="py-2 pr-2"><input data-i="${i}" data-k="u" value="${(L.u||'').replace(/"/g,'&quot;')}" class="w-24 rounded-[10px] border border-black/10 bg-white px-2 py-2 text-[13px]" placeholder="u / h / m²"></td>
+        <td class="py-2 pr-2"><input data-i="${i}" data-k="q" type="number" step="0.01" min="0" value="${L.q}" class="w-20 rounded-[10px] border border-black/10 bg-white px-2 py-2 text-[13px] text-right"></td>
+        <td class="py-2 pr-2"><input data-i="${i}" data-k="pu" type="number" step="0.01" min="0" value="${L.pu}" class="w-28 rounded-[10px] border border-black/10 bg-white px-2 py-2 text-[13px] text-right"></td>
+        <td class="py-2 pr-2">
+          <select data-i="${i}" data-k="tva" class="w-24 rounded-[10px] border border-black/10 bg-white px-2 py-2 text-[13px]">
+            ${TVA_RATES.map(r=>`<option value="${r.v}" ${Number(L.tva)===r.v?'selected':''}>${r.v}%</option>`).join('')}
+          </select>
+        </td>
+        <td class="py-2 pr-2 text-right text-[13px] text-neutral-700 tabular-nums">${fmtEUR((Number(L.q)||0)*(Number(L.pu)||0))}</td>
+        <td class="py-2"><button type="button" data-del="${i}" class="grid h-7 w-7 place-items-center rounded-full bg-neutral-100 text-neutral-500 hover:bg-red-50 hover:text-red-600" aria-label="Supprimer">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button></td>
+      </tr>
+    `).join('');
+    tbody.querySelectorAll('input,select').forEach(el=>{
+      el.addEventListener('input', onDevisLineChange);
+      el.addEventListener('change', onDevisLineChange);
+    });
+    tbody.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = Number(btn.getAttribute('data-del'));
+        window.__devisLines.splice(idx,1);
+        if (window.__devisLines.length===0) window.__devisLines.push({d:'',u:'forfait',q:1,pu:0,tva:20});
+        renderDevisLines(window.__devisLines);
+        computeDevisTotals();
+        saveDevisDraft();
+      });
+    });
+  }
+
+  function onDevisLineChange(e){
+    const el = e.currentTarget;
+    const i = Number(el.getAttribute('data-i'));
+    const k = el.getAttribute('data-k');
+    let v = el.value;
+    if (k==='q'||k==='pu'||k==='tva') v = Number(v);
+    window.__devisLines[i][k] = v;
+    // update total cell without full re-render for typing UX
+    const row = el.closest('tr');
+    if (row){
+      const L = window.__devisLines[i];
+      row.children[5].textContent = fmtEUR((Number(L.q)||0)*(Number(L.pu)||0));
+    }
+    computeDevisTotals();
+    saveDevisDraft();
+  }
+
+  function addDevisLine(){
+    window.__devisLines.push({ d:'', u:'forfait', q:1, pu:0, tva:20 });
+    renderDevisLines(window.__devisLines);
+    computeDevisTotals();
+    saveDevisDraft();
+  }
+  window.addDevisLine = addDevisLine;
+
+  function computeDevisTotals(){
+    const lines = window.__devisLines || [];
+    const franchise = !!document.querySelector('#devis-form [name="em_franchise"]')?.checked;
+    let totalHT = 0;
+    const tvaMap = new Map();
+    lines.forEach(L=>{
+      const ht = (Number(L.q)||0)*(Number(L.pu)||0);
+      totalHT += ht;
+      const rate = franchise ? 0 : Number(L.tva)||0;
+      const tva = ht * rate/100;
+      tvaMap.set(rate, (tvaMap.get(rate)||0) + tva);
+    });
+    const totalTVA = Array.from(tvaMap.values()).reduce((a,b)=>a+b,0);
+    const totalTTC = totalHT + totalTVA;
+    const acomptePct = Number(document.querySelector('#devis-form [name="co_acompte"]')?.value)||0;
+    const acompte = totalTTC * acomptePct/100;
+
+    const el = document.getElementById('devis-totaux');
+    const tvaRows = Array.from(tvaMap.entries())
+      .filter(([r,v])=>r>0 && v>0.0001)
+      .sort((a,b)=>a[0]-b[0])
+      .map(([r,v])=>`<div class="flex justify-between text-neutral-700"><span>TVA ${String(r).replace('.',',')} %</span><span class="tabular-nums">${fmtEUR(v)}</span></div>`).join('');
+    el.innerHTML = `
+      <div class="flex justify-between"><span class="text-neutral-600">Total HT</span><span class="font-semibold tabular-nums">${fmtEUR(totalHT)}</span></div>
+      ${franchise ? '<div class="text-[12px] text-neutral-500">TVA non applicable, art. 293 B du CGI (franchise en base).</div>' : tvaRows || '<div class="text-[12px] text-neutral-500">Aucune TVA (lignes exonérées).</div>'}
+      <div class="flex justify-between border-t border-neutral-200 pt-2"><span class="font-semibold">Total TTC</span><span class="font-display text-xl font-bold tabular-nums">${fmtEUR(totalTTC)}</span></div>
+      <div class="flex justify-between text-[13px] text-neutral-600"><span>Acompte à la commande (${acomptePct}%)</span><span class="tabular-nums">${fmtEUR(acompte)}</span></div>
+      <div class="flex justify-between text-[13px] text-neutral-600"><span>Solde à la fin des travaux</span><span class="tabular-nums">${fmtEUR(totalTTC-acompte)}</span></div>
+    `;
+    window.__devisTotals = { totalHT, totalTVA, totalTTC, tvaMap, acomptePct, acompte, franchise };
+  }
+
+  function readDevisForm(){
+    const f = document.getElementById('devis-form');
+    const fd = new FormData(f);
+    const data = {};
+    for (const [k,v] of fd.entries()) data[k] = v;
+    data.em_franchise = !!f.querySelector('[name="em_franchise"]')?.checked;
+    data.lines = (window.__devisLines||[]).slice();
+    return data;
+  }
+
+  function saveDevisDraft(){
+    try {
+      const data = readDevisForm();
+      localStorage.setItem(DEVIS_LS_KEY, JSON.stringify(data));
+    } catch(e){}
+  }
+
+  function loadDevisDraft(){
+    try {
+      const raw = localStorage.getItem(DEVIS_LS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e){ return null; }
+  }
+
+  function clearDevisDraft(){
+    localStorage.removeItem(DEVIS_LS_KEY);
+    prefillDevisForm(true);
+  }
+  window.clearDevisDraft = clearDevisDraft;
+
+  function prefillDevisForm(reset=false){
+    const f = document.getElementById('devis-form');
+    const draft = reset ? null : loadDevisDraft();
+    const inpi = window.__inpiData || {};
+    const statut = window.__statutRes || {};
+    const assur = window.__assurRes || {};
+
+    const defaults = {
+      em_nom: inpi.denomination || (inpi.prenom && inpi.nom ? `${inpi.prenom} ${inpi.nom}` : ''),
+      em_forme: FORME_LABEL[inpi.forme] || '',
+      em_adresse: [inpi.adresse, inpi.cp, inpi.ville].filter(Boolean).join(', ') || (inpi.adresse||''),
+      em_siren: '',
+      em_tva: '',
+      em_email: (currentUser && currentUser.email) || '',
+      em_tel: inpi.tel || '',
+      em_assureur: assur.metier ? `Décennale ${assur.decMin||''} k€ · RC Pro ${assur.rcMin||''} k€` : '',
+      em_zone: 'France métropolitaine',
+      em_franchise: (inpi.forme === 'micro'),
+      cl_type: 'particulier',
+      cl_nom: '',
+      cl_adresse: '',
+      cl_email: '',
+      cl_tel: '',
+      cl_siret: '',
+      ch_objet: '',
+      ch_adresse: '',
+      ch_nature: 'reno',
+      ch_debut: '',
+      ch_duree: '',
+      ch_num: 'DEV-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-5),
+      co_acompte: 30, co_validite: 30, co_paiement: 30, co_notes: ''
+    };
+    const src = draft || defaults;
+    Object.entries(src).forEach(([k,v])=>{
+      const el = f.querySelector(`[name="${k}"]`);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = !!v;
+      else el.value = v ?? '';
+    });
+
+    // Lines
+    window.__devisLines = (draft && Array.isArray(draft.lines) && draft.lines.length) ? draft.lines : defaultDevisLines();
+    // If nature changed the default TVA and no draft, align default lines
+    if (!draft){
+      const rate = TVA_BY_NATURE[src.ch_nature] ?? 20;
+      window.__devisLines.forEach(L=> L.tva = rate);
+    }
+    renderDevisLines(window.__devisLines);
+    computeDevisTotals();
+
+    // React to nature change → suggest TVA for new lines
+    f.querySelector('[name="ch_nature"]').addEventListener('change', (e)=>{
+      const rate = TVA_BY_NATURE[e.target.value] ?? 20;
+      if (confirm('Appliquer la TVA ' + rate + '% à toutes les lignes ?')){
+        window.__devisLines.forEach(L=> L.tva = rate);
+        renderDevisLines(window.__devisLines);
+        computeDevisTotals();
+        saveDevisDraft();
+      }
+    }, { once:true });
+
+    // Auto-save on any form change
+    f.addEventListener('input', ()=>{ computeDevisTotals(); saveDevisDraft(); });
+  }
+
+  function openDevis(){
+    const m = document.getElementById('devis-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+    document.body.style.overflow='hidden';
+    document.getElementById('devis-form-wrap').classList.remove('hidden');
+    document.getElementById('devis-result').classList.add('hidden');
+    prefillDevisForm();
+  }
+  function closeDevis(){
+    const m = document.getElementById('devis-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
+    document.body.style.overflow='';
+  }
+  window.openDevis = openDevis;
+  window.closeDevis = closeDevis;
+
+  function submitDevis(){
+    const d = readDevisForm();
+    if (!d.lines.length || d.lines.every(L=>!L.d)){
+      showInlineError('Ajoutez au moins une ligne de prestation.'); return;
+    }
+    computeDevisTotals();
+    window.__devisData = d;
+    recordSubmission && recordSubmission('devis', `Devis ${d.ch_num || ''} — ${d.cl_nom || 'client'} — ${fmtEUR(window.__devisTotals.totalTTC)} TTC`, { ...d, totals:{ ht:window.__devisTotals.totalHT, tva:window.__devisTotals.totalTVA, ttc:window.__devisTotals.totalTTC } });
+
+    document.getElementById('devis-form-wrap').classList.add('hidden');
+    const wrap = document.getElementById('devis-result');
+    wrap.classList.remove('hidden');
+    const T = window.__devisTotals;
+    wrap.innerHTML = `
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(16,185,129,.10);color:#0f766e">Devis prêt — Module 5/5</span>
+      <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Votre devis est conforme</h3>
+      <p class="mt-2 text-[14px] text-neutral-600">Mentions BTP obligatoires incluses, TVA détaillée par ligne, rappel décennale &amp; RC Pro, conditions de paiement et validité horodatées.</p>
+
+      <div class="mt-6 grid gap-4 sm:grid-cols-3">
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5">
+          <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">Total HT</div>
+          <div class="mt-1 font-display text-2xl font-bold">${fmtEUR(T.totalHT)}</div>
+        </div>
+        <div class="rounded-2xl border border-neutral-200 bg-white p-5">
+          <div class="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">TVA</div>
+          <div class="mt-1 font-display text-2xl font-bold">${fmtEUR(T.totalTVA)}</div>
+          ${T.franchise ? '<div class="mt-1 text-[11px] text-neutral-500">Franchise en base (art. 293 B CGI)</div>' : ''}
+        </div>
+        <div class="rounded-2xl border p-5" style="border-color:rgba(29,95,163,.25);background:rgba(29,95,163,.05)">
+          <div class="text-[11px] font-semibold uppercase tracking-wide text-brand">Total TTC</div>
+          <div class="mt-1 font-display text-3xl font-bold">${fmtEUR(T.totalTTC)}</div>
+        </div>
+      </div>
+
+      <div class="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-[13px] text-neutral-700">
+        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), délai de paiement (${d.co_paiement} j), rappel assurance décennale &amp; RC Pro (loi Spinetta), ${d.cl_type === 'pro' ? 'pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), applicables de plein droit entre professionnels' : 'pénalités de retard contractuelles (à stipuler au devis, non automatiques pour un client particulier)'}, médiation de la consommation, mention manuscrite “bon pour accord”.
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button onclick="downloadDevisPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
+          <span class="text-[15px] font-semibold">Télécharger le devis (PDF)</span>
+          <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>
+        </button>
+        <button onclick="editDevis()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier le devis</button>
+        <button onclick="closeDevis()" class="rounded-[16px] bg-neutral-950 px-5 py-4 text-[14px] font-medium text-white hover:opacity-90">Terminer</button>
+      </div>
+
+      <p class="mt-6 text-[12px] text-neutral-500">Généré : ${new Date().toLocaleString('fr-FR')} — brouillon sauvegardé localement. Ce modèle est indicatif : vérifiez vos mentions légales spécifiques avant envoi.</p>
+    `;
+    wrap.scrollTop = 0;
+  }
+  window.submitDevis = submitDevis;
+  window.editDevis = function(){
+    document.getElementById('devis-result').classList.add('hidden');
+    document.getElementById('devis-form-wrap').classList.remove('hidden');
+  };
+
+  function downloadDevisPdf(){
+    const d = window.__devisData || readDevisForm();
+    const T = window.__devisTotals || {};
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'pt', format:'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const mx = 40;
+    const maxW = pageW - mx*2;
+    let y = 48;
+
+    function ensure(h){ if (y + h > pageH - 60){ doc.addPage(); y = 48; drawFooter(); } }
+    function drawFooter(){
+      const py = pageH - 30;
+      doc.setDrawColor(230); doc.line(mx, py-8, pageW-mx, py-8);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(140);
+      doc.text(`${d.em_nom || ''} — SIREN ${d.em_siren || '—'} — Devis ${d.ch_num || ''}`, mx, py);
+      doc.text('Page ' + doc.internal.getNumberOfPages(), pageW-mx, py, { align:'right' });
+    }
+    function heading(t, size=13){ ensure(size+10); doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20); doc.text(t, mx, y); y += size+6; }
+    function para(t, size=9.5, color=[60,60,60]){
+      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(...color);
+      const lines = doc.splitTextToSize(t, maxW);
+      lines.forEach(l=>{ ensure(size+3); doc.text(l, mx, y); y += size+3; });
+    }
+
+    // ==== HEADER ====
+    doc.setFillColor(0,132,255); doc.rect(0,0,pageW,6,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(20);
+    doc.text('DEVIS', mx, y+8); y += 22;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
+    doc.text('N° ' + (d.ch_num||'—'), mx, y); y += 12;
+    doc.text('Émis le : ' + new Date().toLocaleDateString('fr-FR'), mx, y); y += 12;
+    doc.text('Valable ' + (d.co_validite||30) + ' jours', mx, y); y += 8;
+
+    // Émetteur bloc droit
+    let ry = 60;
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(0,132,255);
+    doc.text(d.em_nom || 'Votre entreprise', pageW-mx, ry, { align:'right' }); ry += 13;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(60);
+    [d.em_forme, d.em_adresse, d.em_email, d.em_tel,
+     d.em_siren ? 'SIREN/SIRET : '+d.em_siren : '',
+     d.em_tva ? 'TVA : '+d.em_tva : ''
+    ].filter(Boolean).forEach(l=>{
+      const lines = doc.splitTextToSize(l, 240);
+      lines.forEach(ln=>{ doc.text(ln, pageW-mx, ry, { align:'right' }); ry += 11; });
+    });
+    y = Math.max(y, ry) + 12;
+
+    // Client
+    doc.setDrawColor(230); doc.setFillColor(249,250,251);
+    doc.roundedRect(mx, y, maxW, 74, 6, 6, 'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(120);
+    doc.text('CLIENT', mx+12, y+16);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(20);
+    doc.text(d.cl_nom || '—', mx+12, y+32);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(60);
+    const cl = [d.cl_adresse, d.cl_email, d.cl_tel, d.cl_siret?('SIRET : '+d.cl_siret):''].filter(Boolean).join('  ·  ');
+    doc.splitTextToSize(cl, maxW-24).forEach((ln,i)=> doc.text(ln, mx+12, y+48+i*11));
+    y += 88;
+
+    // Chantier
+    heading('Chantier', 11);
+    para('Objet : ' + (d.ch_objet||'—'), 10, [40,40,40]);
+    if (d.ch_adresse) para('Adresse : ' + d.ch_adresse);
+    const meta = [];
+    if (d.ch_debut) meta.push('Début prévu : ' + new Date(d.ch_debut).toLocaleDateString('fr-FR'));
+    if (d.ch_duree) meta.push('Durée estimée : ' + d.ch_duree);
+    if (meta.length) para(meta.join('   ·   '));
+    y += 6;
+
+    // ==== TABLE ====
+    heading('Détail des prestations', 11);
+    const cols = [
+      { k:'d',  l:'Désignation', w: maxW - 60 - 52 - 62 - 46 - 72 },
+      { k:'u',  l:'Unité',       w: 60,  align:'left' },
+      { k:'q',  l:'Qté',         w: 52,  align:'right' },
+      { k:'pu', l:'PU HT',       w: 62,  align:'right' },
+      { k:'tva',l:'TVA',         w: 46,  align:'right' },
+      { k:'ht', l:'Total HT',    w: 72,  align:'right' },
+    ];
+    function drawHeaderRow(){
+      doc.setFillColor(245,247,250); doc.rect(mx, y, maxW, 20, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(60);
+      let x = mx + 6;
+      cols.forEach(c=>{
+        const align = c.align || 'left';
+        const tx = align==='right' ? x + c.w - 12 : x;
+        doc.text(c.l, tx, y+13, { align });
+        x += c.w;
+      });
+      y += 20;
+    }
+    drawHeaderRow();
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30);
+    d.lines.forEach((L, idx)=>{
+      const desig = doc.splitTextToSize(L.d || '—', cols[0].w - 12);
+      const rowH = Math.max(18, desig.length * 11 + 6);
+      ensure(rowH + 4);
+      if (idx % 2 === 1){ doc.setFillColor(252,252,253); doc.rect(mx, y, maxW, rowH, 'F'); }
+      let x = mx + 6;
+      // desig
+      desig.forEach((ln,i)=> doc.text(ln, x, y+12+i*11));
+      x += cols[0].w;
+      // unite
+      doc.text(String(L.u||''), x, y+12); x += cols[1].w;
+      // qté
+      doc.text(String(L.q ?? ''), x + cols[2].w - 12, y+12, { align:'right' }); x += cols[2].w;
+      // PU
+      doc.text((Number(L.pu)||0).toFixed(2), x + cols[3].w - 12, y+12, { align:'right' }); x += cols[3].w;
+      // TVA
+      doc.text((T.franchise ? '—' : (String(L.tva).replace('.',',')+'%')), x + cols[4].w - 12, y+12, { align:'right' }); x += cols[4].w;
+      // HT
+      const ht = (Number(L.q)||0)*(Number(L.pu)||0);
+      doc.text(ht.toFixed(2).replace('.',','), x + cols[5].w - 12, y+12, { align:'right' });
+      y += rowH;
+      doc.setDrawColor(235); doc.line(mx, y, pageW-mx, y);
+    });
+    y += 10;
+
+    // ==== TOTAUX ====
+    const boxW = 240; const boxX = pageW - mx - boxW;
+    ensure(120);
+    doc.setDrawColor(220); doc.setFillColor(255);
+    doc.roundedRect(boxX, y, boxW, 108, 6, 6, 'FD');
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(60);
+    let ty = y + 18;
+    doc.text('Total HT', boxX+12, ty);
+    doc.text(fmtEUR(T.totalHT), boxX+boxW-12, ty, { align:'right' }); ty += 14;
+
+    if (T.franchise){
+      doc.setFont('helvetica','italic'); doc.setFontSize(9); doc.setTextColor(90);
+      doc.text('TVA non applicable — art. 293 B CGI', boxX+12, ty); ty += 14;
+    } else if (T.tvaMap){
+      Array.from(T.tvaMap.entries()).filter(([r,v])=>r>0 && v>0.0001).sort((a,b)=>a[0]-b[0]).forEach(([r,v])=>{
+        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(60);
+        doc.text('TVA ' + String(r).replace('.',',') + ' %', boxX+12, ty);
+        doc.text(fmtEUR(v), boxX+boxW-12, ty, { align:'right' }); ty += 13;
+      });
+    }
+    doc.setDrawColor(230); doc.line(boxX+8, ty, boxX+boxW-8, ty); ty += 10;
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(0,132,255);
+    doc.text('Total TTC', boxX+12, ty);
+    doc.text(fmtEUR(T.totalTTC), boxX+boxW-12, ty, { align:'right' }); ty += 16;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(80);
+    doc.text('Acompte (' + T.acomptePct + '%) : ' + fmtEUR(T.acompte), boxX+12, ty); ty += 12;
+    doc.text('Solde à la fin des travaux : ' + fmtEUR(T.totalTTC - T.acompte), boxX+12, ty);
+    y += 120;
+
+    // ==== CONDITIONS / MENTIONS ====
+    ensure(60);
+    heading('Conditions & mentions légales', 11);
+    para('• Devis gratuit, valable ' + (d.co_validite||30) + ' jours à compter de sa date d\'émission.');
+    para('• Acompte de ' + (T.acomptePct) + '% à la signature ; solde à réception des travaux.');
+    if (d.cl_type === 'pro') {
+      para('• Délai de paiement : ' + (d.co_paiement||30) + ' jours à compter de la facture (art. L441-10 C. com.).');
+      para('• Pénalités de retard : taux BCE + 10 points ; indemnité forfaitaire de recouvrement de 40 € (art. D441-5 C. com.), applicables de plein droit entre professionnels.');
+    } else {
+      para('• Délai de paiement : ' + (d.co_paiement||30) + ' jours à compter de la facture, tel que convenu au présent devis.');
+      para('• Pénalités de retard : taux de ' + (d.co_penalite||'10') + ' % par an à compter du jour suivant la date de règlement prévue, applicables dès lors qu\'elles sont stipulées au présent devis (client particulier — non automatiques par la loi, contrairement aux relations entre professionnels).');
+    }
+    para('• Assurance décennale & RC Pro (loi Spinetta, art. L241-1 C. assur.) : ' + (d.em_assureur || 'compagnie et police à compléter') + ' — Zone : ' + (d.em_zone||'France métropolitaine') + '.');
+    if (T.franchise) para('• TVA non applicable, art. 293 B du CGI (franchise en base — micro-entreprise).');
+    para('• Médiation de la consommation : en cas de litige, le client consommateur peut recourir gratuitement à un médiateur (art. L612-1 C. conso.).');
+    para('• Droit de rétractation de 14 jours en cas de démarchage hors établissement (art. L221-18 C. conso.), sauf renonciation expresse pour travaux urgents.');
+    if (d.co_notes){ y += 4; heading('Notes', 11); para(d.co_notes); }
+
+    // Signature
+    ensure(90);
+    y += 10;
+    doc.setDrawColor(220);
+    doc.roundedRect(mx, y, maxW/2 - 8, 78, 6, 6, 'S');
+    doc.roundedRect(mx + maxW/2 + 8, y, maxW/2 - 8, 78, 6, 6, 'S');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(80);
+    doc.text('L\'entreprise', mx+10, y+14);
+    doc.text('Le client — « Bon pour accord »', mx + maxW/2 + 18, y+14);
+    doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(140);
+    doc.text('Cachet et signature', mx+10, y+70);
+    doc.text('Date, signature manuscrite précédée de la mention « Bon pour accord »', mx + maxW/2 + 18, y+70);
+    y += 90;
+
+    drawFooter();
+    doc.save(`devis-${(d.ch_num||'batipro').replace(/[^\w\-]+/g,'_')}.pdf`);
+  }
+  window.downloadDevisPdf = downloadDevisPdf;
+
+  // ESC to close
+  window.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeAdmin(); closeLegal(); closeAuth(); closeQualif(); closeStatut(); closeInpi(); closeAssur(); closeDevis(); closeEspaceClient(); } });
+
+</script>
+
+<!-- ---------- Sélecteur de date moderne : remplace tous les <input type="date"> ---------- -->
+<script>
+(function(){
+  const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const JOURS = ['L','M','M','J','V','S','D'];
+  let openPanel = null; // { panel, close }
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function toISO(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
+  function parseISO(v){
+    if(!v) return null;
+    const [y,m,d] = v.split('-').map(Number);
+    if(!y||!m||!d) return null;
+    return new Date(y, m-1, d);
+  }
+  function sameDay(a,b){ return a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+
+  const iconCalendar = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18"/><path d="M8 2.5v4"/><path d="M16 2.5v4"/></svg>`;
+  const iconChevronL = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`;
+  const iconChevronR = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+
+  function closeOpenPanel(){
+    if (openPanel){ openPanel.close(); openPanel = null; }
+  }
+
+  function enhance(input){
+    if (input.dataset.mdpDone) return;
+    input.dataset.mdpDone = '1';
+    input.classList.add('mdp-native');
+    input.tabIndex = -1;
+
+    // Enveloppe autour de l'input natif (conserve la place dans le formulaire)
+    const wrap = document.createElement('div');
+    wrap.className = 'mdp-wrap';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+
+    // Bouton déclencheur qui reprend le style visuel de l'input d'origine
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = (input.getAttribute('data-orig-class') || input.className.replace('mdp-native','').trim()) + ' mdp-trigger';
+    trigger.innerHTML = `<span class="mdp-value" data-empty="1">jj/mm/aaaa</span><span class="mdp-icon">${iconCalendar}</span>`;
+    wrap.appendChild(trigger);
+
+    let viewDate = parseISO(input.value) || new Date();
+    let selected = parseISO(input.value);
+
+    function refreshTriggerLabel(){
+      const valEl = trigger.querySelector('.mdp-value');
+      if (selected){
+        valEl.textContent = selected.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+        valEl.dataset.empty = '0';
+      } else {
+        valEl.textContent = 'jj/mm/aaaa';
+        valEl.dataset.empty = '1';
+      }
+    }
+    refreshTriggerLabel();
+
+    function setValue(date){
+      selected = date;
+      input.value = date ? toISO(date.getFullYear(), date.getMonth(), date.getDate()) : '';
+      input.dispatchEvent(new Event('input', { bubbles:true }));
+      input.dispatchEvent(new Event('change', { bubbles:true }));
+      refreshTriggerLabel();
+    }
+
+    function buildPanel(){
+      const min = input.min ? parseISO(input.min) : null;
+      const max = input.max ? parseISO(input.max) : null;
+      const today = new Date(); today.setHours(0,0,0,0);
+
+      const y = viewDate.getFullYear(), m = viewDate.getMonth();
+      const firstOfMonth = new Date(y, m, 1);
+      // Lundi = 0 ... Dimanche = 6
+      const startOffset = (firstOfMonth.getDay() + 6) % 7;
+      const daysInMonth = new Date(y, m+1, 0).getDate();
+      const daysInPrevMonth = new Date(y, m, 0).getDate();
+
+      let cells = '';
+      for (let i=0;i<startOffset;i++){
+        const d = daysInPrevMonth - startOffset + i + 1;
+        cells += `<div class="mdp-day mdp-day-muted" data-nav="-1" data-day="${d}">${d}</div>`;
+      }
+      for (let d=1; d<=daysInMonth; d++){
+        const cur = new Date(y,m,d);
+        const disabled = (min && cur < min) || (max && cur > max);
+        const cls = ['mdp-day'];
+        if (sameDay(cur, selected)) cls.push('mdp-day-selected');
+        if (sameDay(cur, today)) cls.push('mdp-day-today');
+        if (disabled) cls.push('mdp-day-disabled');
+        cells += `<div class="${cls.join(' ')}" data-day="${d}">${d}</div>`;
+      }
+      const totalCells = startOffset + daysInMonth;
+      const trailing = (7 - (totalCells % 7)) % 7;
+      for (let d=1; d<=trailing; d++){
+        cells += `<div class="mdp-day mdp-day-muted" data-nav="1" data-day="${d}">${d}</div>`;
+      }
+
+      const panel = document.createElement('div');
+      panel.className = 'mdp-panel';
+      panel.innerHTML = `
+        <div class="mdp-head">
+          <button type="button" class="mdp-nav-btn" data-act="prev" aria-label="Mois précédent">${iconChevronL}</button>
+          <span class="mdp-head-label">${MOIS[m]} ${y}</span>
+          <button type="button" class="mdp-nav-btn" data-act="next" aria-label="Mois suivant">${iconChevronR}</button>
+        </div>
+        <div class="mdp-weekdays">${JOURS.map(j=>`<span>${j}</span>`).join('')}</div>
+        <div class="mdp-days">${cells}</div>
+        <div class="mdp-foot">
+          <button type="button" class="mdp-link-btn mdp-clear" data-act="clear">Effacer</button>
+          <button type="button" class="mdp-link-btn" data-act="today">Aujourd'hui</button>
+        </div>
+      `;
+      return panel;
+    }
+
+    function positionPanel(panel){
+      // Bascule le panneau à droite si l'espace à droite est insuffisant
+      const rect = trigger.getBoundingClientRect();
+      const overflowRight = rect.left + 300 > window.innerWidth - 12;
+      if (overflowRight) panel.setAttribute('data-align','right');
+    }
+
+    function open(){
+      closeOpenPanel();
+      const panel = buildPanel();
+      wrap.appendChild(panel);
+      positionPanel(panel);
+      trigger.classList.add('mdp-open');
+
+      function onPanelClick(e){
+        const act = e.target.closest('[data-act]');
+        if (act){
+          const a = act.dataset.act;
+          if (a==='prev'){ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1); rerender(); }
+          else if (a==='next'){ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1); rerender(); }
+          else if (a==='clear'){ setValue(null); close(); }
+          else if (a==='today'){ const t=new Date(); t.setHours(0,0,0,0); viewDate = new Date(t.getFullYear(),t.getMonth(),1); setValue(t); close(); }
+          return;
+        }
+        const dayEl = e.target.closest('.mdp-day');
+        if (dayEl && !dayEl.classList.contains('mdp-day-disabled')){
+          if (dayEl.dataset.nav){
+            viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+Number(dayEl.dataset.nav), 1);
+            rerender();
+            return;
+          }
+          setValue(new Date(viewDate.getFullYear(), viewDate.getMonth(), Number(dayEl.dataset.day)));
+          close();
+        }
+      }
+      panel.addEventListener('click', onPanelClick);
+
+      function rerender(){
+        const fresh = buildPanel();
+        panel.innerHTML = fresh.innerHTML;
+      }
+
+      function onOutside(e){
+        if (!wrap.contains(e.target)) close();
+      }
+      document.addEventListener('mousedown', onOutside);
+
+      function close(){
+        panel.remove();
+        trigger.classList.remove('mdp-open');
+        document.removeEventListener('mousedown', onOutside);
+        if (openPanel && openPanel.panel === panel) openPanel = null;
+      }
+      openPanel = { panel, close };
+    }
+
+    trigger.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if (openPanel && wrap.contains(openPanel.panel)) { closeOpenPanel(); }
+      else open();
+    });
+
+    // Si le champ est rempli par ailleurs (pré-remplissage programmatique), on
+    // resynchronise l'affichage du bouton.
+    input.addEventListener('mdp:sync', ()=>{
+      selected = parseISO(input.value);
+      viewDate = selected || new Date();
+      refreshTriggerLabel();
+    });
+  }
+
+  function enhanceAll(){
+    document.querySelectorAll('input[type="date"]').forEach(enhance);
+  }
+
+  document.addEventListener('DOMContentLoaded', enhanceAll);
+  // Certains champs date vivent dans des modales injectées/affichées après coup :
+  // on re-scanne à l'ouverture de chaque modale pour rester exhaustif.
+  ['openAdmin','openInpi','openDevis'].forEach(fnName=>{
+    const original = window[fnName];
+    if (typeof original === 'function'){
+      window[fnName] = function(...args){
+        const r = original.apply(this, args);
+        setTimeout(enhanceAll, 0);
+        return r;
+      };
+    }
+  });
+  window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeOpenPanel(); });
+})();
+</script>
+</body>
+</html>
