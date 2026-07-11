@@ -6167,7 +6167,8 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
 </html>
 <script>
   // Génère et télécharge un vrai fichier PDF du rapport de qualification
-  // (jsPDF), au lieu de passer par la boîte d'impression du navigateur.
+  // (jsPDF) — mise en page "carte" moderne alignée sur la charte Bâtipro
+  // (bandeau de marque, badge de statut coloré, sections en cartes).
   function downloadQualifReportPdf(){
     const res = window.__qualifReportRes;
     const meta = window.__qualifReportMeta || {};
@@ -6176,71 +6177,164 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'pt', format:'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const marginX = 48;
     const maxWidth = pageWidth - marginX*2;
-    let y = 56;
+    const bottomLimit = pageHeight - 56;
+    let y = 0;
 
-    function addSpace(h){ y += h; if (y > 780){ doc.addPage(); y = 56; } }
-    function heading(text, size=12.5){
-      doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20,20,20);
-      doc.text(text, marginX, y); addSpace(size+8);
-    }
-    function line(label, value, size=10.5){
-      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
-      const text = (label ? label + ' : ' : '') + (value || '—');
-      const lines = doc.splitTextToSize(text, maxWidth);
-      lines.forEach(l => { doc.text(l, marginX, y); addSpace(size+5); });
+    // ---- Palette (alignée sur --brand / --brand-2 / --accent du site) ----
+    const BRAND = [29,95,163];      // #1D5FA3
+    const BRAND_2 = [74,134,196];   // #4A86C4
+    const INK = [23,23,23];
+    const SLATE = [82,82,82];
+    const MUTED = [140,140,140];
+    const HAIRLINE = [230,230,230];
+    const STATUS = {
+      eligible: { fg:[6,120,87],  bg:[224,247,239], badgeBg:[16,185,129], label:'Éligible' },
+      presque:  { fg:[161,98,7],  bg:[254,247,224], badgeBg:[245,158,11], label:'Presque éligible' },
+      non:      { fg:[185,28,28], bg:[254,232,232], badgeBg:[239,68,68], label:"Non éligible en l'état" },
+    };
+    const st = STATUS[res.status] || STATUS.non;
+
+    function newPageIfNeeded(neededHeight){
+      if (y + neededHeight > bottomLimit){
+        doc.addPage();
+        drawFooter();
+        y = 64;
+      }
     }
 
-    const badge = res.status==='eligible' ? 'Éligible' : res.status==='presque' ? 'Presque éligible' : 'Non éligible en l\'état';
+    function drawFooter(){
+      const pageNum = doc.internal.getNumberOfPages();
+      doc.setDrawColor(...HAIRLINE);
+      doc.setLineWidth(0.75);
+      doc.line(marginX, pageHeight - 40, pageWidth - marginX, pageHeight - 40);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...MUTED);
+      doc.text('Bâtipro — batipro-ten.vercel.app', marginX, pageHeight - 26);
+      doc.text(String(pageNum), pageWidth - marginX, pageHeight - 26, { align:'right' });
+    }
+
+    // ---- Bandeau d'en-tête coloré ----
+    const headerH = 96;
+    doc.setFillColor(...BRAND);
+    doc.rect(0, 0, pageWidth, headerH, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(255,255,255);
+    doc.text('Bâtipro', marginX, 42);
+    doc.setFont('helvetica','normal'); doc.setFontSize(11.5); doc.setTextColor(220,232,245);
+    doc.text('Rapport de qualification', marginX, 62);
+
     const d = meta.date ? new Date(meta.date) : new Date();
+    const genLabel = 'Généré le ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(220,232,245);
+    doc.text(genLabel, pageWidth - marginX, 62, { align:'right' });
 
-    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(0,132,255);
-    doc.text('Bâtipro — Rapport de qualification', marginX, y); addSpace(26);
+    y = headerH + 34;
 
-    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(120,120,120);
-    doc.text('Résultat : ' + badge + '  —  Test réalisé le ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), marginX, y); addSpace(24);
+    // ---- Badge de statut ----
+    doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+    const badgeLabel = st.label.toUpperCase();
+    const badgeW = doc.getTextWidth(badgeLabel) + 24;
+    doc.setFillColor(...st.badgeBg);
+    doc.roundedRect(marginX, y - 14, badgeW, 22, 11, 11, 'F');
+    doc.setTextColor(255,255,255);
+    doc.text(badgeLabel, marginX + 12, y + 1);
+    y += 34;
 
-    heading(res.title, 14);
-    addSpace(2);
+    // ---- Titre du résultat ----
+    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(...INK);
+    const titleLines = doc.splitTextToSize(res.title, maxWidth);
+    titleLines.forEach(l => { doc.text(l, marginX, y); y += 22; });
+    y += 6;
 
-    heading('Titulaire');
-    line(null, meta.nom);
-    if (meta.email) line(null, meta.email);
-    addSpace(6);
+    // ---- Ligne d'identité (titulaire · métier · diplôme · expérience) ----
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...SLATE);
+    const idParts = [meta.nom, meta.email].filter(Boolean).join('  ·  ');
+    if (idParts){ doc.text(idParts, marginX, y); y += 15; }
+    const detailParts = [
+      'Métier : ' + res.metier.l,
+      'Diplôme : ' + res.diplome.l,
+      'Expérience : ' + res.exp + ' an(s)',
+      res.ueDiploma ? 'Diplôme UE reconnu' : null,
+    ].filter(Boolean).join('   ·   ');
+    const detailLines = doc.splitTextToSize(detailParts, maxWidth);
+    detailLines.forEach(l => { doc.text(l, marginX, y); y += 14; });
+    y += 8;
 
-    heading('Détails du test');
-    line('Métier', res.metier.l);
-    line('Diplôme', res.diplome.l);
-    line('Expérience', res.exp + ' an(s)');
-    if (res.ueDiploma) line(null, 'Diplôme UE reconnu');
-    addSpace(6);
+    doc.setDrawColor(...HAIRLINE);
+    doc.setLineWidth(0.75);
+    doc.line(marginX, y, pageWidth - marginX, y);
+    y += 26;
 
-    heading('Motifs de la décision');
-    (res.reasons || []).forEach(r => line(null, '• ' + r));
-    addSpace(6);
+    // ---- Carte générique : titre + puces, fond teinté + liseré coloré ----
+    function card({ title, items, fg, bg, accent, bodyColor }){
+      if (!items || !items.length) return;
+      const padX = 16, padTop = 14, padBottom = 16, lineH = 13.5, gapTitleBody = 8;
+      const titleSize = 10.5, bodySize = 9.7;
+      doc.setFont('helvetica','bold'); doc.setFontSize(titleSize);
+      const titleH = 13;
 
-    if (res.warnings && res.warnings.length){
-      heading('À retenir');
-      res.warnings.forEach(w => line(null, '• ' + w));
-      addSpace(6);
-    }
+      // Pré-calcule la hauteur totale du texte du corps
+      doc.setFont('helvetica','normal'); doc.setFontSize(bodySize);
+      const wrapped = items.map(it => doc.splitTextToSize('•  ' + it, maxWidth - padX*2));
+      const bodyLineCount = wrapped.reduce((n, arr) => n + arr.length, 0);
+      const cardH = padTop + titleH + gapTitleBody + bodyLineCount*lineH + padBottom;
 
-    if (res.specifics && res.specifics.length){
-      heading(`Exigences spécifiques au métier « ${res.metier.l} »`);
-      res.specifics.forEach(s => {
-        doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(50,50,50);
-        doc.text(s.label, marginX, y); addSpace(14);
-        line(null, s.detail, 9.5);
-        addSpace(2);
+      newPageIfNeeded(cardH + 16);
+
+      doc.setFillColor(...(bg || [246,246,246]));
+      doc.roundedRect(marginX, y, maxWidth, cardH, 8, 8, 'F');
+      doc.setFillColor(...(accent || fg || BRAND));
+      doc.roundedRect(marginX, y, 4, cardH, 2, 2, 'F');
+
+      let cy = y + padTop + 4;
+      doc.setFont('helvetica','bold'); doc.setFontSize(titleSize); doc.setTextColor(...(fg || INK));
+      doc.text(title, marginX + padX, cy);
+      cy += gapTitleBody + 8;
+
+      doc.setFont('helvetica','normal'); doc.setFontSize(bodySize); doc.setTextColor(...(bodyColor || SLATE));
+      wrapped.forEach(arr => {
+        arr.forEach(l => { doc.text(l, marginX + padX, cy); cy += lineH; });
       });
-      addSpace(4);
+
+      y += cardH + 16;
     }
 
-    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(140,140,140);
-    line(null, "Ce rapport a valeur d'auto-évaluation ; la Chambre de Métiers et de l'Artisanat validera formellement la qualification lors de l'immatriculation.", 8.5);
+    // ---- Carte "Motifs de la décision" (teintée selon le statut) ----
+    card({
+      title: 'Motifs de la décision',
+      items: res.reasons || [],
+      fg: st.fg, bg: st.bg, accent: st.badgeBg, bodyColor: INK,
+    });
 
+    // ---- Carte "À retenir" ----
+    if (res.warnings && res.warnings.length){
+      card({
+        title: 'À retenir',
+        items: res.warnings,
+        fg: [161,98,7], bg: [254,249,231], accent: [245,158,11], bodyColor: SLATE,
+      });
+    }
+
+    // ---- Carte "Exigences spécifiques" (titre + détail par ligne) ----
+    if (res.specifics && res.specifics.length){
+      const items = res.specifics.map(s => `${s.label} — ${s.detail}`);
+      card({
+        title: `Exigences spécifiques au métier « ${res.metier.l} »`,
+        items,
+        fg: BRAND, bg: [235,241,248], accent: BRAND_2, bodyColor: SLATE,
+      });
+    }
+
+    // ---- Mention légale finale ----
+    newPageIfNeeded(40);
+    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+    const legal = "Ce rapport a valeur d'auto-évaluation ; la Chambre de Métiers et de l'Artisanat validera formellement la qualification lors de l'immatriculation.";
+    doc.splitTextToSize(legal, maxWidth).forEach(l => { doc.text(l, marginX, y); y += 12; });
+
+    drawFooter();
     doc.save('batipro-rapport-qualification.pdf');
   }
   window.downloadQualifReportPdf = downloadQualifReportPdf;
 </script>
+
