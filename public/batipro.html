@@ -3668,7 +3668,6 @@ if (submission && submission.res){
   window.__qualifReportRes = submission.res;
   window.__qualifReportMeta = meta;
   content.innerHTML = buildQualifReportHTML(submission.res, meta);
-} else {
     } else {
       content.innerHTML = `<p class="text-neutral-600 text-[14px]">Aucun test de qualification trouvé pour ce compte. <button onclick="closeQualifReport(); openQualif();" class="rapport-noprint font-semibold text-brand">Passer le test</button></p>`;
     }
