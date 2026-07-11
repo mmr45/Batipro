@@ -668,6 +668,49 @@
             </button>
           </div>
         </div>
+
+        <!-- Assurance décennale -->
+        <div class="dash-card p-6" data-reveal>
+          <div class="flex items-start justify-between gap-3">
+            <div id="espace-assur-icon" class="dash-stat-icon bg-brand-tint">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5z"/></svg>
+            </div>
+            <span class="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Assurance décennale</span>
+          </div>
+          <div id="espace-assur" class="mt-4">
+            <p class="text-neutral-500 text-[14px]">Chargement…</p>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <button id="espace-assur-voir-btn" onclick="downloadAssurPdf()" class="hidden inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02] bg-brand">
+              Télécharger la synthèse
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            </button>
+            <button onclick="openAssur()" class="inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              <span id="espace-assur-refaire-label">Faire la simulation</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mes devis -->
+      <div class="dash-card mt-5 p-6" data-reveal>
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="dash-stat-icon bg-brand-tint">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5a1 1 0 0 0 1 1h5"/><path d="M6 3h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+            </div>
+            <div>
+              <h3 class="text-[15px] font-semibold text-neutral-900">Mes devis</h3>
+              <p class="text-[13px] text-neutral-500">Retrouvez et retéléchargez vos devis générés</p>
+            </div>
+          </div>
+          <button id="espace-devis-nouveau-btn" onclick="openDevis()" class="hidden shrink-0 inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+            Nouveau devis
+          </button>
+        </div>
+        <div id="espace-devis-list" class="mt-5">
+          <p class="text-neutral-500 text-[14px]">Chargement…</p>
+        </div>
       </div>
 
       <!-- Paramètres du compte -->
@@ -2796,6 +2839,8 @@ animate();
 
     await loadEspaceQualif(userId);
     await loadEspaceInpi(userId, hasDossier || hasPro);
+    await loadEspaceAssur(userId);
+    await loadEspaceDevis(userId, hasPro);
   }
 
   // Récupère et affiche le dernier test de qualification de l'utilisateur
@@ -2975,6 +3020,160 @@ animate();
       box.innerHTML = `<p class="text-neutral-500 text-[14px]">Inclus dans le Pack Lancement (89 €).</p>`;
       if (acheterBtn) acheterBtn.classList.remove('hidden');
     }
+  }
+
+  // Récupère et affiche la dernière simulation d'assurance décennale /
+  // RC Pro de l'utilisateur connecté (module gratuit, non verrouillé par un
+  // plan payant) — même logique que loadEspaceQualif / loadEspaceInpi.
+  async function loadEspaceAssur(userId){
+    const box = document.getElementById('espace-assur');
+    const voirBtn = document.getElementById('espace-assur-voir-btn');
+    const refaireLabel = document.getElementById('espace-assur-refaire-label');
+    box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+    if (voirBtn) voirBtn.classList.add('hidden');
+
+    const sb = window.__supabase;
+    let submission = null;
+
+    if (sb && userId){
+      const { data, error } = await sb
+        .from('submissions')
+        .select('summary, payload, created_at')
+        .eq('user_id', userId)
+        .eq('type', 'assurance')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (error){
+        console.warn('Erreur chargement de la simulation assurance :', error);
+      } else if (data && data.length){
+        const payload = data[0].payload || {};
+        submission = { summary: data[0].summary, date: data[0].created_at, data: payload._data || payload.data || null };
+      }
+    }
+
+    if (!submission){
+      const list = loadSubmissions().filter(s => s.type === 'assurance' && currentUser && s.email === currentUser.email);
+      if (list.length){
+        const last = list[list.length - 1];
+        submission = { summary: last.summary, date: last.date, data: last.data || null };
+      }
+    }
+
+    if (submission){
+      const d = new Date(submission.date);
+      box.innerHTML = `
+        <p class="font-medium">${submission.summary}</p>
+        <p class="mt-1 text-[13px] text-neutral-500">Simulé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+      `;
+      if (submission.data){
+        // Réalimente window.__assurRes pour que downloadAssurPdf() régénère
+        // la synthèse sans repasser par le questionnaire.
+        window.__assurRes = submission.data;
+        if (voirBtn) voirBtn.classList.remove('hidden');
+      }
+      if (refaireLabel) refaireLabel.textContent = 'Refaire la simulation';
+    } else {
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore simulé vos besoins d'assurance.</p>`;
+      if (refaireLabel) refaireLabel.textContent = 'Faire la simulation';
+    }
+  }
+
+  // Recalcule les totaux d'un devis (HT / TVA par taux / TTC / acompte) à
+  // partir des données sauvegardées, sans dépendre du formulaire (DOM) —
+  // reproduit la logique de computeDevisTotals() pour pouvoir régénérer le
+  // PDF d'un devis archivé, depuis "Mon espace", sans rouvrir l'éditeur.
+  function computeDevisTotalsFromData(d){
+    const lines = (d && d.lines) || [];
+    const franchise = !!(d && d.em_franchise);
+    let totalHT = 0;
+    const tvaMap = new Map();
+    lines.forEach(L=>{
+      const ht = (Number(L.q)||0)*(Number(L.pu)||0);
+      totalHT += ht;
+      const rate = franchise ? 0 : Number(L.tva)||0;
+      const tva = ht * rate/100;
+      tvaMap.set(rate, (tvaMap.get(rate)||0) + tva);
+    });
+    const totalTVA = Array.from(tvaMap.values()).reduce((a,b)=>a+b,0);
+    const totalTTC = totalHT + totalTVA;
+    const acomptePct = Number(d && d.co_acompte)||0;
+    const acompte = totalTTC * acomptePct/100;
+    return { totalHT, totalTVA, totalTTC, tvaMap, acomptePct, acompte, franchise };
+  }
+
+  // Régénère et télécharge le PDF d'un devis archivé, listé dans "Mon
+  // espace" (voir loadEspaceDevis), à partir de son index dans
+  // window.__espaceDevisList.
+  window.downloadDevisFromEspaceList = function(i){
+    const s = (window.__espaceDevisList || [])[i];
+    if (!s || !s.data) return;
+    window.__devisData = s.data;
+    window.__devisTotals = computeDevisTotalsFromData(s.data);
+    downloadDevisPdf();
+  };
+
+  // Récupère et affiche les derniers devis générés par l'utilisateur
+  // connecté (module payant de l'abonnement Pro à 19 €/mois — "Archivage
+  // horodaté"), pour qu'il puisse les retrouver et les retélécharger depuis
+  // "Mon espace". Liste les 5 devis les plus récents.
+  async function loadEspaceDevis(userId, hasPro){
+    const box = document.getElementById('espace-devis-list');
+    const nouveauBtn = document.getElementById('espace-devis-nouveau-btn');
+    box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
+    if (nouveauBtn) nouveauBtn.classList.toggle('hidden', !hasPro);
+
+    let list = [];
+    const sb = window.__supabase;
+    if (sb && userId){
+      const { data, error } = await sb
+        .from('submissions')
+        .select('summary, payload, created_at')
+        .eq('user_id', userId)
+        .eq('type', 'devis')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (error){
+        console.warn('Erreur chargement des devis :', error);
+      } else if (data){
+        list = data.map(row => {
+          const payload = row.payload || {};
+          return { summary: row.summary, date: row.created_at, data: payload._data || payload.data || null };
+        });
+      }
+    }
+
+    // Repli localStorage si rien trouvé côté Supabase
+    if (!list.length){
+      const local = loadSubmissions().filter(s => s.type === 'devis' && currentUser && s.email === currentUser.email);
+      list = local.slice(-5).reverse().map(s => ({ summary: s.summary, date: s.date, data: s.data || null }));
+    }
+
+    window.__espaceDevisList = list;
+
+    if (!list.length){
+      box.innerHTML = hasPro
+        ? `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore généré de devis.</p>`
+        : `
+          <p class="text-neutral-500 text-[14px]">Inclus dans l'abonnement Pro (19 €/mois) — éditeur de devis conforme et archivage horodaté.</p>
+          <button onclick="handlePricingClick('pro')" class="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02]" style="background:rgba(255,128,30,.92)">Activer l'éditeur de devis — 19 €/mois</button>
+        `;
+      return;
+    }
+
+    box.innerHTML = list.map((s, i) => {
+      const d = new Date(s.date);
+      return `
+        <div class="flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-neutral-50 px-4 py-3 ${i>0?'mt-2':''}">
+          <div class="min-w-0">
+            <p class="truncate text-[13.5px] font-medium text-neutral-900">${s.summary}</p>
+            <p class="mt-0.5 text-[12px] text-neutral-500">${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
+          </div>
+          <button onclick="downloadDevisFromEspaceList(${i})" ${s.data ? '' : 'disabled'} class="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12.5px] font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed bg-brand">
+            PDF
+          </button>
+        </div>
+      `;
+    }).join('');
   }
 
   // ---------- Rapport de qualification (page dédiée, imprimable / PDF) ----------
