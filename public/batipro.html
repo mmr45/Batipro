@@ -157,6 +157,80 @@
     color: var(--brand);
   }
 
+  /* ---------- Sélecteur de date moderne (remplace les <input type=date> natifs) ---------- */
+  .mdp-native {
+    position: absolute !important;
+    width: 1px !important; height: 1px !important;
+    padding: 0 !important; margin: -1px !important;
+    overflow: hidden !important; clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important; border: 0 !important;
+    opacity: 0 !important; pointer-events: none !important;
+  }
+  .mdp-wrap { position: relative; }
+  .mdp-trigger {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    width: 100%; text-align: left; cursor: pointer;
+    background: #fff; color: #0a0a0a;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .mdp-trigger:hover { background: #fafafa; }
+  .mdp-trigger.mdp-open,
+  .mdp-trigger:focus-visible {
+    border-color: var(--brand) !important;
+    box-shadow: 0 0 0 3px rgba(29,95,163,.15);
+    outline: none;
+  }
+  .mdp-trigger .mdp-value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mdp-trigger .mdp-value[data-empty="1"] { color: #9ca3af; }
+  .mdp-trigger .mdp-icon { flex-shrink: 0; color: var(--brand); opacity: .8; display: flex; }
+  .mdp-panel {
+    position: absolute; z-index: 80; top: calc(100% + 8px); left: 0;
+    width: 300px; max-width: min(300px, 90vw);
+    background: #fff; border-radius: 20px;
+    box-shadow: 0 24px 60px -16px rgba(10,10,10,.28), 0 0 0 1px rgba(10,10,10,.06);
+    padding: 16px; animation: fadeInScale .16s cubic-bezier(.2,.9,.3,1.1);
+    font-family: 'Inter', sans-serif;
+  }
+  .mdp-panel[data-align="right"] { left: auto; right: 0; }
+  .mdp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .mdp-head-label { font-family: 'Big Shoulders Display','Inter',sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; text-transform: capitalize; }
+  .mdp-nav-btn {
+    display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px;
+    color: #525252; transition: background .15s ease, color .15s ease;
+  }
+  .mdp-nav-btn:hover { background: rgba(29,95,163,.1); color: var(--brand); }
+  .mdp-weekdays { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 4px; }
+  .mdp-weekdays span {
+    text-align: center; font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .04em; color: #a3a3a3; padding-bottom: 6px;
+  }
+  .mdp-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+  .mdp-day {
+    position: relative; aspect-ratio: 1/1; display: grid; place-items: center;
+    border-radius: 10px; font-size: 13px; font-weight: 500; color: #171717;
+    cursor: pointer; transition: background .12s ease, color .12s ease, transform .12s ease;
+  }
+  .mdp-day:hover:not(.mdp-day-disabled):not(.mdp-day-selected) { background: rgba(29,95,163,.09); }
+  .mdp-day-muted { color: #d4d4d4; }
+  .mdp-day-today:not(.mdp-day-selected)::after {
+    content: ""; position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px;
+    border-radius: 999px; background: var(--accent); transform: translateX(-50%);
+  }
+  .mdp-day-selected {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff; font-weight: 700; box-shadow: 0 6px 16px -4px rgba(29,95,163,.55);
+  }
+  .mdp-day-disabled { color: #e5e5e5; cursor: not-allowed; }
+  .mdp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+  .mdp-link-btn {
+    font-size: 12.5px; font-weight: 600; color: var(--brand); border-radius: 8px; padding: 6px 10px;
+    transition: background .15s ease;
+  }
+  .mdp-link-btn:hover { background: rgba(29,95,163,.08); }
+  .mdp-link-btn.mdp-clear { color: #9ca3af; }
+  .mdp-link-btn.mdp-clear:hover { background: #f5f5f5; color: #737373; }
+  @media (prefers-reduced-motion: reduce) { .mdp-panel { animation: none; } }
+
   /* ---------- Dashboard "Mon espace" ---------- */
   .dash-hero {
     position: relative;
@@ -888,70 +962,104 @@
 
 <!-- ADMIN MODAL (dashboard créateur uniquement) -->
 <div id="admin-modal" class="fixed inset-0 z-[120] hidden items-center justify-center p-4">
-  <div class="modal-backdrop absolute inset-0 bg-neutral-950/70 backdrop-blur-sm" onclick="closeAdmin()"></div>
-  <div class="modal-panel relative z-10 w-full max-w-[960px] max-h-[92vh] overflow-y-auto rounded-[24px] border border-black/5 bg-white p-6 shadow-2xl md:p-10">
-    <button onclick="closeAdmin()" class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200" aria-label="Fermer">
+  <div class="modal-backdrop absolute inset-0 bg-neutral-950/75 backdrop-blur-md" onclick="closeAdmin()"></div>
+  <div class="modal-panel relative z-10 w-full max-w-[1040px] max-h-[92vh] overflow-y-auto rounded-[28px] border border-black/5 bg-neutral-50 shadow-2xl">
+    <button onclick="closeAdmin()" class="absolute right-5 top-5 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-neutral-500 shadow-sm ring-1 ring-black/5 hover:bg-neutral-100 hover:text-neutral-800" aria-label="Fermer">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>
 
     <!-- Login gate -->
-    <div id="admin-login">
-      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(10,10,10,.06);color:#0a0a0a">Accès restreint</span>
-      <h3 class="mt-4 font-display text-3xl font-bold">Dashboard créateur</h3>
-      <p class="mt-2 text-[14px] text-neutral-600">Réservé à l'administrateur de Bâtipro. Saisissez le mot de passe admin pour continuer.</p>
-      <form class="mt-6 flex flex-col gap-3 sm:flex-row" onsubmit="event.preventDefault(); checkAdminPassword();">
-        <input type="password" id="admin-password" placeholder="Mot de passe admin" class="flex-1 rounded-xl border border-black/10 px-4 py-3 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
-        <button type="submit" class="btn-primary rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Entrer</button>
-      </form>
-      <p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium text-danger">Mot de passe incorrect.</p>
+    <div id="admin-login" class="p-8 md:p-14">
+      <div class="mx-auto max-w-[420px] text-center">
+        <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-neutral-950 text-white shadow-lg">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <span class="mt-5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(10,10,10,.06);color:#0a0a0a">
+          <span class="h-1.5 w-1.5 rounded-full bg-neutral-400"></span> Accès restreint
+        </span>
+        <h3 class="mt-4 font-display text-3xl font-bold">Dashboard créateur</h3>
+        <p class="mt-2 text-[14px] leading-relaxed text-neutral-600">Réservé à l'administrateur de Bâtipro. Saisissez le mot de passe admin pour continuer.</p>
+        <form class="mt-7 flex flex-col gap-3" onsubmit="event.preventDefault(); checkAdminPassword();">
+          <input type="password" id="admin-password" placeholder="Mot de passe admin" class="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-center text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+          <button type="submit" class="btn-primary rounded-[14px] px-6 py-3 text-[15px] font-semibold text-white">Entrer</button>
+        </form>
+        <p id="admin-login-error" class="mt-3 hidden text-[13px] font-medium text-danger">Mot de passe incorrect.</p>
+      </div>
     </div>
 
     <!-- Dashboard -->
     <div id="admin-dashboard" class="hidden">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Dashboard créateur</span>
-          <h3 class="mt-3 font-display text-3xl font-bold md:text-4xl">Vue d'ensemble</h3>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="exportAdminData()" class="rounded-[12px] border border-black/10 bg-white px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">Exporter (JSON)</button>
-          <button onclick="resetAdminData()" class="rounded-[12px] border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] font-semibold text-red-700 hover:bg-red-100">Réinitialiser les données</button>
-          <button onclick="logoutAdmin()" class="rounded-[12px] bg-neutral-950 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-neutral-800">Se déconnecter</button>
-        </div>
-      </div>
-
-      <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4" id="admin-stats"></div>
-
-      <div class="mt-8 rounded-2xl border border-neutral-200 p-5">
-        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Mon accès (compte actuellement connecté)</h4>
-        <p id="admin-mon-compte-info" class="mt-2 text-[14px] text-neutral-600">—</p>
-        <p id="admin-mon-compte-statut" class="mt-1 text-[14px] font-medium">—</p>
-        <button onclick="grantMyProAccess()" class="mt-4 rounded-[12px] bg-neutral-950 px-4 py-2.5 text-[13px] font-semibold text-white hover:bg-neutral-800">
-          M'activer l'accès Pro
-        </button>
-      </div>
-
-      <div class="mt-8">
-        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Comptes créés</h4>
-        <div class="mt-3 overflow-x-auto rounded-2xl border border-neutral-200">
-          <table class="w-full text-left text-[13px]">
-            <thead class="bg-neutral-50 text-neutral-500">
-              <tr><th class="px-4 py-2.5 font-semibold">Nom</th><th class="px-4 py-2.5 font-semibold">Email</th><th class="px-4 py-2.5 font-semibold">Soumissions</th></tr>
-            </thead>
-            <tbody id="admin-accounts-body"></tbody>
-          </table>
+      <!-- Bandeau d'en-tête -->
+      <div class="relative overflow-hidden rounded-t-[28px] px-6 py-8 md:px-10 md:py-10" style="background: radial-gradient(1100px 260px at 15% -20%, rgba(74,134,196,.35), transparent), linear-gradient(135deg, #0a1a2e, #0f2a4a 55%, #123a63);">
+        <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[color:var(--brand-2)]/25 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-[color:var(--accent)]/20 blur-3xl"></div>
+        <div class="relative flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white ring-1 ring-white/15 backdrop-blur">
+              <span class="relative flex h-1.5 w-1.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400"></span></span>
+              Dashboard créateur
+            </span>
+            <h3 class="mt-3 font-display text-3xl font-bold text-white md:text-4xl">Vue d'ensemble</h3>
+            <p class="mt-1.5 text-[13.5px] text-white/60">Suivi en temps réel des comptes et des soumissions Bâtipro.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="exportAdminData()" class="inline-flex items-center gap-2 rounded-[12px] bg-white/10 px-4 py-2.5 text-[13px] font-semibold text-white ring-1 ring-white/15 backdrop-blur transition hover:bg-white/20">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+              Exporter
+            </button>
+            <button onclick="resetAdminData()" class="inline-flex items-center gap-2 rounded-[12px] bg-red-500/15 px-4 py-2.5 text-[13px] font-semibold text-red-200 ring-1 ring-red-400/25 transition hover:bg-red-500/25">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              Réinitialiser
+            </button>
+            <button onclick="logoutAdmin()" class="inline-flex items-center gap-2 rounded-[12px] bg-white px-4 py-2.5 text-[13px] font-semibold text-neutral-900 transition hover:bg-neutral-100">
+              Se déconnecter
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="mt-8">
-        <h4 class="text-[13px] font-semibold uppercase tracking-wide text-neutral-500">Soumissions (les plus récentes en premier)</h4>
-        <div class="mt-3 overflow-x-auto rounded-2xl border border-neutral-200">
-          <table class="w-full text-left text-[13px]">
-            <thead class="bg-neutral-50 text-neutral-500">
-              <tr><th class="px-4 py-2.5 font-semibold">Date</th><th class="px-4 py-2.5 font-semibold">Compte</th><th class="px-4 py-2.5 font-semibold">Module</th><th class="px-4 py-2.5 font-semibold">Résumé</th></tr>
-            </thead>
-            <tbody id="admin-submissions-body"></tbody>
-          </table>
+      <div class="px-6 pb-10 pt-6 md:px-10">
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4" id="admin-stats"></div>
+
+        <div class="mt-6 flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Mon accès</h4>
+            <p class="mt-1 text-[14px] text-neutral-500">Compte actuellement connecté sur le site</p>
+            <p id="admin-mon-compte-info" class="mt-2 text-[14.5px] font-medium text-neutral-900">—</p>
+            <p id="admin-mon-compte-statut" class="mt-1 text-[13.5px]">—</p>
+          </div>
+          <button onclick="grantMyProAccess()" class="shrink-0 rounded-[12px] bg-neutral-950 px-5 py-2.5 text-[13px] font-semibold text-white transition hover:bg-neutral-800">
+            M'activer l'accès Pro
+          </button>
+        </div>
+
+        <div class="mt-8">
+          <div class="flex items-center gap-2">
+            <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Comptes créés</h4>
+          </div>
+          <div class="mt-3 overflow-hidden overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
+            <table class="w-full text-left text-[13px]">
+              <thead class="bg-neutral-50/80 text-neutral-500">
+                <tr><th class="px-4 py-3 font-semibold">Nom</th><th class="px-4 py-3 font-semibold">Email</th><th class="px-4 py-3 font-semibold">Soumissions</th></tr>
+              </thead>
+              <tbody id="admin-accounts-body" class="divide-y divide-neutral-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <div class="flex items-center gap-2">
+            <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-400">Soumissions</h4>
+            <span class="text-[12px] text-neutral-400">— les plus récentes en premier</span>
+          </div>
+          <div class="mt-3 overflow-hidden overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
+            <table class="w-full text-left text-[13px]">
+              <thead class="bg-neutral-50/80 text-neutral-500">
+                <tr><th class="px-4 py-3 font-semibold">Date</th><th class="px-4 py-3 font-semibold">Compte</th><th class="px-4 py-3 font-semibold">Module</th><th class="px-4 py-3 font-semibold">Résumé</th></tr>
+              </thead>
+              <tbody id="admin-submissions-body" class="divide-y divide-neutral-100"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -4040,37 +4148,43 @@ if (sb) {
     const byType = { qualif:0, statut:0, inpi:0, assurance:0 };
     submissions.forEach(s=>{ if (byType[s.type]!==undefined) byType[s.type]++; });
 
-    document.getElementById('admin-stats').innerHTML = `
-      <div class="rounded-2xl border border-neutral-200 bg-white p-4">
-        <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Comptes créés</div>
-        <div class="mt-1 font-display text-2xl font-bold">${accounts.length}</div>
+    const statCards = [
+      { label:'Comptes créés', value: accounts.length, icon:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`, tint:'#1D5FA3' },
+      { label:'Tests de qualification', value: byType.qualif, icon:`<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>`, tint:'#0E9F6E' },
+      { label:'Dossiers INPI', value: byType.inpi, icon:`<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>`, tint:'#7C3AED' },
+      { label:'Simulations assurance', value: byType.assurance, icon:`<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/>`, tint:'#FF6A13' },
+    ];
+    document.getElementById('admin-stats').innerHTML = statCards.map(c => `
+      <div class="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full opacity-[0.08] transition group-hover:opacity-[0.14]" style="background:${c.tint}"></div>
+        <div class="relative flex items-center justify-between">
+          <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">${c.label}</div>
+          <div class="grid h-8 w-8 shrink-0 place-items-center rounded-[10px]" style="background:${c.tint}1a;color:${c.tint}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${c.icon}</svg>
+          </div>
+        </div>
+        <div class="relative mt-2 font-display text-3xl font-bold text-neutral-900">${c.value}</div>
       </div>
-      <div class="rounded-2xl border border-neutral-200 bg-white p-4">
-        <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Tests de qualification</div>
-        <div class="mt-1 font-display text-2xl font-bold">${byType.qualif}</div>
-      </div>
-      <div class="rounded-2xl border border-neutral-200 bg-white p-4">
-        <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Dossiers INPI</div>
-        <div class="mt-1 font-display text-2xl font-bold">${byType.inpi}</div>
-      </div>
-      <div class="rounded-2xl border border-neutral-200 bg-white p-4">
-        <div class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Simulations assurance</div>
-        <div class="mt-1 font-display text-2xl font-bold">${byType.assurance}</div>
-      </div>
-    `;
+    `).join('');
 
     document.getElementById('admin-accounts-body').innerHTML =
-      `<tr><td class="px-4 py-3 text-neutral-400" colspan="3">Les comptes sont désormais gérés par Supabase — voir Authentication → Users dans le dashboard Supabase.</td></tr>`;
+      `<tr><td class="px-4 py-4 text-neutral-400" colspan="3">Les comptes sont désormais gérés par Supabase — voir Authentication → Users dans le dashboard Supabase.</td></tr>`;
 
     const typeLabel = { qualif:'Test de qualification', statut:'Simulateur de statut', inpi:'Dossier INPI', assurance:'Assurance décennale' };
+    const typeTint = { qualif:'#0E9F6E', statut:'#1D5FA3', inpi:'#7C3AED', assurance:'#FF6A13' };
     document.getElementById('admin-submissions-body').innerHTML = submissions.length ? submissions.map(s=>`
-      <tr class="border-t border-neutral-100">
-        <td class="px-4 py-2.5 whitespace-nowrap">${new Date(s.date).toLocaleString('fr-FR')}</td>
-        <td class="px-4 py-2.5">${s.nom}</td>
-        <td class="px-4 py-2.5">${typeLabel[s.type] || s.type}</td>
-        <td class="px-4 py-2.5">${s.summary}</td>
+      <tr class="transition hover:bg-neutral-50">
+        <td class="whitespace-nowrap px-4 py-3 text-neutral-500">${new Date(s.date).toLocaleString('fr-FR')}</td>
+        <td class="px-4 py-3 font-medium text-neutral-900">${s.nom}</td>
+        <td class="px-4 py-3">
+          <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold" style="background:${(typeTint[s.type]||'#525252')}1a;color:${typeTint[s.type]||'#525252'}">
+            <span class="h-1.5 w-1.5 rounded-full" style="background:${typeTint[s.type]||'#525252'}"></span>
+            ${typeLabel[s.type] || s.type}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-neutral-600">${s.summary}</td>
       </tr>
-    `).join('') : `<tr><td class="px-4 py-3 text-neutral-400" colspan="4">Aucune soumission pour l'instant.</td></tr>`;
+    `).join('') : `<tr><td class="px-4 py-4 text-neutral-400" colspan="4">Aucune soumission pour l'instant.</td></tr>`;
   }
 
   function exportAdminData(){
@@ -5599,6 +5713,215 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   // ESC to close
   window.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeAdmin(); closeLegal(); closeAuth(); closeQualif(); closeStatut(); closeInpi(); closeAssur(); closeDevis(); } });
 
+</script>
+
+<!-- ---------- Sélecteur de date moderne : remplace tous les <input type="date"> ---------- -->
+<script>
+(function(){
+  const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const JOURS = ['L','M','M','J','V','S','D'];
+  let openPanel = null; // { panel, close }
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function toISO(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
+  function parseISO(v){
+    if(!v) return null;
+    const [y,m,d] = v.split('-').map(Number);
+    if(!y||!m||!d) return null;
+    return new Date(y, m-1, d);
+  }
+  function sameDay(a,b){ return a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+
+  const iconCalendar = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18"/><path d="M8 2.5v4"/><path d="M16 2.5v4"/></svg>`;
+  const iconChevronL = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>`;
+  const iconChevronR = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+
+  function closeOpenPanel(){
+    if (openPanel){ openPanel.close(); openPanel = null; }
+  }
+
+  function enhance(input){
+    if (input.dataset.mdpDone) return;
+    input.dataset.mdpDone = '1';
+    input.classList.add('mdp-native');
+    input.tabIndex = -1;
+
+    // Enveloppe autour de l'input natif (conserve la place dans le formulaire)
+    const wrap = document.createElement('div');
+    wrap.className = 'mdp-wrap';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+
+    // Bouton déclencheur qui reprend le style visuel de l'input d'origine
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = (input.getAttribute('data-orig-class') || input.className.replace('mdp-native','').trim()) + ' mdp-trigger';
+    trigger.innerHTML = `<span class="mdp-value" data-empty="1">jj/mm/aaaa</span><span class="mdp-icon">${iconCalendar}</span>`;
+    wrap.appendChild(trigger);
+
+    let viewDate = parseISO(input.value) || new Date();
+    let selected = parseISO(input.value);
+
+    function refreshTriggerLabel(){
+      const valEl = trigger.querySelector('.mdp-value');
+      if (selected){
+        valEl.textContent = selected.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+        valEl.dataset.empty = '0';
+      } else {
+        valEl.textContent = 'jj/mm/aaaa';
+        valEl.dataset.empty = '1';
+      }
+    }
+    refreshTriggerLabel();
+
+    function setValue(date){
+      selected = date;
+      input.value = date ? toISO(date.getFullYear(), date.getMonth(), date.getDate()) : '';
+      input.dispatchEvent(new Event('input', { bubbles:true }));
+      input.dispatchEvent(new Event('change', { bubbles:true }));
+      refreshTriggerLabel();
+    }
+
+    function buildPanel(){
+      const min = input.min ? parseISO(input.min) : null;
+      const max = input.max ? parseISO(input.max) : null;
+      const today = new Date(); today.setHours(0,0,0,0);
+
+      const y = viewDate.getFullYear(), m = viewDate.getMonth();
+      const firstOfMonth = new Date(y, m, 1);
+      // Lundi = 0 ... Dimanche = 6
+      const startOffset = (firstOfMonth.getDay() + 6) % 7;
+      const daysInMonth = new Date(y, m+1, 0).getDate();
+      const daysInPrevMonth = new Date(y, m, 0).getDate();
+
+      let cells = '';
+      for (let i=0;i<startOffset;i++){
+        const d = daysInPrevMonth - startOffset + i + 1;
+        cells += `<div class="mdp-day mdp-day-muted" data-nav="-1" data-day="${d}">${d}</div>`;
+      }
+      for (let d=1; d<=daysInMonth; d++){
+        const cur = new Date(y,m,d);
+        const disabled = (min && cur < min) || (max && cur > max);
+        const cls = ['mdp-day'];
+        if (sameDay(cur, selected)) cls.push('mdp-day-selected');
+        if (sameDay(cur, today)) cls.push('mdp-day-today');
+        if (disabled) cls.push('mdp-day-disabled');
+        cells += `<div class="${cls.join(' ')}" data-day="${d}">${d}</div>`;
+      }
+      const totalCells = startOffset + daysInMonth;
+      const trailing = (7 - (totalCells % 7)) % 7;
+      for (let d=1; d<=trailing; d++){
+        cells += `<div class="mdp-day mdp-day-muted" data-nav="1" data-day="${d}">${d}</div>`;
+      }
+
+      const panel = document.createElement('div');
+      panel.className = 'mdp-panel';
+      panel.innerHTML = `
+        <div class="mdp-head">
+          <button type="button" class="mdp-nav-btn" data-act="prev" aria-label="Mois précédent">${iconChevronL}</button>
+          <span class="mdp-head-label">${MOIS[m]} ${y}</span>
+          <button type="button" class="mdp-nav-btn" data-act="next" aria-label="Mois suivant">${iconChevronR}</button>
+        </div>
+        <div class="mdp-weekdays">${JOURS.map(j=>`<span>${j}</span>`).join('')}</div>
+        <div class="mdp-days">${cells}</div>
+        <div class="mdp-foot">
+          <button type="button" class="mdp-link-btn mdp-clear" data-act="clear">Effacer</button>
+          <button type="button" class="mdp-link-btn" data-act="today">Aujourd'hui</button>
+        </div>
+      `;
+      return panel;
+    }
+
+    function positionPanel(panel){
+      // Bascule le panneau à droite si l'espace à droite est insuffisant
+      const rect = trigger.getBoundingClientRect();
+      const overflowRight = rect.left + 300 > window.innerWidth - 12;
+      if (overflowRight) panel.setAttribute('data-align','right');
+    }
+
+    function open(){
+      closeOpenPanel();
+      const panel = buildPanel();
+      wrap.appendChild(panel);
+      positionPanel(panel);
+      trigger.classList.add('mdp-open');
+
+      function onPanelClick(e){
+        const act = e.target.closest('[data-act]');
+        if (act){
+          const a = act.dataset.act;
+          if (a==='prev'){ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1); rerender(); }
+          else if (a==='next'){ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1); rerender(); }
+          else if (a==='clear'){ setValue(null); close(); }
+          else if (a==='today'){ const t=new Date(); t.setHours(0,0,0,0); viewDate = new Date(t.getFullYear(),t.getMonth(),1); setValue(t); close(); }
+          return;
+        }
+        const dayEl = e.target.closest('.mdp-day');
+        if (dayEl && !dayEl.classList.contains('mdp-day-disabled')){
+          if (dayEl.dataset.nav){
+            viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+Number(dayEl.dataset.nav), 1);
+            rerender();
+            return;
+          }
+          setValue(new Date(viewDate.getFullYear(), viewDate.getMonth(), Number(dayEl.dataset.day)));
+          close();
+        }
+      }
+      panel.addEventListener('click', onPanelClick);
+
+      function rerender(){
+        const fresh = buildPanel();
+        panel.innerHTML = fresh.innerHTML;
+      }
+
+      function onOutside(e){
+        if (!wrap.contains(e.target)) close();
+      }
+      document.addEventListener('mousedown', onOutside);
+
+      function close(){
+        panel.remove();
+        trigger.classList.remove('mdp-open');
+        document.removeEventListener('mousedown', onOutside);
+        if (openPanel && openPanel.panel === panel) openPanel = null;
+      }
+      openPanel = { panel, close };
+    }
+
+    trigger.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if (openPanel && wrap.contains(openPanel.panel)) { closeOpenPanel(); }
+      else open();
+    });
+
+    // Si le champ est rempli par ailleurs (pré-remplissage programmatique), on
+    // resynchronise l'affichage du bouton.
+    input.addEventListener('mdp:sync', ()=>{
+      selected = parseISO(input.value);
+      viewDate = selected || new Date();
+      refreshTriggerLabel();
+    });
+  }
+
+  function enhanceAll(){
+    document.querySelectorAll('input[type="date"]').forEach(enhance);
+  }
+
+  document.addEventListener('DOMContentLoaded', enhanceAll);
+  // Certains champs date vivent dans des modales injectées/affichées après coup :
+  // on re-scanne à l'ouverture de chaque modale pour rester exhaustif.
+  ['openAdmin','openInpi','openDevis'].forEach(fnName=>{
+    const original = window[fnName];
+    if (typeof original === 'function'){
+      window[fnName] = function(...args){
+        const r = original.apply(this, args);
+        setTimeout(enhanceAll, 0);
+        return r;
+      };
+    }
+  });
+  window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeOpenPanel(); });
+})();
 </script>
 </body>
 </html>
