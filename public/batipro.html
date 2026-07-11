@@ -3657,6 +3657,36 @@ animate();
         <p class="text-neutral-600 text-[14px]">Vous devez être connecté pour consulter votre rapport de qualification.</p>
         <button onclick="closeQualifReport(); openAuth();" class="rapport-noprint mt-4 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white bg-brand">Se connecter</button>
       `;
+      return;
+    }
+
+    const userId = currentUser.id || currentUser.user_id;
+    let submission = window.__lastQualifSubmission;
+
+    if (!submission){
+      const sb = window.__supabase;
+      if (sb && userId){
+        const { data, error } = await sb
+          .from('submissions')
+          .select('summary, payload, created_at')
+          .eq('user_id', userId)
+          .eq('type', 'qualif')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (!error && data && data.length){
+          const payload = data[0].payload || {};
+          submission = { summary: data[0].summary, date: data[0].created_at, res: payload._data || payload.data || null };
+        }
+      }
+      if (!submission){
+        const list = loadSubmissions().filter(s => s.type === 'qualif' && s.email === currentUser.email);
+        if (list.length){
+          const last = list[list.length - 1];
+          submission = { summary: last.summary, date: last.date, res: last.data || null };
+        }
+      }
+    }
+
 if (submission && submission.res){
   const meta = {
     nom: `${currentUser.prenom} ${currentUser.nom}`.trim(),
