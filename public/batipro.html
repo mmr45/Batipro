@@ -3002,34 +3002,46 @@ animate();
       // Connecté : le bouton "Inscription" disparaît, remplacé par "Mon
       // compte" (toujours visible) + "Reprendre mon test" (seulement si un
       // vrai brouillon est en cours).
+      // NB: on pilote l'affichage via style.display en plus de la classe
+      // "hidden", car ce bouton porte aussi la classe statique "inline-flex"
+      // et les deux utilitaires Tailwind ont la même spécificité CSS — selon
+      // l'ordre de génération du CDN, "inline-flex" peut l'emporter sur
+      // "hidden" et laisser le bouton visible malgré tout.
       btn.classList.add('hidden');
+      btn.style.display = 'none';
 
       accountBtn.classList.remove('hidden');
       accountBtn.classList.add('inline-flex');
+      accountBtn.style.display = '';
       accountLabel.textContent = `${currentUser.prenom} — Mon compte`;
 
       const draft = (typeof getQualifDraft === 'function') ? getQualifDraft() : null;
       if (draft){
         resumeBtn.classList.remove('hidden');
         resumeBtn.classList.add('inline-flex');
+        resumeBtn.style.display = '';
       } else {
         resumeBtn.classList.add('hidden');
         resumeBtn.classList.remove('inline-flex');
+        resumeBtn.style.display = 'none';
       }
 
-      if (logoutBtn) logoutBtn.classList.remove('hidden');
+      if (logoutBtn) { logoutBtn.classList.remove('hidden'); logoutBtn.style.display = ''; }
       if (typeof updateCtaBottomButton === 'function') updateCtaBottomButton();
     } else {
       // Déconnecté : seul le bouton "Inscription" est visible.
       btn.classList.remove('hidden');
+      btn.style.display = '';
       label.textContent = 'Inscription';
       btn.onclick = () => openQualif();
 
       accountBtn.classList.add('hidden');
       accountBtn.classList.remove('inline-flex');
+      accountBtn.style.display = 'none';
       resumeBtn.classList.add('hidden');
       resumeBtn.classList.remove('inline-flex');
-      if (logoutBtn) logoutBtn.classList.add('hidden');
+      resumeBtn.style.display = 'none';
+      if (logoutBtn) { logoutBtn.classList.add('hidden'); logoutBtn.style.display = 'none'; }
       if (typeof updateCtaBottomButton === 'function') updateCtaBottomButton();
     }
   }
