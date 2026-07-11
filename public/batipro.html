@@ -5446,74 +5446,202 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     wrap.scrollTop = 0;
   }
 
+  // Génère et télécharge la synthèse assurance décennale en PDF — même
+  // charte "carte moderne" que le rapport de qualification (bandeau de
+  // marque, badge de risque coloré, cartes teintées à liseré, pied de page).
   function downloadAssurPdf(){
     const res = window.__assurRes || {};
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'pt', format:'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const marginX = 48;
     const maxWidth = pageWidth - marginX*2;
-    let y = 56;
+    const bottomLimit = pageHeight - 56;
+    let y = 0;
 
-    function addSpace(h){ y += h; if (y > 780){ doc.addPage(); y = 56; } }
-    function heading(text, size=14){
-      doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20,20,20);
-      doc.text(text, marginX, y); addSpace(size+10);
+    // ---- Palette (alignée sur --brand / --brand-2 / --accent du site) ----
+    const BRAND = [29,95,163];      // #1D5FA3
+    const BRAND_2 = [74,134,196];   // #4A86C4
+    const INK = [23,23,23];
+    const SLATE = [82,82,82];
+    const MUTED = [140,140,140];
+    const HAIRLINE = [230,230,230];
+    const risk = res.adjRisk || 1;
+    const RISK = risk >= 4
+      ? { fg:[185,28,28],  bg:[254,232,232], badgeBg:[239,68,68],  label:'Risque élevé' }
+      : risk === 3
+      ? { fg:[161,98,7],   bg:[254,247,224], badgeBg:[245,158,11], label:'Risque modéré' }
+      : { fg:[6,120,87],   bg:[224,247,239], badgeBg:[16,185,129], label:'Risque maîtrisé' };
+
+    const strip = (s) => String(s == null ? '' : s).replace(/<[^>]+>/g,'');
+
+    function newPageIfNeeded(neededHeight){
+      if (y + neededHeight > bottomLimit){
+        doc.addPage();
+        drawFooter();
+        y = 64;
+      }
     }
-    function paragraph(text, size=10.5){
-      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
-      const lines = doc.splitTextToSize(text, maxWidth);
-      lines.forEach(line => { doc.text(line, marginX, y); addSpace(size+4); });
+
+    function drawFooter(){
+      const pageNum = doc.internal.getNumberOfPages();
+      doc.setDrawColor(...HAIRLINE);
+      doc.setLineWidth(0.75);
+      doc.line(marginX, pageHeight - 40, pageWidth - marginX, pageHeight - 40);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...MUTED);
+      doc.text('Bâtipro — batipro-ten.vercel.app', marginX, pageHeight - 26);
+      doc.text(String(pageNum), pageWidth - marginX, pageHeight - 26, { align:'right' });
     }
-    function bulletList(items, size=10.5){
-      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
-      items.forEach(item=>{
-        const plain = String(item).replace(/<[^>]+>/g,'');
-        const lines = doc.splitTextToSize('•  '+plain, maxWidth-10);
-        lines.forEach((line,i)=>{ doc.text(line, marginX + (i===0?0:14), y); addSpace(size+5); });
+
+    // ---- Bandeau d'en-tête coloré ----
+    const headerH = 96;
+    doc.setFillColor(...BRAND);
+    doc.rect(0, 0, pageWidth, headerH, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(255,255,255);
+    doc.text('Bâtipro', marginX, 42);
+    doc.setFont('helvetica','normal'); doc.setFontSize(11.5); doc.setTextColor(220,232,245);
+    doc.text('Synthèse assurance décennale', marginX, 62);
+
+    const genLabel = 'Généré le ' + new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(220,232,245);
+    doc.text(genLabel, pageWidth - marginX, 62, { align:'right' });
+
+    y = headerH + 34;
+
+    // ---- Badge de niveau de risque ----
+    doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+    const badgeLabel = (RISK.label + ' — ' + risk + '/5').toUpperCase();
+    const badgeW = doc.getTextWidth(badgeLabel) + 24;
+    doc.setFillColor(...RISK.badgeBg);
+    doc.roundedRect(marginX, y - 14, badgeW, 22, 11, 11, 'F');
+    doc.setTextColor(255,255,255);
+    doc.text(badgeLabel, marginX + 12, y + 1);
+    y += 34;
+
+    // ---- Titre ----
+    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(...INK);
+    doc.text('Vos seuils de garantie', marginX, y); y += 22;
+    if (res.metier && res.metier.l){
+      y += 6;
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...SLATE);
+      doc.text('Métier : ' + res.metier.l, marginX, y); y += 15;
+    }
+    y += 8;
+    doc.setDrawColor(...HAIRLINE);
+    doc.setLineWidth(0.75);
+    doc.line(marginX, y, pageWidth - marginX, y);
+    y += 26;
+
+    // ---- Deux pastilles chiffrées côte à côte : décennale / RC Pro ----
+    function statTile(x, w, { label, value, note, fg, bg }){
+      const tileH = 74, padX = 16;
+      doc.setFillColor(...(bg || [246,246,246]));
+      doc.roundedRect(x, y, w, tileH, 10, 10, 'F');
+      doc.setFillColor(...(fg || BRAND));
+      doc.roundedRect(x, y, 4, tileH, 2, 2, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...(fg || BRAND));
+      doc.text(label.toUpperCase(), x + padX, y + 20);
+      doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(...INK);
+      doc.text(value, x + padX, y + 42);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+      doc.text(note, x + padX, y + 58);
+    }
+    if (res.decMin != null && res.rcMin != null){
+      const gap = 14, tileW = (maxWidth - gap) / 2;
+      newPageIfNeeded(74 + 16);
+      statTile(marginX, tileW, {
+        label:'Décennale — plafond conseillé', value: res.decMin.toLocaleString('fr-FR') + ' k€',
+        note:"Par sinistre / année d'assurance.", fg: RISK.fg, bg: RISK.bg,
       });
+      statTile(marginX + tileW + gap, tileW, {
+        label:'RC Pro — plafond conseillé', value: res.rcMin.toLocaleString('fr-FR') + ' k€',
+        note:'Dommages aux tiers pendant chantier.', fg: BRAND, bg: [235,241,248],
+      });
+      y += 74 + 16;
     }
 
-    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(0,132,255);
-    doc.text('Bâtipro — Synthèse assurance décennale', marginX, y); addSpace(28);
-
-    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(120,120,120);
-    doc.text('Généré le ' + new Date().toLocaleString('fr-FR'), marginX, y); addSpace(24);
-
+    // ---- Carte "Prime indicative estimée" ----
     if (res.primeLow != null && res.primeHigh != null){
-      heading('Prime indicative estimée');
-      paragraph(res.primeLow.toLocaleString('fr-FR') + ' € – ' + res.primeHigh.toLocaleString('fr-FR') + ' € / an');
-      paragraph('Ordre de grandeur marché — un devis nominatif reste indispensable.', 9.5);
-      addSpace(6);
+      const cardH = 74;
+      newPageIfNeeded(cardH + 16);
+      doc.setFillColor(246,246,246);
+      doc.roundedRect(marginX, y, maxWidth, cardH, 8, 8, 'F');
+      doc.setFillColor(...BRAND_2);
+      doc.roundedRect(marginX, y, 4, cardH, 2, 2, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...SLATE);
+      doc.text('PRIME ANNUELLE ESTIMÉE', marginX + 16, y + 20);
+      doc.setFont('helvetica','bold'); doc.setFontSize(17); doc.setTextColor(...INK);
+      doc.text(res.primeLow.toLocaleString('fr-FR') + ' € – ' + res.primeHigh.toLocaleString('fr-FR') + ' € / an', marginX + 16, y + 42);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+      doc.text('Ordre de grandeur marché — un devis nominatif reste indispensable.', marginX + 16, y + 58);
+      y += cardH + 16;
     }
 
-    if (res.reasons && res.reasons.length){
-      heading('Motifs du calcul', 12.5);
-      bulletList(res.reasons);
-      addSpace(6);
+    // ---- Carte générique : titre + puces, fond teinté + liseré coloré ----
+    function card({ title, items, fg, bg, accent, bodyColor }){
+      if (!items || !items.length) return;
+      const padX = 16, padTop = 14, padBottom = 16, lineH = 13.5, gapTitleBody = 8;
+      const titleSize = 10.5, bodySize = 9.7;
+
+      doc.setFont('helvetica','normal'); doc.setFontSize(bodySize);
+      const wrapped = items.map(it => doc.splitTextToSize('•  ' + strip(it), maxWidth - padX*2));
+      const bodyLineCount = wrapped.reduce((n, arr) => n + arr.length, 0);
+      const titleH = 13;
+      const cardH = padTop + titleH + gapTitleBody + bodyLineCount*lineH + padBottom;
+
+      newPageIfNeeded(cardH + 16);
+
+      doc.setFillColor(...(bg || [246,246,246]));
+      doc.roundedRect(marginX, y, maxWidth, cardH, 8, 8, 'F');
+      doc.setFillColor(...(accent || fg || BRAND));
+      doc.roundedRect(marginX, y, 4, cardH, 2, 2, 'F');
+
+      let cy = y + padTop + 4;
+      doc.setFont('helvetica','bold'); doc.setFontSize(titleSize); doc.setTextColor(...(fg || INK));
+      doc.text(title, marginX + padX, cy);
+      cy += gapTitleBody + 8;
+
+      doc.setFont('helvetica','normal'); doc.setFontSize(bodySize); doc.setTextColor(...(bodyColor || SLATE));
+      wrapped.forEach(arr => {
+        arr.forEach(l => { doc.text(l, marginX + padX, cy); cy += lineH; });
+      });
+
+      y += cardH + 16;
     }
+
+    card({
+      title: 'Motifs du calcul',
+      items: res.reasons || [],
+      fg: RISK.fg, bg: RISK.bg, accent: RISK.badgeBg, bodyColor: INK,
+    });
 
     if (res.warnings && res.warnings.length){
-      heading('Points de vigilance', 12.5);
-      bulletList(res.warnings);
-      addSpace(6);
-    }
-
-    if (res.guarantees && res.guarantees.length){
-      heading('Garanties de référence bâtiment', 12.5);
-      res.guarantees.forEach(g=>{
-        doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(20,20,20);
-        doc.text(String(g.l).replace(/<[^>]+>/g,'') + '  —  ' + String(g.v).replace(/<[^>]+>/g,''), marginX, y);
-        addSpace(14);
-        paragraph(String(g.note).replace(/<[^>]+>/g,''), 9.5);
-        addSpace(4);
+      card({
+        title: 'Points de vigilance',
+        items: res.warnings,
+        fg: [161,98,7], bg: [254,249,231], accent: [245,158,11], bodyColor: SLATE,
       });
     }
 
-    addSpace(10);
-    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(140,140,140);
-    paragraph('Recommandation horodatée — indicative, non contractuelle. Les seuils réels dépendent du contrat souscrit.', 8.5);
+    // ---- Carte "Garanties de référence bâtiment" (titre + détail par ligne) ----
+    if (res.guarantees && res.guarantees.length){
+      const items = res.guarantees.map(g => `${strip(g.l)} — ${strip(g.v)} : ${strip(g.note)}`);
+      card({
+        title: 'Garanties de référence bâtiment',
+        items,
+        fg: BRAND, bg: [235,241,248], accent: BRAND_2, bodyColor: SLATE,
+      });
+    }
 
+    // ---- Mention légale finale ----
+    newPageIfNeeded(40);
+    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+    const legal = 'Recommandation horodatée — indicative, non contractuelle. Les seuils réels dépendent du contrat souscrit.';
+    doc.splitTextToSize(legal, maxWidth).forEach(l => { doc.text(l, marginX, y); y += 12; });
+
+    drawFooter();
     doc.save('batipro-assurance.pdf');
   }
   window.submitAssur = submitAssur;
