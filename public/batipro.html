@@ -1252,7 +1252,7 @@
     <div id="qualif-form-wrap">
       <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide bg-brand-tint">Module 1/5 — Test de qualification</span>
       <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Ai-je le droit d'ouvrir mon entreprise&nbsp;?</h3>
-      <p class="mt-3 text-[14px] text-neutral-600">Vérification factuelle et instantanée de vos critères légaux selon la loi Raffarin (loi n°96-603 du 5 juillet 1996). Aucun conseil personnalisé, uniquement les faits.</p>
+      <p class="mt-3 text-[14px] text-neutral-600">Vérification factuelle et instantanée de vos critères légaux selon le Code de l'artisanat (art. L.121-1 à L.121-3, issu de la loi Raffarin n°96-603 du 5 juillet 1996, recodifiée depuis le 1er juillet 2023). Aucun conseil personnalisé, uniquement les faits.</p>
 
       <div id="qualif-draft-banner" class="mt-4 hidden items-center justify-between gap-3 rounded-[12px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-neutral-700">
         <span class="flex items-start gap-2">
@@ -1319,49 +1319,60 @@
       <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Quel statut juridique pour votre activité ?</h3>
       <p class="mt-2 text-[14px] text-neutral-600">Répondez à 5 questions. L'algorithme vous pré-oriente vers Micro-entreprise, EI ou SASU, avec un niveau de confiance.</p>
 
+      <div class="mt-6">
+        <div class="flex items-center justify-between text-[12px] font-medium text-neutral-500">
+          <span id="statut-step-label">0 question sur 5 confirmée</span>
+          <span id="statut-step-pct">0%</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div id="statut-progress" class="h-full rounded-full transition-all duration-500" style="width:0%;background:var(--brand)"></div>
+        </div>
+      </div>
+
+
       <form id="statut-form" class="mt-8 space-y-8" onsubmit="event.preventDefault(); submitStatut();">
         <div>
-          <label class="block text-[14px] font-semibold text-neutral-900">Chiffre d'affaires prévisionnel la 1re année</label>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Chiffre d'affaires prévisionnel la 1re année</label>
           <div class="mt-3 grid gap-2">
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-lt40"><input type="radio" name="ca" value="lt40" class="mt-1 accent-brand" checked id="r-ca-lt40"><span><b>Moins de 40 000 €</b><span class="block text-[13px] text-neutral-500">Démarrage progressif, chantiers ponctuels</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-40to77"><input type="radio" name="ca" value="40to77" class="mt-1 accent-brand" id="r-ca-40to77"><span><b>40 000 € – 77 700 €</b><span class="block text-[13px] text-neutral-500">Sous le seuil micro BIC prestations</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-77to188"><input type="radio" name="ca" value="77to188" class="mt-1 accent-brand" id="r-ca-77to188"><span><b>77 700 € – 188 700 €</b><span class="block text-[13px] text-neutral-500">Dépassement probable du plafond services</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-gt188"><input type="radio" name="ca" value="gt188" class="mt-1 accent-brand" id="r-ca-gt188"><span><b>Plus de 188 700 €</b><span class="block text-[13px] text-neutral-500">Activité soutenue, achats/reventes de matériaux</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-lt40"><input type="radio" name="ca" value="lt40" class="mt-1 accent-brand" checked id="r-ca-lt40"><span><b>Moins de 40 000 €</b><span class="block text-[13px] text-neutral-500">Démarrage progressif, chantiers ponctuels</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-40to77"><input type="radio" name="ca" value="40to77" class="mt-1 accent-brand" id="r-ca-40to77"><span><b>40 000 € – 83 600 €</b><span class="block text-[13px] text-neutral-500">Sous le seuil micro BIC prestations</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-77to188"><input type="radio" name="ca" value="77to188" class="mt-1 accent-brand" id="r-ca-77to188"><span><b>83 600 € – 203 100 €</b><span class="block text-[13px] text-neutral-500">Dépassement probable du plafond services</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-ca-gt188"><input type="radio" name="ca" value="gt188" class="mt-1 accent-brand" id="r-ca-gt188"><span><b>Plus de 203 100 €</b><span class="block text-[13px] text-neutral-500">Activité soutenue, achats/reventes de matériaux</span></span></label>
           </div>
         </div>
 
         <div>
-          <label class="block text-[14px] font-semibold text-neutral-900">Souhaitez-vous vous associer ?</label>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Souhaitez-vous vous associer ?</label>
           <div class="mt-3 grid gap-2 sm:grid-cols-2">
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-associes-non"><input class="accent-brand" type="radio" name="associes" value="non" checked id="r-associes-non"><span><b>Seul(e)</b></span></label>
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-associes-oui"><input class="accent-brand" type="radio" name="associes" value="oui" id="r-associes-oui"><span><b>Avec un ou plusieurs associés</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-associes-non"><input class="accent-brand" type="radio" name="associes" value="non" checked id="r-associes-non"><span><b>Seul(e)</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-associes-oui"><input class="accent-brand" type="radio" name="associes" value="oui" id="r-associes-oui"><span><b>Avec un ou plusieurs associés</b></span></label>
           </div>
         </div>
 
         <div>
-          <label class="block text-[14px] font-semibold text-neutral-900">Protection du patrimoine personnel</label>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg></span>Protection du patrimoine personnel</label>
           <p class="mt-1 text-[13px] text-neutral-500">En EI (depuis 2022) et en SASU, votre patrimoine personnel est séparé de celui de l'entreprise.</p>
           <div class="mt-3 grid gap-2 sm:grid-cols-2">
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-patrimoine-oui"><input class="accent-brand" type="radio" name="patrimoine" value="oui" checked id="r-patrimoine-oui"><span><b>Oui, priorité forte</b></span></label>
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-patrimoine-non"><input class="accent-brand" type="radio" name="patrimoine" value="non" id="r-patrimoine-non"><span><b>Peu important</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-patrimoine-oui"><input class="accent-brand" type="radio" name="patrimoine" value="oui" checked id="r-patrimoine-oui"><span><b>Oui, priorité forte</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-patrimoine-non"><input class="accent-brand" type="radio" name="patrimoine" value="non" id="r-patrimoine-non"><span><b>Peu important</b></span></label>
           </div>
         </div>
 
         <div>
-          <label class="block text-[14px] font-semibold text-neutral-900">Régime social souhaité</label>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>Régime social souhaité</label>
           <div class="mt-3 grid gap-2">
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-tns"><input type="radio" name="social" value="tns" class="mt-1 accent-brand" checked id="r-social-tns"><span><b>Travailleur non-salarié (TNS)</b><span class="block text-[13px] text-neutral-500">Cotisations plus faibles, protection sociale de base</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-assimile"><input type="radio" name="social" value="assimile" class="mt-1 accent-brand" id="r-social-assimile"><span><b>Assimilé-salarié</b><span class="block text-[13px] text-neutral-500">Meilleure couverture, cotisations plus élevées</span></span></label>
-            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-indiff"><input type="radio" name="social" value="indiff" class="mt-1 accent-brand" id="r-social-indiff"><span><b>Indifférent</b></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-tns"><input type="radio" name="social" value="tns" class="mt-1 accent-brand" checked id="r-social-tns"><span><b>Travailleur non-salarié (TNS)</b><span class="block text-[13px] text-neutral-500">Cotisations plus faibles, protection sociale de base</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-assimile"><input type="radio" name="social" value="assimile" class="mt-1 accent-brand" id="r-social-assimile"><span><b>Assimilé-salarié</b><span class="block text-[13px] text-neutral-500">Meilleure couverture, cotisations plus élevées</span></span></label>
+            <label class="radio-card flex cursor-pointer items-start gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-social-indiff"><input type="radio" name="social" value="indiff" class="mt-1 accent-brand" id="r-social-indiff"><span><b>Indifférent</b></span></label>
           </div>
         </div>
 
         <div>
-          <label class="block text-[14px] font-semibold text-neutral-900">Besoin de récupérer la TVA sur vos achats ?</label>
+          <label class="flex items-center gap-2 text-[14px] font-semibold text-neutral-900"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-brand-tint text-brand"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h13l3 3v17l-3-2-3 2-3-2-3 2-3-2-3 2V5z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg></span>Besoin de récupérer la TVA sur vos achats ?</label>
           <p class="mt-1 text-[13px] text-neutral-500">La micro-entreprise ne facture ni ne récupère la TVA sous le seuil de franchise.</p>
           <div class="mt-3 grid gap-2 sm:grid-cols-2">
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-tva-oui"><input class="accent-brand" type="radio" name="tva" value="oui" id="r-tva-oui"><span><b>Oui, achats importants</b></span></label>
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-tva-non"><input class="accent-brand" type="radio" name="tva" value="non" checked id="r-tva-non"><span><b>Non, peu d'achats</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-tva-oui"><input class="accent-brand" type="radio" name="tva" value="oui" id="r-tva-oui"><span><b>Oui, achats importants</b></span></label>
+            <label class="radio-card flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-3 hover:bg-neutral-50" for="r-tva-non"><input class="accent-brand" type="radio" name="tva" value="non" checked id="r-tva-non"><span><b>Non, peu d'achats</b></span></label>
           </div>
         </div>
 
@@ -1711,7 +1722,7 @@
     <div id="devis-form-wrap">
       <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:rgba(255,128,30,.10);color:var(--accent)">Module 5/5 — Premier devis conforme</span>
       <h3 class="mt-4 font-display text-3xl font-bold md:text-4xl">Éditez votre premier devis BTP conforme</h3>
-      <p class="mt-2 text-[14px] text-neutral-600">Mentions obligatoires BTP (arrêté 2 mars 1990, art. L441-1 & L441-9 C. com., décret 83-1025), TVA multi-taux (5,5% / 10% / 20%), rappel décennale & RC Pro : votre devis est prêt à envoyer.</p>
+      <p class="mt-2 text-[14px] text-neutral-600">Mentions obligatoires BTP (arrêté du 2 mars 1990, art. L441-1 & L441-9 C. com.), TVA multi-taux (5,5% / 10% / 20%), rappel décennale & RC Pro : votre devis est prêt à envoyer.</p>
 
       <div class="mt-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-[12.5px] text-neutral-700">
         <b>Brouillon local :</b> vos saisies sont automatiquement sauvegardées dans ce navigateur.
@@ -2142,7 +2153,7 @@ animate();
     { v:"autre", l:"Autre métier du bâtiment", reglemente:false },
   ];
 
-  // Exigences spécifiques par métier, au-delà de la qualification CAP/BEP/3 ans (loi Raffarin).
+  // Exigences spécifiques par métier, au-delà de la qualification CAP/BEP/3 ans (Code de l'artisanat, art. L.121-1, ex-loi Raffarin).
   // Ces obligations s'ajoutent à l'immatriculation et ne dispensent jamais de la garantie décennale.
   const EXIGENCES_METIER = {
     electricien: [
@@ -4385,7 +4396,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     if (!isReg) {
       status = "eligible";
       title = "Vous pouvez immatriculer votre entreprise";
-      reasons.push(`Le métier « ${m.l} » n'est pas une activité réglementée au sens de la loi Raffarin.`);
+      reasons.push(`Le métier « ${m.l} » n'est pas une activité réglementée au sens du Code de l'artisanat (art. L.121-1).`);
       reasons.push("Aucune obligation de diplôme ou d'expérience pour l'immatriculation.");
       warnings.push("Une assurance responsabilité civile professionnelle (RC Pro) reste fortement recommandée. Pour tout travaux relevant du bâtiment, la garantie décennale est obligatoire.");
       next = "Passer à l'étape suivante : simulateur de statut";
@@ -4412,7 +4423,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       } else {
         status = "non";
         title = "Vous ne pouvez pas immatriculer en l'état";
-        reasons.push(`Le métier « ${m.l} » est une activité réglementée par la loi n°96-603 du 5 juillet 1996 (loi Raffarin).`);
+        reasons.push(`Le métier « ${m.l} » est une activité réglementée par le Code de l'artisanat (art. L.121-1, ex-loi Raffarin).`);
         reasons.push("Aucune des trois conditions n'est remplie : ni diplôme CAP/BEP+, ni 3 ans d'expérience, ni diplôme UE équivalent.");
         warnings.push("Options : (1) passer un CAP/BEP dans le métier — souvent 1 à 2 ans en candidat libre ; (2) cumuler 3 ans d'expérience salariée avant d'immatriculer ; (3) faire valider un diplôme UE équivalent auprès de la CMA.");
         next = "Voir les parcours de qualification";
@@ -4507,12 +4518,44 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   };
 
   // ---------- STATUT (SIMULATEUR) MODAL ----------
+  const STATUT_GROUPS = ['ca','associes','patrimoine','social','tva'];
+  let statutAnswered = new Set();
+
+  function renderStatutProgress(){
+    const label = document.getElementById('statut-step-label');
+    const pct = document.getElementById('statut-step-pct');
+    const bar = document.getElementById('statut-progress');
+    if (!label || !pct || !bar) return;
+    const n = statutAnswered.size;
+    label.textContent = `${n} question${n>1?'s':''} sur ${STATUT_GROUPS.length} confirmée${n>1?'s':''}`;
+    const p = Math.round((n/STATUT_GROUPS.length)*100);
+    pct.textContent = `${p}%`;
+    bar.style.width = `${p}%`;
+  }
+  function resetStatutProgress(){
+    statutAnswered = new Set();
+    renderStatutProgress();
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    const form = document.getElementById('statut-form');
+    if (!form) return;
+    form.addEventListener('change', (e)=>{
+      const name = e.target && e.target.name;
+      if (STATUT_GROUPS.includes(name)){
+        statutAnswered.add(name);
+        renderStatutProgress();
+      }
+    });
+    renderStatutProgress();
+  });
+
   function openStatut(){
     const m = document.getElementById('statut-modal');
     m.classList.remove('hidden'); m.classList.add('flex');
     document.body.style.overflow='hidden';
     document.getElementById('statut-form-wrap').classList.remove('hidden');
     document.getElementById('statut-result').classList.add('hidden');
+    resetStatutProgress();
   }
   function closeStatut(){
     const m = document.getElementById('statut-modal');
@@ -4537,8 +4580,8 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
 
     // CA
     if (ca === 'lt40') { scores.micro += 4; reasons.micro.push("CA prévisionnel bas : la micro simplifie au maximum démarches et cotisations."); scores.ei += 1; }
-    if (ca === '40to77') { scores.micro += 3; reasons.micro.push("CA sous le plafond micro BIC prestations (77 700 €)."); scores.ei += 2; }
-    if (ca === '77to188') { scores.ei += 3; reasons.ei.push("CA proche/au-dessus du plafond micro services : l'EI reste souple sans limite de CA."); scores.sasu += 2; scores.micro -= 3; reasons.micro.push("Risque de dépasser le plafond micro services (77 700 €)."); }
+    if (ca === '40to77') { scores.micro += 3; reasons.micro.push("CA sous le plafond micro BIC prestations (83 600 €)."); scores.ei += 2; }
+    if (ca === '77to188') { scores.ei += 3; reasons.ei.push("CA proche/au-dessus du plafond micro services : l'EI reste souple sans limite de CA."); scores.sasu += 2; scores.micro -= 3; reasons.micro.push("Risque de dépasser le plafond micro services (83 600 €)."); }
     if (ca === 'gt188') { scores.sasu += 4; reasons.sasu.push("CA élevé : la SASU permet d'optimiser la rémunération (salaire + dividendes) et de piloter la fiscalité."); scores.ei += 2; scores.micro -= 6; reasons.micro.push("CA au-delà des plafonds micro : régime inadapté."); }
 
     // Patrimoine
@@ -4679,6 +4722,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   window.resetStatut = function(){
     document.getElementById('statut-result').classList.add('hidden');
     document.getElementById('statut-form-wrap').classList.remove('hidden');
+    resetStatutProgress();
   };
 
   // ---------- INPI (DOSSIER) MODAL ----------
@@ -5522,7 +5566,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       </div>
 
       <div class="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-[13px] text-neutral-700">
-        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), délai de paiement (${d.co_paiement} j), rappel assurance décennale &amp; RC Pro (loi Spinetta), pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), médiation de la consommation, mention manuscrite “bon pour accord”.
+        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), délai de paiement (${d.co_paiement} j), rappel assurance décennale &amp; RC Pro (loi Spinetta), ${d.cl_type === 'pro' ? 'pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), applicables de plein droit entre professionnels' : 'pénalités de retard contractuelles (à stipuler au devis, non automatiques pour un client particulier)'}, médiation de la consommation, mention manuscrite “bon pour accord”.
       </div>
 
       <div class="mt-6 flex flex-wrap gap-3">
@@ -5698,8 +5742,13 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     heading('Conditions & mentions légales', 11);
     para('• Devis gratuit, valable ' + (d.co_validite||30) + ' jours à compter de sa date d\'émission.');
     para('• Acompte de ' + (T.acomptePct) + '% à la signature ; solde à réception des travaux.');
-    para('• Délai de paiement : ' + (d.co_paiement||30) + ' jours à compter de la facture (art. L441-10 C. com.).');
-    para('• Pénalités de retard : taux BCE + 10 points ; indemnité forfaitaire de recouvrement de 40 € (art. D441-5 C. com.).');
+    if (d.cl_type === 'pro') {
+      para('• Délai de paiement : ' + (d.co_paiement||30) + ' jours à compter de la facture (art. L441-10 C. com.).');
+      para('• Pénalités de retard : taux BCE + 10 points ; indemnité forfaitaire de recouvrement de 40 € (art. D441-5 C. com.), applicables de plein droit entre professionnels.');
+    } else {
+      para('• Délai de paiement : ' + (d.co_paiement||30) + ' jours à compter de la facture, tel que convenu au présent devis.');
+      para('• Pénalités de retard : taux de ' + (d.co_penalite||'10') + ' % par an à compter du jour suivant la date de règlement prévue, applicables dès lors qu\'elles sont stipulées au présent devis (client particulier — non automatiques par la loi, contrairement aux relations entre professionnels).');
+    }
     para('• Assurance décennale & RC Pro (loi Spinetta, art. L241-1 C. assur.) : ' + (d.em_assureur || 'compagnie et police à compléter') + ' — Zone : ' + (d.em_zone||'France métropolitaine') + '.');
     if (T.franchise) para('• TVA non applicable, art. 293 B du CGI (franchise en base — micro-entreprise).');
     para('• Médiation de la consommation : en cas de litige, le client consommateur peut recourir gratuitement à un médiateur (art. L612-1 C. conso.).');
