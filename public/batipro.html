@@ -937,7 +937,7 @@
           <span class="font-display text-[15px] font-bold">Bâti<span style="color:var(--brand-2)">pro</span></span>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="window.print()" class="dash-glow-btn inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white">
+          <button onclick="downloadQualifReportPdf()" class="dash-glow-btn inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white">
             Télécharger en PDF
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
           </button>
@@ -6151,3 +6151,82 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
 </script>
 </body>
 </html>
+<script>
+  // Génère et télécharge un vrai fichier PDF du rapport de qualification
+  // (jsPDF), au lieu de passer par la boîte d'impression du navigateur.
+  function downloadQualifReportPdf(){
+    const res = window.__qualifReportRes;
+    const meta = window.__qualifReportMeta || {};
+    if (!res){ showInlineError("Aucun rapport à télécharger pour le moment."); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'pt', format:'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginX = 48;
+    const maxWidth = pageWidth - marginX*2;
+    let y = 56;
+
+    function addSpace(h){ y += h; if (y > 780){ doc.addPage(); y = 56; } }
+    function heading(text, size=12.5){
+      doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20,20,20);
+      doc.text(text, marginX, y); addSpace(size+8);
+    }
+    function line(label, value, size=10.5){
+      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(50,50,50);
+      const text = (label ? label + ' : ' : '') + (value || '—');
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach(l => { doc.text(l, marginX, y); addSpace(size+5); });
+    }
+
+    const badge = res.status==='eligible' ? 'Éligible' : res.status==='presque' ? 'Presque éligible' : 'Non éligible en l\'état';
+    const d = meta.date ? new Date(meta.date) : new Date();
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.setTextColor(0,132,255);
+    doc.text('Bâtipro — Rapport de qualification', marginX, y); addSpace(26);
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(120,120,120);
+    doc.text('Résultat : ' + badge + '  —  Test réalisé le ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), marginX, y); addSpace(24);
+
+    heading(res.title, 14);
+    addSpace(2);
+
+    heading('Titulaire');
+    line(null, meta.nom);
+    if (meta.email) line(null, meta.email);
+    addSpace(6);
+
+    heading('Détails du test');
+    line('Métier', res.metier.l);
+    line('Diplôme', res.diplome.l);
+    line('Expérience', res.exp + ' an(s)');
+    if (res.ueDiploma) line(null, 'Diplôme UE reconnu');
+    addSpace(6);
+
+    heading('Motifs de la décision');
+    (res.reasons || []).forEach(r => line(null, '• ' + r));
+    addSpace(6);
+
+    if (res.warnings && res.warnings.length){
+      heading('À retenir');
+      res.warnings.forEach(w => line(null, '• ' + w));
+      addSpace(6);
+    }
+
+    if (res.specifics && res.specifics.length){
+      heading(`Exigences spécifiques au métier « ${res.metier.l} »`);
+      res.specifics.forEach(s => {
+        doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(50,50,50);
+        doc.text(s.label, marginX, y); addSpace(14);
+        line(null, s.detail, 9.5);
+        addSpace(2);
+      });
+      addSpace(4);
+    }
+
+    doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(140,140,140);
+    line(null, "Ce rapport a valeur d'auto-évaluation ; la Chambre de Métiers et de l'Artisanat validera formellement la qualification lors de l'immatriculation.", 8.5);
+
+    doc.save('batipro-rapport-qualification.pdf');
+  }
+  window.downloadQualifReportPdf = downloadQualifReportPdf;
+</script>
