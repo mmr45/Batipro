@@ -3634,6 +3634,10 @@ animate();
     const page = document.getElementById('rapport-qualif-page');
     if (page) page.classList.add('hidden');
     document.body.style.overflow = '';
+    // On réaffiche la barre de navigation du site, cachée pendant la
+    // consultation du rapport.
+    const siteHeader = document.querySelector('header');
+    if (siteHeader) siteHeader.classList.remove('hidden');
     // Si l'onglet a été ouvert uniquement pour le rapport, on retire le
     // paramètre d'URL pour retrouver le site normal sans le rouvrir.
     const url = new URL(window.location.href);
@@ -3650,6 +3654,11 @@ animate();
     if (!page || !content) return;
     page.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    // On masque la barre de navigation du site le temps que le rapport
+    // (page plein écran) soit affiché — évite qu'elle reste visible/collée
+    // en haut par-dessus ou à côté du rapport.
+    const siteHeader = document.querySelector('header');
+    if (siteHeader) siteHeader.classList.add('hidden');
     content.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement du rapport…</p>';
 
     if (!currentUser){
