@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "tailwindcss -i ./batipro-input.css -o ./public/output.css --minify && vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -66,6 +66,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.2.1",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "2.7.0",
     "@types/node": "^22.16.5",
