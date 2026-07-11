@@ -518,9 +518,9 @@
             <span class="text-[13px] text-neutral-500">une seule fois</span>
           </div>
           <p class="mt-2 text-[13px] text-neutral-600">Générateur de dossier INPI, pièces justificatives incluses.</p>
-          <button onclick="handlePricingClick('dossier')" class="btn-primary group mt-5 inline-flex w-full items-center justify-center gap-3 rounded-[14px] py-3.5 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.02]">
-            <span class="text-[15px] font-semibold">Acheter le pack — 89 €</span>
-            <span class="grid h-8 w-8 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45 text-brand">
+          <button id="hero-pack-btn" onclick="handlePricingClick('dossier')" class="btn-primary group mt-5 inline-flex w-full items-center justify-center gap-3 rounded-[14px] py-3.5 pl-6 pr-2 text-white transition-transform duration-300 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed">
+            <span id="hero-pack-btn-label" class="text-[15px] font-semibold">Acheter le pack — 89 €</span>
+            <span id="hero-pack-btn-icon" class="grid h-8 w-8 place-items-center rounded-full bg-white transition-transform group-hover:rotate-45 text-brand">
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
             </span>
           </button>
@@ -685,8 +685,11 @@
               Télécharger la synthèse
               <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
             </button>
-            <button onclick="openAssur()" class="inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+            <button id="espace-assur-refaire-btn" onclick="goToAssurGated()" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60 disabled:cursor-wait">
               <span id="espace-assur-refaire-label">Faire la simulation</span>
+            </button>
+            <button id="espace-assur-acheter-btn" onclick="handlePricingClick('dossier')" class="hidden inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+              Acheter le pack — 89 €
             </button>
           </div>
         </div>
@@ -704,7 +707,7 @@
               <p class="text-[13px] text-neutral-500">Retrouvez et retéléchargez vos devis générés</p>
             </div>
           </div>
-          <button id="espace-devis-nouveau-btn" onclick="openDevis()" class="hidden shrink-0 inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
+          <button id="espace-devis-nouveau-btn" onclick="goToDevisGated()" class="hidden shrink-0 inline-flex items-center gap-2 rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">
             Nouveau devis
           </button>
         </div>
@@ -2291,7 +2294,7 @@ animate();
     // identifiant à son Price ID Stripe (le site ne connaît pas les Price IDs).
     { name:"Gratuit", price:"0 €", sub:"pour toujours", features:["Test de qualification complet","Simulateur de statut","Alertes de risque","Support par email"], cta:"Commencer", highlight:false, plan:null },
     { name:"Lancement", price:"89 €", sub:"paiement unique", features:["Tout Gratuit +","Générateur de dossier INPI","Pièces justificatives incluses"], cta:"Créer ma boîte", highlight:true, plan:"dossier" },
-    { name:"Pro", price:"19 €", sub:"/ mois", features:["Tout Lancement +","Éditeur de devis conforme","Mises à jour TVA & décennale","Archivage horodaté"], cta:"Passer Pro", highlight:false, plan:"pro" },
+    { name:"Pro", price:"19 €", sub:"/ mois", features:["Tout Gratuit +","Éditeur de devis conforme","Mises à jour TVA & décennale","Archivage horodaté"], cta:"Passer Pro", highlight:false, plan:"pro" },
   ];
 
   const ICONS = {
@@ -2556,7 +2559,82 @@ animate();
     };
   }
 
-  // Restaure la session existante au chargement de la page (si l'utilisateur
+  // Met à jour les CTA d'achat (carte "Pack Lancement" de la section hero +
+  // cartes de la grille tarifaire) selon les entitlements réels de
+  // l'utilisateur connecté :
+  //  - l'abonnement Pro (19 €/mois) inclut tout le Pack Lancement (89 €) —
+  //    un compte Pro ne doit donc JAMAIS être invité à (re)payer les 89 €
+  //    séparément, même s'il n'a jamais acheté le Pack Lancement isolément ;
+  //  - à l'inverse, un compte ayant déjà acheté le Pack Lancement ou déjà
+  //    abonné Pro ne doit pas se voir proposer de payer une seconde fois le
+  //    même produit.
+  // Sans utilisateur connecté (ou sans Supabase dispo), les CTA restent à
+  // leur état par défaut ("Acheter…").
+  async function updatePricingButtonsForUser(){
+    const dossierBtns = [document.getElementById('hero-pack-btn'), document.querySelector('[data-plan-btn="dossier"]')].filter(Boolean);
+    const proBtn = document.querySelector('[data-plan-btn="pro"]');
+    const allBtns = [...dossierBtns, proBtn].filter(Boolean);
+
+    const labelOf = (btn) => btn.id === 'hero-pack-btn'
+      ? document.getElementById('hero-pack-btn-label')
+      : btn.querySelector('[data-plan-btn-label]');
+
+    // Mémorise le libellé d'origine de chaque bouton (une seule fois) pour
+    // pouvoir le restaurer proprement après une déconnexion.
+    allBtns.forEach(btn => {
+      const label = labelOf(btn);
+      if (label && btn.dataset.defaultLabel === undefined) btn.dataset.defaultLabel = label.innerHTML;
+    });
+
+    const resetBtn = (btn) => {
+      if (!btn) return;
+      btn.disabled = false;
+      btn.classList.remove('opacity-60', 'cursor-not-allowed');
+      const label = labelOf(btn);
+      if (label && btn.dataset.defaultLabel !== undefined) label.innerHTML = btn.dataset.defaultLabel;
+    };
+
+    if (!currentUser){
+      allBtns.forEach(resetBtn);
+      return;
+    }
+
+    const sb = window.__supabase;
+    if (!sb) return;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (error){ console.warn('Erreur vérification entitlements (CTA tarifs) :', error); return; }
+
+    const hasDossier = (data || []).some(e => e.product_key === 'dossier');
+    const hasPro = (data || []).some(e => e.product_key === 'pro');
+    // Le Pack Lancement (89 €) et l'abonnement Pro (19 €/mois) sont deux
+    // produits indépendants : être Pro ne donne PAS accès au Pack Lancement
+    // (INPI + Assurance), il faut l'acheter séparément.
+
+    allBtns.forEach(resetBtn); // repart d'un état propre avant d'appliquer les nouveaux libellés
+
+    dossierBtns.forEach(btn => {
+      if (!hasDossier) return;
+      btn.disabled = true;
+      btn.classList.add('opacity-60', 'cursor-not-allowed');
+      const label = labelOf(btn);
+      if (label) label.textContent = 'Déjà acheté ✓';
+    });
+
+    if (proBtn && hasPro){
+      proBtn.disabled = true;
+      proBtn.classList.add('opacity-60', 'cursor-not-allowed');
+      const label = labelOf(proBtn);
+      if (label) label.textContent = 'Abonnement actif ✓';
+    }
+  }
+  window.updatePricingButtonsForUser = updatePricingButtonsForUser;
+
+
   // était déjà connecté lors d'une visite précédente), et écoute les
   // changements de session (connexion/déconnexion) pour garder currentUser
   // synchronisé avec la vraie session Supabase.
@@ -2570,9 +2648,11 @@ animate();
     } catch(e){
       console.warn('Impossible de restaurer la session Supabase :', e);
     }
+    updatePricingButtonsForUser();
     sb.auth.onAuthStateChange((_event, session) => {
       currentUser = mapSupabaseUser(session ? session.user : null);
       updateAuthUI();
+      updatePricingButtonsForUser();
       // Sécurité : on efface toujours la session admin locale dès qu'un
       // changement de compte/connexion/déconnexion survient, pour qu'un
       // compte ne puisse jamais hériter de l'accès dashboard obtenu par un
@@ -2696,7 +2776,7 @@ animate();
       showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
       return;
     }
-    const hasAccess = (data || []).some(e => e.product_key === 'dossier' || e.product_key === 'pro');
+    const hasAccess = (data || []).some(e => e.product_key === 'dossier');
     if (hasAccess){
       closeStatut();
       openInpi();
@@ -2706,6 +2786,78 @@ animate();
     }
   }
   window.goToInpiGated = goToInpiGated;
+
+  // Verrou d'accès au module Devis (Module 5/5) : réservé aux comptes ayant
+  // l'abonnement Pro (product_key "pro", 19 €/mois). Le Pack Lancement seul
+  // (89 €, product_key "dossier") ne donne PAS accès à l'éditeur de devis —
+  // contrairement au module INPI, qui lui est inclus dès le Pack Lancement.
+  // Se connecte d'abord si nécessaire, vérifie les entitlements Supabase,
+  // puis ouvre soit l'éditeur de devis, soit un rappel d'abonnement
+  // (paywall) à la place.
+  async function goToDevisGated(){
+    if (!currentUser){ requireAuth(goToDevisGated); return; }
+    const sb = window.__supabase;
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    const btn = document.getElementById('assur-devis-btn');
+    if (btn) btn.disabled = true;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (btn) btn.disabled = false;
+    if (error){
+      console.error('Erreur vérification entitlements :', error);
+      showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
+      return;
+    }
+    const hasAccess = (data || []).some(e => e.product_key === 'pro');
+    if (hasAccess){
+      const paywall = document.getElementById('assur-devis-paywall');
+      if (paywall) paywall.classList.add('hidden');
+      closeAssur();
+      openDevis();
+    } else {
+      const paywall = document.getElementById('assur-devis-paywall');
+      if (paywall){ paywall.classList.remove('hidden'); paywall.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    }
+  }
+  window.goToDevisGated = goToDevisGated;
+
+  // Verrou d'accès au module Assurance décennale (Module 4/5) : réservé aux
+  // comptes ayant acheté le Pack Lancement (89 €, product_key "dossier") ou
+  // l'abonnement Pro (product_key "pro"), même règle que le module INPI. Se
+  // connecte d'abord si nécessaire, vérifie les entitlements Supabase, puis
+  // ouvre soit le module Assurance, soit un rappel d'achat (toast + renvoi
+  // vers les tarifs) à la place.
+  async function goToAssurGated(){
+    if (!currentUser){ requireAuth(goToAssurGated); return; }
+    const sb = window.__supabase;
+    if (!sb){ showInlineError("Connexion au serveur indisponible. Réessayez dans un instant."); return; }
+    const btn = document.getElementById('espace-assur-refaire-btn');
+    if (btn) btn.disabled = true;
+    const userId = currentUser.id || currentUser.user_id;
+    const { data, error } = await sb
+      .from('entitlements')
+      .select('product_key, active')
+      .eq('user_id', userId)
+      .eq('active', true);
+    if (btn) btn.disabled = false;
+    if (error){
+      console.error('Erreur vérification entitlements :', error);
+      showInlineError("Impossible de vérifier votre accès pour le moment. Réessayez dans un instant.");
+      return;
+    }
+    const hasAccess = (data || []).some(e => e.product_key === 'dossier');
+    if (hasAccess){
+      openAssur();
+    } else {
+      showInlineError("La simulation d'assurance décennale fait partie du Pack Lancement (89 €). Achetez-le pour y accéder.", 'warning');
+      document.getElementById('tarifs')?.scrollIntoView({ behavior:'smooth' });
+    }
+  }
+  window.goToAssurGated = goToAssurGated;
 
   function showAuthError(msg, isSuccess){
     const el = document.getElementById('auth-error');
@@ -2838,9 +2990,10 @@ animate();
     }
 
     await loadEspaceQualif(userId);
-    await loadEspaceInpi(userId, hasDossier || hasPro);
-    await loadEspaceAssur(userId);
+    await loadEspaceInpi(userId, hasDossier);
+    await loadEspaceAssur(userId, hasDossier);
     await loadEspaceDevis(userId, hasPro);
+    updatePricingButtonsForUser();
   }
 
   // Récupère et affiche le dernier test de qualification de l'utilisateur
@@ -3025,12 +3178,14 @@ animate();
   // Récupère et affiche la dernière simulation d'assurance décennale /
   // RC Pro de l'utilisateur connecté (module gratuit, non verrouillé par un
   // plan payant) — même logique que loadEspaceQualif / loadEspaceInpi.
-  async function loadEspaceAssur(userId){
+  async function loadEspaceAssur(userId, hasAccess){
     const box = document.getElementById('espace-assur');
     const voirBtn = document.getElementById('espace-assur-voir-btn');
+    const refaireBtn = document.getElementById('espace-assur-refaire-btn');
     const refaireLabel = document.getElementById('espace-assur-refaire-label');
+    const acheterBtn = document.getElementById('espace-assur-acheter-btn');
     box.innerHTML = '<p class="text-neutral-500 text-[14px]">Chargement…</p>';
-    if (voirBtn) voirBtn.classList.add('hidden');
+    [voirBtn, refaireBtn, acheterBtn].forEach(b => b && b.classList.add('hidden'));
 
     const sb = window.__supabase;
     let submission = null;
@@ -3072,9 +3227,18 @@ animate();
         if (voirBtn) voirBtn.classList.remove('hidden');
       }
       if (refaireLabel) refaireLabel.textContent = 'Refaire la simulation';
-    } else {
+      // Un dossier déjà existant reste consultable/retéléchargeable même si
+      // l'accès venait à changer ; seule une NOUVELLE simulation nécessite
+      // le Pack Lancement (89 €) ou l'abonnement Pro.
+      if (hasAccess && refaireBtn) refaireBtn.classList.remove('hidden');
+      else if (acheterBtn) acheterBtn.classList.remove('hidden');
+    } else if (hasAccess){
       box.innerHTML = `<p class="text-neutral-500 text-[14px]">Vous n'avez pas encore simulé vos besoins d'assurance.</p>`;
       if (refaireLabel) refaireLabel.textContent = 'Faire la simulation';
+      if (refaireBtn) refaireBtn.classList.remove('hidden');
+    } else {
+      box.innerHTML = `<p class="text-neutral-500 text-[14px]">Inclus dans le Pack Lancement (89 €).</p>`;
+      if (acheterBtn) acheterBtn.classList.remove('hidden');
     }
   }
 
@@ -4634,7 +4798,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
           <span class="text-[15px] font-semibold">Télécharger le dossier (PDF)</span>
           <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
         </button>
-        <button onclick="closeInpi(); openAssur();" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02]">
+        <button onclick="closeInpi(); goToAssurGated();" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02]">
           <span class="text-[15px] font-semibold">Passer à l'assurance décennale</span>
         </button>
 
@@ -4875,10 +5039,16 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
           <span class="text-[15px] font-semibold">Télécharger la synthèse (PDF)</span>
           <span class="grid h-9 w-9 place-items-center rounded-full bg-white text-brand">${icon('arrow','h-4 w-4')}</span>
         </button>
-        <button onclick="closeAssur(); openDevis();" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02]">
+        <button id="assur-devis-btn" onclick="goToDevisGated()" class="inline-flex items-center gap-3 rounded-[16px] bg-neutral-950 py-4 pl-6 pr-6 text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait">
           <span class="text-[15px] font-semibold">Passer au devis conforme</span>
         </button>
         <button onclick="resetAssur()" class="rounded-[16px] border border-black/10 bg-white px-5 py-4 text-[14px] font-medium text-neutral-700 hover:bg-neutral-50">Modifier mes réponses</button>
+      </div>
+
+      <div id="assur-devis-paywall" class="mt-4 hidden rounded-2xl border p-5" style="border-color:rgba(255,128,30,.35); background:rgba(255,128,30,.06)">
+        <p class="text-[14px] font-semibold text-neutral-900">Éditeur de devis conforme — réservé à l'abonnement Pro</p>
+        <p class="mt-2 text-[14px] text-neutral-700">La génération de devis conformes fait partie de l'abonnement <b>Pro (19 €/mois)</b>. Le Pack Lancement (89 €) ne l'inclut pas. Passez Pro pour continuer.</p>
+        <button onclick="handlePricingClick('pro')" class="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02]" style="background:rgba(255,128,30,.92)">Activer l'éditeur de devis — 19 €/mois</button>
       </div>
 
       <p class="mt-6 text-[12px] text-neutral-500">Recommandation horodatée : ${new Date().toLocaleString('fr-FR')} — indicative, non contractuelle. Les seuils réels dépendent du contrat souscrit.</p>
