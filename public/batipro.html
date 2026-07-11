@@ -673,7 +673,7 @@
         </div>
         <div class="flex md:justify-end">
           <button onclick="ctaTesterOuOrientation()" class="btn-primary inline-flex items-center justify-center gap-3 rounded-2xl px-8 py-4 text-[15px] font-semibold text-white transition-transform hover:scale-[1.03]">
-            Tester ma qualification
+            <span id="cta-bottom-label">Tester ma qualification</span>
             <span class="grid h-9 w-9 place-items-center rounded-full bg-white" style="color:var(--brand)"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
           </button>
         </div>
@@ -2597,6 +2597,7 @@ animate();
       }
 
       if (logoutBtn) logoutBtn.classList.remove('hidden');
+      if (typeof updateCtaBottomButton === 'function') updateCtaBottomButton();
     } else {
       // Déconnecté : seul le bouton "Inscription" est visible.
       btn.classList.remove('hidden');
@@ -2608,6 +2609,7 @@ animate();
       resumeBtn.classList.add('hidden');
       resumeBtn.classList.remove('inline-flex');
       if (logoutBtn) logoutBtn.classList.add('hidden');
+      if (typeof updateCtaBottomButton === 'function') updateCtaBottomButton();
     }
   }
 
@@ -2728,6 +2730,20 @@ animate();
     }
   }
   window.ctaTesterOuOrientation = ctaTesterOuOrientation;
+
+  // Met à jour le libellé du bouton du bandeau CTA du bas selon la
+  // situation : "Voir mon orientation" si déjà connecté avec un test fait,
+  // sinon "Tester ma qualification".
+  async function updateCtaBottomButton(){
+    const label = document.getElementById('cta-bottom-label');
+    if (!label) return;
+    if (currentUser && await hasQualifSubmission()){
+      label.textContent = 'Voir mon orientation';
+    } else {
+      label.textContent = 'Tester ma qualification';
+    }
+  }
+  window.updateCtaBottomButton = updateCtaBottomButton;
 
   async function loadEspaceQualif(userId){
     const box = document.getElementById('espace-qualif');
@@ -3776,6 +3792,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     const res = evaluateQualif({ metier, diplome, experience, ueDiploma });
     window.__qualifRes = res;
     recordSubmission('qualif', `${res.metier.l} — ${res.status==='eligible'?'Éligible':res.status==='presque'?'Presque éligible':'Non éligible'} (${res.exp} an(s) d'exp.)`, res);
+    if (typeof updateCtaBottomButton === 'function') updateCtaBottomButton();
     clearQualifDraft();
     updateAuthUI();
 
