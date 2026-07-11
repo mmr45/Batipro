@@ -690,8 +690,13 @@
   </section>
 
   <!-- Espace client -->
-  <section id="espace-client" class="hidden scroll-mt-28 py-28">
-    <div class="mx-auto max-w-4xl px-6">
+  <div id="espace-client" class="fixed inset-0 z-[115] hidden items-center justify-center p-4">
+    <div class="modal-backdrop absolute inset-0 bg-neutral-950/75 backdrop-blur-md" onclick="closeEspaceClient()"></div>
+    <div class="modal-panel relative z-10 w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-[28px] border border-black/5 bg-neutral-50 shadow-2xl">
+    <button onclick="closeEspaceClient()" class="rapport-noprint absolute right-5 top-5 z-20 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-neutral-500 shadow-sm ring-1 ring-black/5 hover:bg-neutral-100 hover:text-neutral-800" aria-label="Fermer">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <div class="px-6 py-8 md:px-8 md:py-10">
 
       <!-- Hero -->
       <div class="dash-hero" data-reveal>
@@ -878,7 +883,8 @@
         </div>
       </div>
     </div>
-  </section>
+    </div>
+  </div>
   <div id="rapport-qualif-page" class="fixed inset-0 z-[200] hidden overflow-y-auto bg-white">
     <div class="rapport-shell">
       <div class="rapport-noprint mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-6">
@@ -3108,19 +3114,24 @@ animate();
     updateAuthUI();
     // Masque immédiatement "Mon espace" (sinon il ne disparaît qu'au
     // prochain rechargement de page).
-    document.getElementById('espace-client').classList.add('hidden');
+    closeEspaceClient();
   }
 
   // ---------- Espace client ----------
   function goToEspaceClient(){
     loadEspaceClient();
-    // On laisse le temps au navigateur de calculer la mise en page de la
-    // section (qui vient d'être démasquée) avant de défiler jusqu'à elle,
-    // sinon le premier clic ne scrolle pas (l'élément était encore caché).
-    requestAnimationFrame(() => {
-      document.getElementById('espace-client').scrollIntoView({ behavior: 'smooth' });
-    });
+    const m = document.getElementById('espace-client');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
   }
+  function closeEspaceClient(){
+    const m = document.getElementById('espace-client');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+  window.closeEspaceClient = closeEspaceClient;
 
   async function loadEspaceClient(){
     const section = document.getElementById('espace-client');
@@ -5846,7 +5857,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   window.downloadDevisPdf = downloadDevisPdf;
 
   // ESC to close
-  window.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeAdmin(); closeLegal(); closeAuth(); closeQualif(); closeStatut(); closeInpi(); closeAssur(); closeDevis(); } });
+  window.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeAdmin(); closeLegal(); closeAuth(); closeQualif(); closeStatut(); closeInpi(); closeAssur(); closeDevis(); closeEspaceClient(); } });
 
 </script>
 
