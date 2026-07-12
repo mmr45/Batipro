@@ -5996,18 +5996,22 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     }, { once:true });
 
     // L'attestation de TVA à taux réduit n'a de sens que si un taux réduit
-    // (5,5% ou 10%) est effectivement appliqué. En "neuf" ou "autre/pro",
-    // la TVA est à 20% et aucune attestation n'est requise : on masque le
-    // champ pour ne pas induire en erreur.
+    // (5,5% ou 10%) est effectivement appliqué ET que l'entreprise facture
+    // réellement de la TVA (pas en franchise en base, art. 293 B CGI — une
+    // micro-entreprise en franchise ne facture aucune TVA, quelle que soit
+    // la nature des travaux, donc l'attestation ne s'applique pas).
+    const franchiseCheckbox = f.querySelector('[name="em_franchise"]');
     const attestationWrap = document.getElementById('ch_attestation_wrap');
     const natureSelect = f.querySelector('[name="ch_nature"]');
     const syncAttestationVisibility = () => {
-      const needsAttestation = natureSelect.value === 'reno' || natureSelect.value === 'energie';
+      const tauxReduitConcerne = natureSelect.value === 'reno' || natureSelect.value === 'energie';
+      const needsAttestation = tauxReduitConcerne && !franchiseCheckbox.checked;
       attestationWrap.classList.toggle('hidden', !needsAttestation);
       f.querySelector('[name="ch_attestation_tva"]').required = needsAttestation;
     };
     syncAttestationVisibility();
     natureSelect.addEventListener('change', syncAttestationVisibility);
+    franchiseCheckbox.addEventListener('change', syncAttestationVisibility);
 
     // Démarchage à domicile → affiche le rappel du délai légal de
     // rétractation de 14 jours (art. L221-9 et s. C. conso.), pertinent
@@ -6028,7 +6032,6 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     // facture pas de TVA et n'est pas censée en communiquer un. On rend donc
     // le champ obligatoire seulement quand la case franchise est décochée,
     // et on l'indique clairement dans le libellé.
-    const franchiseCheckbox = f.querySelector('[name="em_franchise"]');
     const tvaInput = document.getElementById('em_tva_input');
     const tvaLabel = document.getElementById('em_tva_label');
     const syncTvaRequirement = () => {
@@ -6097,9 +6100,9 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       </div>
 
       <div class="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-[13px] text-neutral-700">
-        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), délai de paiement (${d.co_paiement} j), rappel assurance décennale &amp; RC Pro (loi Spinetta)${d.em_qualif ? ', qualification professionnelle déclarée' : ''}, ${d.cl_type === 'pro' ? 'pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), applicables de plein droit entre professionnels' : 'pénalités de retard contractuelles (à stipuler au devis, non automatiques pour un client particulier)'}, médiation de la consommation, mention manuscrite “bon pour accord”${(d.ch_nature==='reno'||d.ch_nature==='energie') ? ', rappel de l\'attestation de TVA à taux réduit' + (d.ch_attestation_tva ? ' (déclarée signée)' : ' (⚠ pas encore signée par le client — à faire avant travaux)') : ''}${d.cl_demarchage && d.cl_type==='particulier' ? ', formulaire type de rétractation (14 jours, démarchage à domicile)' : ''}.
+        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), délai de paiement (${d.co_paiement} j), rappel assurance décennale &amp; RC Pro (loi Spinetta)${d.em_qualif ? ', qualification professionnelle déclarée' : ''}, ${d.cl_type === 'pro' ? 'pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), applicables de plein droit entre professionnels' : 'pénalités de retard contractuelles (à stipuler au devis, non automatiques pour un client particulier)'}, médiation de la consommation, mention manuscrite “bon pour accord”${(!d.em_franchise && (d.ch_nature==='reno'||d.ch_nature==='energie')) ? ', rappel de l\'attestation de TVA à taux réduit' + (d.ch_attestation_tva ? ' (déclarée signée)' : ' (⚠ pas encore signée par le client — à faire avant travaux)') : ''}${d.cl_demarchage && d.cl_type==='particulier' ? ', formulaire type de rétractation (14 jours, démarchage à domicile)' : ''}.
       </div>
-      ${(d.ch_nature==='reno'||d.ch_nature==='energie') && !d.ch_attestation_tva ? `
+      ${(!d.em_franchise && (d.ch_nature==='reno'||d.ch_nature==='energie') && !d.ch_attestation_tva) ? `
       <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-[13px] text-red-800">
         <b>Attention :</b> vous appliquez une TVA à taux réduit mais n'avez pas coché l'attestation client. Faites-la signer avant le début des travaux (CERFA 1301-SD ou 1300-SD) pour éviter un redressement fiscal.
       </div>` : ''}
