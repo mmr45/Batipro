@@ -1881,6 +1881,7 @@
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Raison sociale / Nom</label>
               <input name="em_nom" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Dupont Rénovation">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : votre extrait Kbis, votre certificat d'inscription au répertoire des métiers, ou votre avis de situation SIRENE.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Forme juridique</label>
@@ -1894,39 +1895,58 @@
                 <option value="SAS">SAS</option>
                 <option value="Autre">Autre</option>
               </select>
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : mentionnée sur votre Kbis ou votre avis de situation SIRENE (sirene.fr).</p>
             </div>
             <div class="sm:col-span-2">
               <label class="text-[13px] font-semibold text-neutral-800">Adresse du siège</label>
               <input name="em_adresse" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="12 rue des Artisans, 75011 Paris">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : l'adresse déclarée sur votre Kbis / avis SIRENE — pas forcément votre adresse d'intervention.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">SIREN / SIRET</label>
               <input name="em_siren" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="123 456 789 00012">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : sur votre Kbis, votre certificat SIRENE (sirene.fr), ou votre notification INSEE de création.</p>
             </div>
             <div>
               <label id="em_tva_label" class="text-[13px] font-semibold text-neutral-800">N° TVA intracom. (si assujetti)</label>
               <input id="em_tva_input" name="em_tva" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="FR12345678901">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : format FR + clé + SIREN, attribué par le service des impôts des entreprises — visible sur votre espace impots.gouv.fr, rubrique "Entreprise".</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Email</label>
               <input name="em_email" type="email" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="contact@monentreprise.fr">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Utilisez l'adresse que vos clients peuvent réellement utiliser pour vous contacter/répondre.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Téléphone</label>
               <input name="em_tel" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="06 12 34 56 78">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Numéro professionnel joignable — il figurera sur un document contractuel envoyé au client.</p>
             </div>
             <div>
-              <label class="text-[13px] font-semibold text-neutral-800">Assureur décennale</label>
-              <input name="em_assureur" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="MAAF Pro — police n° 000123">
+              <label class="text-[13px] font-semibold text-neutral-800">Assureur décennale (nom)</label>
+              <input name="em_assureur_nom" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="MAAF Pro">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : en-tête de votre attestation d'assurance décennale en cours de validité.</p>
+            </div>
+            <div>
+              <label class="text-[13px] font-semibold text-neutral-800">N° de police d'assurance</label>
+              <input name="em_assureur_police" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="000123">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : indiqué sur la même attestation, souvent sous "N° de contrat" ou "N° de police".</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Zone de couverture décennale</label>
               <input name="em_zone" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="France métropolitaine" value="France métropolitaine">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : précisée dans les conditions générales de votre contrat décennale (DOM-TOM parfois exclus ou en option).</p>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-[13px] font-semibold text-neutral-800">Qualification professionnelle (RGE, Qualibat…)</label>
+              <input name="em_qualif" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="RGE Qualibat n° 123456 (si applicable)">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver / vérifier : annuaire-rge.gouv.fr ou qualibat.com avec votre n° SIRET. Nécessaire pour ouvrir droit aux aides MaPrimeRénov' du client ; non obligatoire si vous ne facturez pas en TVA 5,5% énergie.</p>
             </div>
           </div>
           <label class="mt-3 flex items-start gap-2 text-[13px] text-neutral-700">
             <input type="checkbox" name="em_franchise" class="mt-1"> <span>Franchise en base de TVA (art. 293 B CGI) — mention automatique “TVA non applicable”.</span>
           </label>
+          <p class="ml-6 mt-1 text-[11.5px] text-neutral-400">Où vérifier : votre seuil de CA sur votre dernière déclaration URSSAF (micro-entreprise) ou avec votre comptable — seuils à jour sur entreprendre.service-public.fr.</p>
         </section>
 
         <!-- CLIENT -->
@@ -1939,27 +1959,41 @@
                 <option value="particulier">Particulier</option>
                 <option value="pro">Professionnel / Entreprise</option>
               </select>
+              <p class="mt-1 text-[11.5px] text-neutral-400">Détermine les mentions légales applicables (pénalités de retard automatiques entre pros, droit de rétractation possible pour un particulier).</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Nom / Raison sociale</label>
               <input name="cl_nom" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Mme Martin">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Nom légal du client (pièce d'identité) ou raison sociale exacte s'il s'agit d'une entreprise.</p>
             </div>
             <div class="sm:col-span-2">
               <label class="text-[13px] font-semibold text-neutral-800">Adresse</label>
               <input name="cl_adresse" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="5 av. de la République, 75011 Paris">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Adresse de facturation du client — à distinguer de l'adresse du chantier si elles diffèrent.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Email</label>
               <input name="cl_email" type="email" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Utile pour l'envoi du devis et, le cas échéant, du formulaire de rétractation.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Téléphone</label>
               <input name="cl_tel" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Facultatif mais recommandé pour organiser la visite/l'intervention.</p>
             </div>
             <div class="sm:col-span-2">
               <label class="text-[13px] font-semibold text-neutral-800">SIRET (si professionnel)</label>
               <input name="cl_siret" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Où trouver : sur le Kbis du client, ou via pappers.fr / annuaire-entreprises.data.gouv.fr.</p>
             </div>
+          </div>
+
+          <label class="mt-4 flex items-start gap-2 text-[13px] text-neutral-700">
+            <input type="checkbox" name="cl_demarchage" id="cl_demarchage" class="mt-1"> <span>Ce devis fait suite à un démarchage à domicile ou hors établissement (visite non sollicitée, salon, appel entrant sans rendez-vous préalable du client).</span>
+          </label>
+          <p class="ml-6 mt-1 text-[11.5px] text-neutral-400">Comment savoir : si c'est vous (ou votre commercial) qui avez pris l'initiative du contact chez le client, sans qu'il vous ait sollicité au préalable — cochez. Un devis signé sur RDV pris à l'initiative du client n'est pas concerné.</p>
+          <div id="cl_retractation_notice" class="mt-2 hidden rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[12.5px] text-amber-900">
+            <b>Droit de rétractation obligatoire (art. L221-9 et L221-18 C. conso.) :</b> pour un particulier démarché à domicile, un délai de rétractation de 14 jours s'applique. Le formulaire type de rétractation sera automatiquement ajouté au PDF. Le client ne peut pas exiger le début des travaux avant la fin de ce délai, sauf demande expresse écrite de sa part (art. L221-28).
           </div>
         </section>
 
@@ -1970,10 +2004,12 @@
             <div class="sm:col-span-2">
               <label class="text-[13px] font-semibold text-neutral-800">Intitulé des travaux</label>
               <input name="ch_objet" required class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Rénovation salle de bains — 6 m²">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Description synthétique — le détail des prestations se fait ligne par ligne plus bas.</p>
             </div>
             <div class="sm:col-span-2">
               <label class="text-[13px] font-semibold text-neutral-800">Adresse du chantier</label>
               <input name="ch_adresse" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Identique au client">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Laissez vide si identique à l'adresse du client renseignée ci-dessus.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Nature du logement (TVA)</label>
@@ -1983,19 +2019,30 @@
                 <option value="neuf">Neuf ou &lt; 2 ans (TVA 20%)</option>
                 <option value="autre">Autre / Pro (TVA 20%)</option>
               </select>
+              <p class="mt-1 text-[11.5px] text-neutral-400">Comment savoir : l'ancienneté du logement se vérifie sur l'acte de propriété, la taxe foncière du client, ou l'avis de taxe d'habitation. En cas de doute, demandez l'attestation au client plutôt que de deviner.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Date prévisionnelle de début</label>
               <input name="ch_debut" type="date" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+              <p class="mt-1 text-[11.5px] text-neutral-400">À caler avec le client — sert aussi de point de départ pour le délai de rétractation le cas échéant.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Durée estimée</label>
               <input name="ch_duree" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="5 jours ouvrés">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Estimation raisonnable — engage votre responsabilité en cas de retard important non justifié.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Numéro du devis</label>
               <input name="ch_num" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Auto-généré">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Généré automatiquement ; gardez une numérotation continue pour votre comptabilité (recommandé, non modifiable pour raison légale une fois le devis accepté).</p>
             </div>
+          </div>
+
+          <div id="ch_attestation_wrap" class="mt-4 hidden">
+            <label class="flex items-start gap-2 text-[13px] text-neutral-700">
+              <input type="checkbox" name="ch_attestation_tva" id="ch_attestation_tva" class="mt-1"> <span>Le client a signé (ou signera avant travaux) l'attestation de TVA à taux réduit correspondant à la nature des travaux sélectionnée.</span>
+            </label>
+            <p class="ml-6 mt-1 text-[11.5px] text-neutral-400">Où trouver le formulaire : CERFA n°1301-SD (taux 10%) ou n°1300-SD (taux 5,5%), disponibles sur service-public.fr ou impots.gouv.fr. Obligatoire depuis le 16/02/2025 avant le début des travaux — à faire signer par le client et à conserver.</p>
           </div>
         </section>
 
@@ -2030,18 +2077,32 @@
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Acompte demandé (%)</label>
               <input name="co_acompte" type="number" min="0" max="100" value="30" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Usuellement entre 20% et 30% dans le BTP, à ajuster selon votre trésorerie et le coût des matériaux à avancer.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Validité (jours)</label>
               <input name="co_validite" type="number" min="1" value="30" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Durée pendant laquelle vos prix restent garantis — utile en cas de fluctuation du coût des matériaux.</p>
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Délai de paiement (jours)</label>
               <input name="co_paiement" type="number" min="0" value="30" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+              <p class="mt-1 text-[11.5px] text-neutral-400">Entre pros, ce délai ne peut légalement dépasser 60 jours (ou 45 jours fin de mois) — art. L441-10 C. com.</p>
+            </div>
+            <div class="sm:col-span-3">
+              <label class="text-[13px] font-semibold text-neutral-800">Moyens de paiement acceptés</label>
+              <div class="mt-1 flex flex-wrap gap-x-5 gap-y-2">
+                <label class="flex items-center gap-2 text-[13px] text-neutral-700"><input type="checkbox" name="co_paiement_virement" checked> Virement</label>
+                <label class="flex items-center gap-2 text-[13px] text-neutral-700"><input type="checkbox" name="co_paiement_cheque" checked> Chèque</label>
+                <label class="flex items-center gap-2 text-[13px] text-neutral-700"><input type="checkbox" name="co_paiement_cb"> Carte bancaire</label>
+                <label class="flex items-center gap-2 text-[13px] text-neutral-700"><input type="checkbox" name="co_paiement_especes"> Espèces</label>
+              </div>
+              <p class="mt-1 text-[11.5px] text-neutral-400">Non obligatoire légalement, mais évite les malentendus avec le client. Vérifiez auprès de votre banque les moyens que vous pouvez réellement encaisser (ex. TPE pour la CB) ; les espèces sont plafonnées à 1 000 € pour un particulier résident fiscal français (art. D112-3 C. mon. et fin.).</p>
             </div>
             <div class="sm:col-span-3">
               <label class="text-[13px] font-semibold text-neutral-800">Notes / précisions complémentaires</label>
               <textarea name="co_notes" rows="2" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Conditions d'accès, fournitures, gestion des déchets…"></textarea>
+              <p class="mt-1 text-[11.5px] text-neutral-400">Précisez ici tout ce qui n'est pas déjà couvert : accès chantier, stationnement, fourniture matériaux par le client, évacuation des déchets, etc.</p>
             </div>
           </div>
         </section>
@@ -5833,7 +5894,12 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     const fd = new FormData(f);
     const data = {};
     for (const [k,v] of fd.entries()) data[k] = v;
-    data.em_franchise = !!f.querySelector('[name="em_franchise"]')?.checked;
+    // Cases à cocher : FormData ne renvoie une valeur que si elles sont
+    // cochées, donc on force explicitement un booléen pour chacune afin que
+    // l'état "décoché" soit bien transmis (brouillon, soumission, PDF).
+    ['em_franchise','cl_demarchage','ch_attestation_tva',
+     'co_paiement_virement','co_paiement_cheque','co_paiement_cb','co_paiement_especes']
+      .forEach(name=>{ data[name] = !!f.querySelector(`[name="${name}"]`)?.checked; });
     data.lines = (window.__devisLines||[]).slice();
     return data;
   }
@@ -5878,22 +5944,27 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       em_tva: '',
       em_email: (currentUser && currentUser.email) || '',
       em_tel: '',
-      em_assureur: '',
+      em_assureur_nom: '',
+      em_assureur_police: '',
       em_zone: 'France métropolitaine',
       em_franchise: false,
+      em_qualif: '',
       cl_type: 'particulier',
       cl_nom: '',
       cl_adresse: '',
       cl_email: '',
       cl_tel: '',
       cl_siret: '',
+      cl_demarchage: false,
       ch_objet: '',
       ch_adresse: '',
       ch_nature: 'reno',
+      ch_attestation_tva: false,
       ch_debut: '',
       ch_duree: '',
       ch_num: 'DEV-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-5),
-      co_acompte: 30, co_validite: 30, co_paiement: 30, co_notes: ''
+      co_acompte: 30, co_validite: 30, co_paiement: 30, co_notes: '',
+      co_paiement_virement: true, co_paiement_cheque: true, co_paiement_cb: false, co_paiement_especes: false
     };
     const src = draft || defaults;
     Object.entries(src).forEach(([k,v])=>{
@@ -5923,6 +5994,34 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
         saveDevisDraft();
       }
     }, { once:true });
+
+    // L'attestation de TVA à taux réduit n'a de sens que si un taux réduit
+    // (5,5% ou 10%) est effectivement appliqué. En "neuf" ou "autre/pro",
+    // la TVA est à 20% et aucune attestation n'est requise : on masque le
+    // champ pour ne pas induire en erreur.
+    const attestationWrap = document.getElementById('ch_attestation_wrap');
+    const natureSelect = f.querySelector('[name="ch_nature"]');
+    const syncAttestationVisibility = () => {
+      const needsAttestation = natureSelect.value === 'reno' || natureSelect.value === 'energie';
+      attestationWrap.classList.toggle('hidden', !needsAttestation);
+      f.querySelector('[name="ch_attestation_tva"]').required = needsAttestation;
+    };
+    syncAttestationVisibility();
+    natureSelect.addEventListener('change', syncAttestationVisibility);
+
+    // Démarchage à domicile → affiche le rappel du délai légal de
+    // rétractation de 14 jours (art. L221-9 et s. C. conso.), pertinent
+    // uniquement pour un client particulier.
+    const demarchageCheckbox = document.getElementById('cl_demarchage');
+    const retractationNotice = document.getElementById('cl_retractation_notice');
+    const clTypeSelect = f.querySelector('[name="cl_type"]');
+    const syncRetractationNotice = () => {
+      const applicable = demarchageCheckbox.checked && clTypeSelect.value === 'particulier';
+      retractationNotice.classList.toggle('hidden', !applicable);
+    };
+    syncRetractationNotice();
+    demarchageCheckbox.addEventListener('change', syncRetractationNotice);
+    clTypeSelect.addEventListener('change', syncRetractationNotice);
 
     // Le N° de TVA intracommunautaire n'a de sens que si l'entreprise est
     // assujettie à la TVA. En franchise en base (art. 293 B CGI), elle ne
@@ -5998,8 +6097,12 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       </div>
 
       <div class="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-[13px] text-neutral-700">
-        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), délai de paiement (${d.co_paiement} j), rappel assurance décennale &amp; RC Pro (loi Spinetta), ${d.cl_type === 'pro' ? 'pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), applicables de plein droit entre professionnels' : 'pénalités de retard contractuelles (à stipuler au devis, non automatiques pour un client particulier)'}, médiation de la consommation, mention manuscrite “bon pour accord”.
+        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), délai de paiement (${d.co_paiement} j), rappel assurance décennale &amp; RC Pro (loi Spinetta)${d.em_qualif ? ', qualification professionnelle déclarée' : ''}, ${d.cl_type === 'pro' ? 'pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), applicables de plein droit entre professionnels' : 'pénalités de retard contractuelles (à stipuler au devis, non automatiques pour un client particulier)'}, médiation de la consommation, mention manuscrite “bon pour accord”${(d.ch_nature==='reno'||d.ch_nature==='energie') ? ', rappel de l\'attestation de TVA à taux réduit' + (d.ch_attestation_tva ? ' (déclarée signée)' : ' (⚠ pas encore signée par le client — à faire avant travaux)') : ''}${d.cl_demarchage && d.cl_type==='particulier' ? ', formulaire type de rétractation (14 jours, démarchage à domicile)' : ''}.
       </div>
+      ${(d.ch_nature==='reno'||d.ch_nature==='energie') && !d.ch_attestation_tva ? `
+      <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-[13px] text-red-800">
+        <b>Attention :</b> vous appliquez une TVA à taux réduit mais n'avez pas coché l'attestation client. Faites-la signer avant le début des travaux (CERFA 1301-SD ou 1300-SD) pour éviter un redressement fiscal.
+      </div>` : ''}
 
       <div class="mt-6 flex flex-wrap gap-3">
         <button onclick="downloadDevisPdf()" class="btn-primary inline-flex items-center gap-3 rounded-[16px] py-4 pl-6 pr-2 text-white transition-transform hover:scale-[1.02]">
