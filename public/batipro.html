@@ -5987,189 +5987,65 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     document.getElementById('devis-form-wrap').classList.remove('hidden');
   };
 
-  function downloadDevisPdf(){
+  // Remplace l'ancienne fonction downloadDevisPdf() (jsPDF client-side) par
+  // celle-ci. Le PDF est désormais généré côté serveur, après vérification
+  // (avec la clé service_role) que le compte a bien un entitlement 'pro'
+  // actif. Il n'y a plus aucune génération de PDF possible depuis la
+  // console : sans token valide + abonnement actif en base, la fonction
+  // renvoie 403 et rien n'est produit.
+  async function downloadDevisPdf(){
     const d = window.__devisData || readDevisForm();
-    const T = window.__devisTotals || {};
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit:'pt', format:'a4' });
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
-    const mx = 40;
-    const maxW = pageW - mx*2;
-    let y = 48;
-
-    function ensure(h){ if (y + h > pageH - 60){ doc.addPage(); y = 48; drawFooter(); } }
-    function drawFooter(){
-      const py = pageH - 30;
-      doc.setDrawColor(230); doc.line(mx, py-8, pageW-mx, py-8);
-      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(140);
-      doc.text(`${d.em_nom || ''} — SIREN ${d.em_siren || '—'} — Devis ${d.ch_num || ''}`, mx, py);
-      doc.text('Page ' + doc.internal.getNumberOfPages(), pageW-mx, py, { align:'right' });
-    }
-    function heading(t, size=13){ ensure(size+10); doc.setFont('helvetica','bold'); doc.setFontSize(size); doc.setTextColor(20); doc.text(t, mx, y); y += size+6; }
-    function para(t, size=9.5, color=[60,60,60]){
-      doc.setFont('helvetica','normal'); doc.setFontSize(size); doc.setTextColor(...color);
-      const lines = doc.splitTextToSize(t, maxW);
-      lines.forEach(l=>{ ensure(size+3); doc.text(l, mx, y); y += size+3; });
+    const sb = window.__supabase;
+    if (!sb){
+      showInlineError("Connexion au serveur indisponible. Réessayez dans un instant.");
+      return;
     }
 
-    // ==== HEADER ====
-    doc.setFillColor(0,132,255); doc.rect(0,0,pageW,6,'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(20);
-    doc.text('DEVIS', mx, y+8); y += 22;
-    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
-    doc.text('N° ' + (d.ch_num||'—'), mx, y); y += 12;
-    doc.text('Émis le : ' + new Date().toLocaleDateString('fr-FR'), mx, y); y += 12;
-    doc.text('Valable ' + (d.co_validite||30) + ' jours', mx, y); y += 8;
+    const btn = document.querySelector('#devis-result button[onclick="downloadDevisPdf()"]');
+    if (btn) btn.disabled = true;
 
-    // Émetteur bloc droit
-    let ry = 60;
-    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(0,132,255);
-    doc.text(d.em_nom || 'Votre entreprise', pageW-mx, ry, { align:'right' }); ry += 13;
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(60);
-    [d.em_forme, d.em_adresse, d.em_email, d.em_tel,
-     d.em_siren ? 'SIREN/SIRET : '+d.em_siren : '',
-     d.em_tva ? 'TVA : '+d.em_tva : ''
-    ].filter(Boolean).forEach(l=>{
-      const lines = doc.splitTextToSize(l, 240);
-      lines.forEach(ln=>{ doc.text(ln, pageW-mx, ry, { align:'right' }); ry += 11; });
-    });
-    y = Math.max(y, ry) + 12;
+    try {
+      const { data: sessionData } = await sb.auth.getSession();
+      const token = sessionData && sessionData.session && sessionData.session.access_token;
+      if (!token){
+        showInlineError("Veuillez vous reconnecter pour télécharger votre devis.");
+        return;
+      }
 
-    // Client
-    doc.setDrawColor(230); doc.setFillColor(249,250,251);
-    doc.roundedRect(mx, y, maxW, 74, 6, 6, 'FD');
-    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(120);
-    doc.text('CLIENT', mx+12, y+16);
-    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(20);
-    doc.text(d.cl_nom || '—', mx+12, y+32);
-    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(60);
-    const cl = [d.cl_adresse, d.cl_email, d.cl_tel, d.cl_siret?('SIRET : '+d.cl_siret):''].filter(Boolean).join('  ·  ');
-    doc.splitTextToSize(cl, maxW-24).forEach((ln,i)=> doc.text(ln, mx+12, y+48+i*11));
-    y += 88;
-
-    // Chantier
-    heading('Chantier', 11);
-    para('Objet : ' + (d.ch_objet||'—'), 10, [40,40,40]);
-    if (d.ch_adresse) para('Adresse : ' + d.ch_adresse);
-    const meta = [];
-    if (d.ch_debut) meta.push('Début prévu : ' + new Date(d.ch_debut).toLocaleDateString('fr-FR'));
-    if (d.ch_duree) meta.push('Durée estimée : ' + d.ch_duree);
-    if (meta.length) para(meta.join('   ·   '));
-    y += 6;
-
-    // ==== TABLE ====
-    heading('Détail des prestations', 11);
-    const cols = [
-      { k:'d',  l:'Désignation', w: maxW - 60 - 52 - 62 - 46 - 72 },
-      { k:'u',  l:'Unité',       w: 60,  align:'left' },
-      { k:'q',  l:'Qté',         w: 52,  align:'right' },
-      { k:'pu', l:'PU HT',       w: 62,  align:'right' },
-      { k:'tva',l:'TVA',         w: 46,  align:'right' },
-      { k:'ht', l:'Total HT',    w: 72,  align:'right' },
-    ];
-    function drawHeaderRow(){
-      doc.setFillColor(245,247,250); doc.rect(mx, y, maxW, 20, 'F');
-      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(60);
-      let x = mx + 6;
-      cols.forEach(c=>{
-        const align = c.align || 'left';
-        const tx = align==='right' ? x + c.w - 12 : x;
-        doc.text(c.l, tx, y+13, { align });
-        x += c.w;
+      const resp = await fetch(`${window.SUPABASE_URL}/functions/v1/generate-devis-pdf`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(d),
       });
-      y += 20;
+
+      if (!resp.ok){
+        let message = "Impossible de générer le PDF pour le moment.";
+        try {
+          const errBody = await resp.json();
+          if (errBody && errBody.error) message = errBody.error;
+        } catch (_e) {}
+        showInlineError(message);
+        return;
+      }
+
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `devis-${(d.ch_num||'batipro').replace(/[^\w\-]+/g,'_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Erreur téléchargement PDF devis :', err);
+      showInlineError("Une erreur est survenue pendant la génération du PDF.");
+    } finally {
+      if (btn) btn.disabled = false;
     }
-    drawHeaderRow();
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30);
-    d.lines.forEach((L, idx)=>{
-      const desig = doc.splitTextToSize(L.d || '—', cols[0].w - 12);
-      const rowH = Math.max(18, desig.length * 11 + 6);
-      ensure(rowH + 4);
-      if (idx % 2 === 1){ doc.setFillColor(252,252,253); doc.rect(mx, y, maxW, rowH, 'F'); }
-      let x = mx + 6;
-      // desig
-      desig.forEach((ln,i)=> doc.text(ln, x, y+12+i*11));
-      x += cols[0].w;
-      // unite
-      doc.text(String(L.u||''), x, y+12); x += cols[1].w;
-      // qté
-      doc.text(String(L.q ?? ''), x + cols[2].w - 12, y+12, { align:'right' }); x += cols[2].w;
-      // PU
-      doc.text((Number(L.pu)||0).toFixed(2), x + cols[3].w - 12, y+12, { align:'right' }); x += cols[3].w;
-      // TVA
-      doc.text((T.franchise ? '—' : (String(L.tva).replace('.',',')+'%')), x + cols[4].w - 12, y+12, { align:'right' }); x += cols[4].w;
-      // HT
-      const ht = (Number(L.q)||0)*(Number(L.pu)||0);
-      doc.text(ht.toFixed(2).replace('.',','), x + cols[5].w - 12, y+12, { align:'right' });
-      y += rowH;
-      doc.setDrawColor(235); doc.line(mx, y, pageW-mx, y);
-    });
-    y += 10;
-
-    // ==== TOTAUX ====
-    const boxW = 240; const boxX = pageW - mx - boxW;
-    ensure(120);
-    doc.setDrawColor(220); doc.setFillColor(255);
-    doc.roundedRect(boxX, y, boxW, 108, 6, 6, 'FD');
-    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(60);
-    let ty = y + 18;
-    doc.text('Total HT', boxX+12, ty);
-    doc.text(fmtEUR(T.totalHT), boxX+boxW-12, ty, { align:'right' }); ty += 14;
-
-    if (T.franchise){
-      doc.setFont('helvetica','italic'); doc.setFontSize(9); doc.setTextColor(90);
-      doc.text('TVA non applicable — art. 293 B CGI', boxX+12, ty); ty += 14;
-    } else if (T.tvaMap){
-      Array.from(T.tvaMap.entries()).filter(([r,v])=>r>0 && v>0.0001).sort((a,b)=>a[0]-b[0]).forEach(([r,v])=>{
-        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(60);
-        doc.text('TVA ' + String(r).replace('.',',') + ' %', boxX+12, ty);
-        doc.text(fmtEUR(v), boxX+boxW-12, ty, { align:'right' }); ty += 13;
-      });
-    }
-    doc.setDrawColor(230); doc.line(boxX+8, ty, boxX+boxW-8, ty); ty += 10;
-    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(0,132,255);
-    doc.text('Total TTC', boxX+12, ty);
-    doc.text(fmtEUR(T.totalTTC), boxX+boxW-12, ty, { align:'right' }); ty += 16;
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(80);
-    doc.text('Acompte (' + T.acomptePct + '%) : ' + fmtEUR(T.acompte), boxX+12, ty); ty += 12;
-    doc.text('Solde à la fin des travaux : ' + fmtEUR(T.totalTTC - T.acompte), boxX+12, ty);
-    y += 120;
-
-    // ==== CONDITIONS / MENTIONS ====
-    ensure(60);
-    heading('Conditions & mentions légales', 11);
-    para('• Devis gratuit, valable ' + (d.co_validite||30) + ' jours à compter de sa date d\'émission.');
-    para('• Acompte de ' + (T.acomptePct) + '% à la signature ; solde à réception des travaux.');
-    if (d.cl_type === 'pro') {
-      para('• Délai de paiement : ' + (d.co_paiement||30) + ' jours à compter de la facture (art. L441-10 C. com.).');
-      para('• Pénalités de retard : taux BCE + 10 points ; indemnité forfaitaire de recouvrement de 40 € (art. D441-5 C. com.), applicables de plein droit entre professionnels.');
-    } else {
-      para('• Délai de paiement : ' + (d.co_paiement||30) + ' jours à compter de la facture, tel que convenu au présent devis.');
-      para('• Pénalités de retard : taux de ' + (d.co_penalite||'10') + ' % par an à compter du jour suivant la date de règlement prévue, applicables dès lors qu\'elles sont stipulées au présent devis (client particulier — non automatiques par la loi, contrairement aux relations entre professionnels).');
-    }
-    para('• Assurance décennale & RC Pro (loi Spinetta, art. L241-1 C. assur.) : ' + (d.em_assureur || 'compagnie et police à compléter') + ' — Zone : ' + (d.em_zone||'France métropolitaine') + '.');
-    if (T.franchise) para('• TVA non applicable, art. 293 B du CGI (franchise en base — micro-entreprise).');
-    para('• Médiation de la consommation : en cas de litige, le client consommateur peut recourir gratuitement à un médiateur (art. L612-1 C. conso.).');
-    para('• Droit de rétractation de 14 jours en cas de démarchage hors établissement (art. L221-18 C. conso.), sauf renonciation expresse pour travaux urgents.');
-    if (d.co_notes){ y += 4; heading('Notes', 11); para(d.co_notes); }
-
-    // Signature
-    ensure(90);
-    y += 10;
-    doc.setDrawColor(220);
-    doc.roundedRect(mx, y, maxW/2 - 8, 78, 6, 6, 'S');
-    doc.roundedRect(mx + maxW/2 + 8, y, maxW/2 - 8, 78, 6, 6, 'S');
-    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(80);
-    doc.text('L\'entreprise', mx+10, y+14);
-    doc.text('Le client — « Bon pour accord »', mx + maxW/2 + 18, y+14);
-    doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(140);
-    doc.text('Cachet et signature', mx+10, y+70);
-    doc.text('Date, signature manuscrite précédée de la mention « Bon pour accord »', mx + maxW/2 + 18, y+70);
-    y += 90;
-
-    drawFooter();
-    doc.save(`devis-${(d.ch_num||'batipro').replace(/[^\w\-]+/g,'_')}.pdf`);
   }
   window.downloadDevisPdf = downloadDevisPdf;
 
