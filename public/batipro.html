@@ -1884,7 +1884,16 @@
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Forme juridique</label>
-              <input name="em_forme" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="Micro-entreprise / EI / SASU">
+              <select name="em_forme" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
+                <option value="">Sélectionnez…</option>
+                <option value="Micro-entreprise">Micro-entreprise</option>
+                <option value="Entreprise Individuelle (EI)">Entreprise Individuelle (EI)</option>
+                <option value="EURL">EURL</option>
+                <option value="SARL">SARL</option>
+                <option value="SASU">SASU</option>
+                <option value="SAS">SAS</option>
+                <option value="Autre">Autre</option>
+              </select>
             </div>
             <div class="sm:col-span-2">
               <label class="text-[13px] font-semibold text-neutral-800">Adresse du siège</label>
@@ -1895,8 +1904,8 @@
               <input name="em_siren" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="123 456 789 00012">
             </div>
             <div>
-              <label class="text-[13px] font-semibold text-neutral-800">N° TVA intracom. (si assujetti)</label>
-              <input name="em_tva" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="FR12345678901">
+              <label id="em_tva_label" class="text-[13px] font-semibold text-neutral-800">N° TVA intracom. (si assujetti)</label>
+              <input id="em_tva_input" name="em_tva" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]" placeholder="FR12345678901">
             </div>
             <div>
               <label class="text-[13px] font-semibold text-neutral-800">Email</label>
@@ -5914,6 +5923,25 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
         saveDevisDraft();
       }
     }, { once:true });
+
+    // Le N° de TVA intracommunautaire n'a de sens que si l'entreprise est
+    // assujettie à la TVA. En franchise en base (art. 293 B CGI), elle ne
+    // facture pas de TVA et n'est pas censée en communiquer un. On rend donc
+    // le champ obligatoire seulement quand la case franchise est décochée,
+    // et on l'indique clairement dans le libellé.
+    const franchiseCheckbox = f.querySelector('[name="em_franchise"]');
+    const tvaInput = document.getElementById('em_tva_input');
+    const tvaLabel = document.getElementById('em_tva_label');
+    const syncTvaRequirement = () => {
+      const assujetti = !franchiseCheckbox.checked;
+      tvaInput.required = assujetti;
+      tvaInput.placeholder = assujetti ? 'FR12345678901 (obligatoire)' : 'FR12345678901';
+      tvaLabel.textContent = assujetti
+        ? 'N° TVA intracom. (obligatoire, entreprise assujettie)'
+        : 'N° TVA intracom. (non applicable en franchise)';
+    };
+    syncTvaRequirement();
+    franchiseCheckbox.addEventListener('change', syncTvaRequirement);
 
     // Auto-save on any form change
     f.addEventListener('input', ()=>{ computeDevisTotals(); saveDevisDraft(); });
