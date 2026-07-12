@@ -3623,7 +3623,7 @@ animate();
 
     return `
       <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide" style="background:${bg};color:${color}">Résultat — ${badge}</span>
-      <h1 class="mt-4 font-display text-3xl font-bold md:text-4xl">${res.title}</h1>
+      <h2 class="mt-4 font-display text-3xl font-bold md:text-4xl">${res.title}</h2>
       <p class="mt-3 text-[14px] text-neutral-600">Titulaire : <b>${escapeHtml(meta.nom || '—')}</b>${meta.email ? ` · ${escapeHtml(meta.email)}` : ''}</p>
       <p class="mt-1 text-[14px] text-neutral-600">Métier : <b>${res.metier.l}</b> · Diplôme : <b>${res.diplome.l}</b> · Expérience : <b>${res.exp} an(s)</b>${res.ueDiploma?' · <b>Diplôme UE reconnu</b>':''}</p>
       <p class="mt-1 text-[13px] text-neutral-500">Test réalisé le ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</p>
