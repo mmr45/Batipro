@@ -278,6 +278,10 @@
   .mdp-link-btn.mdp-clear:hover { background: #f5f5f5; color: #737373; }
   @media (prefers-reduced-motion: reduce) { .mdp-panel { animation: none; } }
 
+  /* FAQ (accordéon natif <details>) */
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::marker { content: ""; }
+
   /* ---------- Dashboard "Mon espace" ---------- */
   .dash-hero {
     position: relative;
@@ -769,6 +773,16 @@
       <p class="mt-4 text-neutral-600">Le test de qualification est offert. Vous ne payez qu'au moment de générer votre dossier.</p>
     </div>
     <div class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3" id="pricing"></div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="scroll-mt-28 py-28">
+    <div class="max-w-2xl" data-reveal>
+      <p class="text-sm font-medium uppercase tracking-[0.15em] text-brand">Questions fréquentes</p>
+      <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Avant de vous lancer.</h2>
+      <p class="mt-4 text-neutral-600">Les réponses aux questions qu'on nous pose le plus souvent. Une autre question ? Contactez-nous, on répond par email.</p>
+    </div>
+    <div class="mt-14 max-w-3xl space-y-3" id="faq-list"></div>
   </section>
 
   <!-- Espace client -->
@@ -2246,6 +2260,7 @@ animate();
     { id: "apropos", label: "À propos" },
     { id: "exemple", label: "Exemple concret" },
     { id: "tarifs", label: "Tarifs" },
+    { id: "faq", label: "FAQ" },
   ];
 
   // Guides métier (pages statiques dédiées, une par métier réglementé)
@@ -2325,6 +2340,17 @@ animate();
     { v:"cap_bep", l:"CAP / BEP dans le métier", niveau:3 },
     { v:"bac_pro", l:"Bac Pro / BP dans le métier", niveau:4 },
     { v:"bts_sup", l:"BTS / DUT / Diplôme supérieur dans le métier", niveau:5 },
+  ];
+
+  const FAQ = [
+    { q:"Est-ce que je peux annuler mon abonnement Pro à tout moment ?", a:"Oui, sans condition ni préavis. L'abonnement Pro (19 €/mois) est résiliable en un clic depuis votre espace client, via le portail de gestion sécurisé. Aucun engagement de durée, aucun frais de résiliation." },
+    { q:"Le Pack Lancement inclut-il l'immatriculation officielle de mon entreprise ?", a:"Le Pack Lancement (89 €) génère votre dossier complet et vos pièces justificatives, prêts à déposer sur le Guichet Unique de l'INPI. Le dépôt et la validation officielle restent effectués par vous-même (ou avec l'aide d'un professionnel) directement auprès de l'INPI, qui reste le seul organisme habilité à immatriculer votre entreprise." },
+    { q:"Que se passe-t-il si le simulateur de statut n'est pas sûr de sa réponse ?", a:"Le simulateur affiche toujours un niveau de confiance. Lorsque votre situation est limite entre deux statuts (ex : Micro vs SASU), il vous le signale explicitement et recommande une validation par un expert-comptable avant de vous immatriculer, plutôt que de trancher à votre place." },
+    { q:"Bâtipro remplace-t-il un comptable ou un avocat ?", a:"Non. Bâtipro automatise et simplifie les démarches courantes, mais ne remplace pas un professionnel du droit ou du chiffre. Dès qu'une décision engage votre responsabilité (patrimoine, associés, seuils de chiffre d'affaires...), l'outil vous oriente vers un expert externe." },
+    { q:"Combien de devis puis-je générer avec l'abonnement Pro ?", a:"Autant que vous voulez : la génération et l'export de devis conformes sont illimités avec l'abonnement Pro, sans surcoût lié au volume." },
+    { q:"Le test de qualification est-il vraiment gratuit ?", a:"Oui, sans limite de temps et sans carte bancaire requise. Vous ne payez qu'au moment de générer votre dossier INPI (Pack Lancement) ou d'activer l'éditeur de devis (abonnement Pro)." },
+    { q:"Mes données personnelles sont-elles sécurisées ?", a:"Vos données sont hébergées au sein de l'Union Européenne, dans le respect du RGPD. Vous disposez à tout moment d'un droit d'accès, de rectification et de suppression depuis votre espace client." },
+    { q:"Que faire si le test indique que je ne suis pas encore qualifié pour mon métier ?", a:"L'outil vous détaille précisément ce qui manque (diplôme, années d'expérience) et vous propose les alternatives réalistes : passer un CAP/BEP en candidat libre, valider une VAE, ou cumuler l'expérience salariée nécessaire." },
   ];
 
   const FEATURES = [
@@ -2684,6 +2710,17 @@ animate();
       </ul>
       <button data-plan-btn="${p.plan||'gratuit'}" onclick="handlePricingClick(${p.plan?`'${p.plan}'`:'null'})" class="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-wait" style="background:${p.highlight?'var(--brand)':'#0a0a0a'}"><span data-plan-btn-label>${p.cta} ${icon('arrow','h-4 w-4')}</span></button>
     </div>
+  `).join('');
+
+  // FAQ (accordéon natif <details>, accessible, sans JS supplémentaire au clic)
+  document.getElementById('faq-list').innerHTML = FAQ.map((f,i)=>`
+    <details data-reveal style="transition-delay:${i*40}ms" class="faq-item group rounded-2xl border border-black/5 bg-white/70 backdrop-blur px-6 py-1 open:bg-white open:shadow-sm">
+      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-semibold text-neutral-900">
+        ${f.q}
+        <span class="faq-chevron grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-tint text-brand transition-transform duration-200 group-open:rotate-45">${icon('arrow','h-3.5 w-3.5')}</span>
+      </summary>
+      <p class="pb-5 pr-10 text-[14px] leading-relaxed text-neutral-600">${f.a}</p>
+    </details>
   `).join('');
 
   // ---------- Paiement Stripe (offres Lancement / Pro) ----------
