@@ -5852,21 +5852,26 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   function prefillDevisForm(reset=false){
     const f = document.getElementById('devis-form');
     const draft = reset ? null : loadDevisDraft();
-    const inpi = window.__inpiData || {};
-    const statut = window.__statutRes || {};
-    const assur = window.__assurRes || {};
 
+    // Important : on ne pré-remplit JAMAIS les champs entreprise/assurance à
+    // partir de window.__inpiData ou window.__assurRes. Ces modules (Pack
+    // Lancement 89€, simulation décennale) sont des achats indépendants de
+    // l'abonnement Devis (19€/mois) — un utilisateur peut avoir le Devis
+    // sans avoir jamais acheté ou finalisé le module INPI. Faire fuiter des
+    // données de test ou d'un autre parcours dans un document légal envoyé
+    // à un client serait trompeur. Seul l'email du compte connecté (fiable,
+    // car lié à l'authentification) est repris automatiquement.
     const defaults = {
-      em_nom: inpi.denomination || (inpi.prenom && inpi.nom ? `${inpi.prenom} ${inpi.nom}` : ''),
-      em_forme: FORME_LABEL[inpi.forme] || '',
-      em_adresse: [inpi.adresse, inpi.cp, inpi.ville].filter(Boolean).join(', ') || (inpi.adresse||''),
+      em_nom: '',
+      em_forme: '',
+      em_adresse: '',
       em_siren: '',
       em_tva: '',
       em_email: (currentUser && currentUser.email) || '',
-      em_tel: inpi.tel || '',
-      em_assureur: assur.metier ? `Décennale ${assur.decMin||''} k€ · RC Pro ${assur.rcMin||''} k€` : '',
+      em_tel: '',
+      em_assureur: '',
       em_zone: 'France métropolitaine',
-      em_franchise: (inpi.forme === 'micro'),
+      em_franchise: false,
       cl_type: 'particulier',
       cl_nom: '',
       cl_adresse: '',
