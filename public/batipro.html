@@ -227,7 +227,20 @@
   }
   .mdp-panel[data-align="right"] { left: auto; right: 0; }
   .mdp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .mdp-head-label { font-family: 'Inter',sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; text-transform: capitalize; }
+  .mdp-head-label { font-family: 'Inter',sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; text-transform: capitalize; border-radius: 8px; padding: 4px 8px; transition: background .15s ease, color .15s ease; cursor: pointer; }
+  .mdp-head-label:hover { background: rgba(29,95,163,.08); color: var(--brand); }
+  .mdp-years { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+  .mdp-year {
+    display: grid; place-items: center; padding: 12px 0; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600; color: #171717; cursor: pointer;
+    transition: background .12s ease, color .12s ease;
+  }
+  .mdp-year:hover:not(.mdp-year-selected) { background: rgba(29,95,163,.09); }
+  .mdp-year-disabled { color: #e5e5e5; cursor: not-allowed; pointer-events: none; }
+  .mdp-year-selected {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff; font-weight: 700; box-shadow: 0 6px 16px -4px rgba(29,95,163,.55);
+  }
   .mdp-nav-btn {
     display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px;
     color: #525252; transition: background .15s ease, color .15s ease;
@@ -6173,6 +6186,8 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
 
     let viewDate = parseISO(input.value) || new Date();
     let selected = parseISO(input.value);
+    let mode = 'days'; // 'days' | 'years'
+    let yearsPageStart = viewDate.getFullYear() - 5;
 
     function refreshTriggerLabel(){
       const valEl = trigger.querySelector('.mdp-value');
@@ -6231,7 +6246,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       panel.innerHTML = `
         <div class="mdp-head">
           <button type="button" class="mdp-nav-btn" data-act="prev" aria-label="Mois précédent">${iconChevronL}</button>
-          <span class="mdp-head-label">${MOIS[m]} ${y}</span>
+          <button type="button" class="mdp-head-label" data-act="show-years">${MOIS[m]} ${y}</button>
           <button type="button" class="mdp-nav-btn" data-act="next" aria-label="Mois suivant">${iconChevronR}</button>
         </div>
         <div class="mdp-weekdays">${JOURS.map(j=>`<span>${j}</span>`).join('')}</div>
@@ -6240,6 +6255,34 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
           <button type="button" class="mdp-link-btn mdp-clear" data-act="clear">Effacer</button>
           <button type="button" class="mdp-link-btn" data-act="today">Aujourd'hui</button>
         </div>
+      `;
+      return panel;
+    }
+
+    function buildYearsPanel(){
+      const min = input.min ? parseISO(input.min) : null;
+      const max = input.max ? parseISO(input.max) : null;
+      const y = viewDate.getFullYear();
+
+      let cells = '';
+      for (let i=0;i<12;i++){
+        const yy = yearsPageStart + i;
+        const disabled = (min && yy < min.getFullYear()) || (max && yy > max.getFullYear());
+        const cls = ['mdp-year'];
+        if (yy === y) cls.push('mdp-year-selected');
+        if (disabled) cls.push('mdp-year-disabled');
+        cells += `<div class="${cls.join(' ')}" data-year="${yy}">${yy}</div>`;
+      }
+
+      const panel = document.createElement('div');
+      panel.className = 'mdp-panel';
+      panel.innerHTML = `
+        <div class="mdp-head">
+          <button type="button" class="mdp-nav-btn" data-act="prev-years" aria-label="Années précédentes">${iconChevronL}</button>
+          <span class="mdp-head-label">${yearsPageStart} – ${yearsPageStart+11}</span>
+          <button type="button" class="mdp-nav-btn" data-act="next-years" aria-label="Années suivantes">${iconChevronR}</button>
+        </div>
+        <div class="mdp-years">${cells}</div>
       `;
       return panel;
     }
@@ -6253,6 +6296,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
 
     function open(){
       closeOpenPanel();
+      mode = 'days';
       const panel = buildPanel();
       wrap.appendChild(panel);
       positionPanel(panel);
@@ -6266,6 +6310,16 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
           else if (a==='next'){ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1); rerender(); }
           else if (a==='clear'){ setValue(null); close(); }
           else if (a==='today'){ const t=new Date(); t.setHours(0,0,0,0); viewDate = new Date(t.getFullYear(),t.getMonth(),1); setValue(t); close(); }
+          else if (a==='show-years'){ yearsPageStart = viewDate.getFullYear() - 5; mode = 'years'; rerender(); }
+          else if (a==='prev-years'){ yearsPageStart -= 12; rerender(); }
+          else if (a==='next-years'){ yearsPageStart += 12; rerender(); }
+          return;
+        }
+        const yearEl = e.target.closest('.mdp-year');
+        if (yearEl && !yearEl.classList.contains('mdp-year-disabled')){
+          viewDate = new Date(Number(yearEl.dataset.year), viewDate.getMonth(), 1);
+          mode = 'days';
+          rerender();
           return;
         }
         const dayEl = e.target.closest('.mdp-day');
@@ -6282,7 +6336,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       panel.addEventListener('click', onPanelClick);
 
       function rerender(){
-        const fresh = buildPanel();
+        const fresh = mode === 'days' ? buildPanel() : buildYearsPanel();
         panel.innerHTML = fresh.innerHTML;
       }
 
