@@ -2101,9 +2101,12 @@
               <p class="mt-1 text-[11.5px] text-neutral-400">Durée pendant laquelle vos prix restent garantis — utile en cas de fluctuation du coût des matériaux.</p>
             </div>
             <div>
-              <label class="text-[13px] font-semibold text-neutral-800">Délai de paiement (jours)</label>
+              <label id="co_paiement_label" class="text-[13px] font-semibold text-neutral-800">Délai de paiement (jours)</label>
               <input name="co_paiement" type="number" min="0" value="30" class="mt-1 w-full rounded-[12px] border border-black/10 bg-white px-3 py-2.5 text-[14px]">
-              <p class="mt-1 text-[11.5px] text-neutral-400">Entre pros, ce délai ne peut légalement dépasser 60 jours (ou 45 jours fin de mois) — art. L441-10 C. com.</p>
+              <p id="co_paiement_help" class="mt-1 text-[11.5px] text-neutral-400">Entre pros, ce délai ne peut légalement dépasser 60 jours (ou 45 jours fin de mois) — art. L441-10 C. com.</p>
+              <div id="co_paiement_particulier_notice" class="mt-2 hidden rounded-2xl border border-amber-200 bg-amber-50 p-3 text-[12px] text-amber-900">
+                <b>Client particulier :</b> le délai légal de 60 jours (art. L441-10 C. com.) ne s'applique qu'entre professionnels. Pour un particulier, l'usage est plutôt <b>solde à la réception des travaux</b> (délai&nbsp;0), un différé n'étant valable que si vous le stipulez expressément et que le client l'accepte. Un « délai de paiement 30 jours » non justifié sur un devis à un particulier peut prêter à confusion.
+              </div>
             </div>
             <div class="sm:col-span-3">
               <label class="text-[13px] font-semibold text-neutral-800">Moyens de paiement acceptés</label>
@@ -6140,6 +6143,48 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     demarchageCheckbox.addEventListener('change', syncRetractationNotice);
     clTypeSelect.addEventListener('change', syncRetractationNotice);
 
+    // Le "délai de paiement (jours)" façon B2B (60 j max, art. L441-10 C. com.)
+    // n'a pas de sens par défaut pour un particulier : l'usage est le solde
+    // à réception des travaux, pas un différé façon facture inter-entreprises.
+    // On adapte le libellé/l'aide et on prévient si une valeur non nulle est
+    // conservée pour un client particulier, sans forcer la saisie de l'artisan.
+    const co_paiementInput = f.querySelector('[name="co_paiement"]');
+    const co_paiementLabel = document.getElementById('co_paiement_label');
+    const co_paiementHelp = document.getElementById('co_paiement_help');
+    const co_paiementNotice = document.getElementById('co_paiement_particulier_notice');
+    let co_paiementLastAuto = null; // mémorise si la valeur actuelle vient de notre auto-ajustement
+    const syncPaiementDelay = () => {
+      const isParticulier = clTypeSelect.value === 'particulier';
+      if (isParticulier){
+        co_paiementLabel.textContent = 'Solde à régler sous (jours après travaux)';
+        co_paiementHelp.textContent = 'Pour un particulier, le solde se règle en principe à la réception des travaux. Ne mettez un délai différé que si vous l\'avez expressément convenu avec le client.';
+        // Si le champ était encore à la valeur par défaut "pro" (30) et n'a pas
+        // été modifié à la main, on le ramène à 0 (réception des travaux) —
+        // sans écraser une valeur que l'artisan aurait déjà personnalisée.
+        if (co_paiementInput.value === '30' && co_paiementLastAuto !== 'particulier'){
+          co_paiementInput.value = '0';
+        }
+        co_paiementNotice.classList.toggle('hidden', co_paiementInput.value === '0' || co_paiementInput.value === '');
+        co_paiementLastAuto = 'particulier';
+      } else {
+        co_paiementLabel.textContent = 'Délai de paiement (jours)';
+        co_paiementHelp.textContent = 'Entre pros, ce délai ne peut légalement dépasser 60 jours (ou 45 jours fin de mois) — art. L441-10 C. com.';
+        if (co_paiementInput.value === '0' && co_paiementLastAuto === 'particulier'){
+          co_paiementInput.value = '30';
+        }
+        co_paiementNotice.classList.add('hidden');
+        co_paiementLastAuto = 'pro';
+      }
+    };
+    syncPaiementDelay();
+    clTypeSelect.addEventListener('change', syncPaiementDelay);
+    co_paiementInput.addEventListener('input', () => {
+      const isParticulier = clTypeSelect.value === 'particulier';
+      if (isParticulier){
+        co_paiementNotice.classList.toggle('hidden', co_paiementInput.value === '0' || co_paiementInput.value === '');
+      }
+    });
+
     // Le N° de TVA intracommunautaire n'a de sens que si l'entreprise est
     // assujettie à la TVA. En franchise en base (art. 293 B CGI), elle ne
     // facture pas de TVA et n'est pas censée en communiquer un. On rend donc
@@ -6213,7 +6258,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       </div>
 
       <div class="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-[13px] text-neutral-700">
-        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), délai de paiement (${d.co_paiement} j), rappel assurance décennale &amp; RC Pro (loi Spinetta)${d.em_qualif ? ', qualification professionnelle déclarée' : ''}, ${d.cl_type === 'pro' ? 'pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), applicables de plein droit entre professionnels' : 'pénalités de retard contractuelles (à stipuler au devis, non automatiques pour un client particulier)'}, médiation de la consommation, mention manuscrite “bon pour accord”${(!d.em_franchise && (d.ch_nature==='reno'||d.ch_nature==='energie')) ? ', rappel de l\'attestation de TVA à taux réduit' + (d.ch_attestation_tva ? ' (déclarée signée)' : ' (⚠ pas encore signée par le client — à faire avant travaux)') : ''}${d.cl_demarchage && d.cl_type==='particulier' ? ', formulaire type de rétractation (14 jours, démarchage à domicile)' : ''}.
+        <b>Mentions incluses dans le PDF :</b> identité & SIREN/SIRET émetteur, coordonnées client, désignation détaillée, décompte HT/TVA/TTC par ligne, acompte, validité (${d.co_validite} j), ${d.cl_type === 'pro' ? `délai de paiement (${d.co_paiement} j)` : (Number(d.co_paiement) > 0 ? `solde à régler sous ${d.co_paiement} j après travaux` : 'solde à la réception des travaux')}, rappel assurance décennale &amp; RC Pro (loi Spinetta)${d.em_qualif ? ', qualification professionnelle déclarée' : ''}, ${d.cl_type === 'pro' ? 'pénalités de retard légales (BCE + 10 pts) et indemnité forfaitaire 40 € (art. L441-10 C. com.), applicables de plein droit entre professionnels' : 'pénalités de retard contractuelles (à stipuler au devis, non automatiques pour un client particulier)'}, médiation de la consommation, mention manuscrite “bon pour accord”${(!d.em_franchise && (d.ch_nature==='reno'||d.ch_nature==='energie')) ? ', rappel de l\'attestation de TVA à taux réduit' + (d.ch_attestation_tva ? ' (déclarée signée)' : ' (⚠ pas encore signée par le client — à faire avant travaux)') : ''}${d.cl_demarchage && d.cl_type==='particulier' ? ', formulaire type de rétractation (14 jours, démarchage à domicile)' : ''}.
       </div>
       ${(!d.em_franchise && (d.ch_nature==='reno'||d.ch_nature==='energie') && !d.ch_attestation_tva) ? `
       <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-[13px] text-red-800">
