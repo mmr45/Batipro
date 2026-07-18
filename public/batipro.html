@@ -1637,12 +1637,46 @@
             </div>
             <div class="sm:col-span-2">
               <label class="block text-[13px] font-semibold text-neutral-900">Forme juridique</label>
-              <select name="forme" class="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+              <select name="forme" onchange="toggleFormeExtras()" class="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
                 <option value="micro">Micro-entreprise</option>
                 <option value="ei">Entreprise Individuelle (EI)</option>
                 <option value="sasu">SASU</option>
               </select>
             </div>
+          </div>
+
+          <!-- Bloc spécifique SASU — masqué pour Micro/EI, requis pour SASU -->
+          <div id="sasu-extra-fields" class="hidden space-y-4 rounded-2xl border border-black/10 bg-neutral-50 p-4">
+            <p class="text-[13px] font-semibold text-neutral-900">Constitution de la société (SASU)</p>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="block text-[13px] font-semibold text-neutral-900">Capital social (€)</label>
+                <input type="number" name="sasu_capital" min="1" step="1" placeholder="1000" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+                <p class="mt-1 text-[12px] text-neutral-500">1 € minimum légal, mais un montant crédible rassure banques et clients.</p>
+              </div>
+              <div>
+                <label class="block text-[13px] font-semibold text-neutral-900">Nature des apports</label>
+                <select name="sasu_apport" class="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+                  <option value="numeraire">Numéraire (argent)</option>
+                  <option value="nature">Nature (matériel, outillage…)</option>
+                  <option value="mixte">Mixte (numéraire + nature)</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[13px] font-semibold text-neutral-900">Président de la SASU</label>
+                <input type="text" name="sasu_president" placeholder="Nom du président (vous, par défaut)" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+                <p class="mt-1 text-[12px] text-neutral-500">Laissez vide pour indiquer que vous êtes votre propre président.</p>
+              </div>
+              <div>
+                <label class="block text-[13px] font-semibold text-neutral-900">Date de clôture de l'exercice social</label>
+                <input type="text" name="sasu_cloture" placeholder="31/12" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+              </div>
+              <div>
+                <label class="block text-[13px] font-semibold text-neutral-900">Banque de dépôt du capital</label>
+                <input type="text" name="sasu_banque" placeholder="Nom de la banque" class="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-[15px] outline-none focus:border-[color:var(--brand)] focus:ring-2 focus:ring-[color:var(--brand)]/20">
+              </div>
+            </div>
+            <p class="text-[12px] text-neutral-500">La SASU implique en plus, hors périmètre de ce formulaire : la rédaction des statuts, le dépôt des fonds sur un compte bloqué, et la publication d'une annonce légale — étapes à réaliser avant le dépôt final sur le Guichet Unique.</p>
           </div>
         </section>
 
@@ -1726,6 +1760,30 @@
                   </span>
                   <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[12px] font-bold" style="background:rgba(16,185,129,.15);color:#10b981">✓</span>
                 </div>
+              </div>
+
+              <div class="rounded-xl border border-black/10 p-3 transition-colors hidden" data-doc-card="statuts" id="doc-card-statuts">
+                <label class="flex cursor-pointer items-start gap-3">
+                  <span class="flex-1">
+                    <b>Statuts signés <span class="text-red-500">*</span></b>
+                    <span class="block text-[13px] text-neutral-500">Statuts de la SASU, datés et signés par le président</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-statuts-status">Ajouter un fichier →</span>
+                  </span>
+                  <input type="file" name="doc-statuts" id="doc-statuts-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'statuts')">
+                </label>
+                <div id="doc-statuts-preview" class="mt-2 hidden"></div>
+              </div>
+
+              <div class="rounded-xl border border-black/10 p-3 transition-colors hidden" data-doc-card="depot-fonds" id="doc-card-depot-fonds">
+                <label class="flex cursor-pointer items-start gap-3">
+                  <span class="flex-1">
+                    <b>Attestation de dépôt des fonds <span class="text-red-500">*</span></b>
+                    <span class="block text-[13px] text-neutral-500">Délivrée par la banque ou le notaire après dépôt du capital</span>
+                    <span class="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-brand" id="doc-depot-fonds-status">Ajouter un fichier →</span>
+                  </span>
+                  <input type="file" name="doc-depot-fonds" id="doc-depot-fonds-input" accept="image/*,.pdf" class="hidden" onchange="handleDocUpload(event,'depot-fonds')">
+                </label>
+                <div id="doc-depot-fonds-preview" class="mt-2 hidden"></div>
               </div>
 
               <div class="rounded-xl border border-black/10 p-3 transition-colors" data-doc-card="conjoint">
@@ -5111,13 +5169,41 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   function clearDocError(key){
     const card = document.querySelector(`[data-doc-card="${key}"]`);
     if (card){ card.classList.remove('border-red-400','ring-2','ring-red-200'); card.classList.add('border-black/10'); }
-    const stillMissing = REQUIRED_DOCS.some(k => !window.__docFiles[k]);
+    const allRequired = REQUIRED_DOCS.concat(window.SASU_REQUIRED_DOCS || []);
+    const stillMissing = allRequired.some(k => !window.__docFiles[k]);
     const errEl = document.getElementById('inpi-docs-error');
     if (!stillMissing && errEl) errEl.classList.add('hidden');
   }
 
   window.handleDocUpload = handleDocUpload;
   window.removeDoc = removeDoc;
+
+  // Affiche/masque le bloc "constitution SASU" (étape 2) et les pièces
+  // spécifiques SASU (étape 4) selon la forme juridique choisie. Gère aussi
+  // les attributs `required` pour ne bloquer la validation que si SASU est
+  // sélectionnée — sinon un champ caché resterait requis et bloquerait
+  // Micro/EI.
+  function toggleFormeExtras(){
+    const sel = document.querySelector('select[name="forme"]');
+    const isSasu = sel && sel.value === 'sasu';
+
+    const extra = document.getElementById('sasu-extra-fields');
+    if (extra){
+      extra.classList.toggle('hidden', !isSasu);
+      extra.querySelector('input[name="sasu_capital"]').required = isSasu;
+    }
+
+    ['statuts','depot-fonds'].forEach(key => {
+      const card = document.getElementById('doc-card-' + key);
+      if (card) card.classList.toggle('hidden', !isSasu);
+    });
+
+    // Recalcule dynamiquement les pièces obligatoires selon la forme :
+    // celles communes à toutes les formes, plus statuts/dépôt des fonds
+    // uniquement pour la SASU.
+    window.SASU_REQUIRED_DOCS = isSasu ? ['statuts','depot-fonds'] : [];
+  }
+  window.toggleFormeExtras = toggleFormeExtras;
 
   function renderInpiStep(){
     document.querySelectorAll('[data-inpi-step]').forEach(s=>{
@@ -5140,7 +5226,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       if (!el.checkValidity()){ el.reportValidity(); return false; }
     }
     if (inpiStep === 4){
-      const missingReq = REQUIRED_DOCS.filter(k => !window.__docFiles[k]);
+      const missingReq = REQUIRED_DOCS.concat(window.SASU_REQUIRED_DOCS || []).filter(k => !window.__docFiles[k]);
       document.querySelectorAll('[data-doc-card]').forEach(card => {
         const k = card.dataset.docCard;
         const isMissing = missingReq.includes(k);
@@ -5224,6 +5310,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
       if (nomInput && !nomInput.value) nomInput.value = currentUser.nom;
     }
     renderInpiStep();
+    toggleFormeExtras();
   }
   function closeInpi(){
     const m = document.getElementById('inpi-modal');
@@ -5253,7 +5340,7 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
   }
 
   const FORME_LABEL = { micro:'Micro-entreprise', ei:'Entreprise Individuelle (EI)', sasu:'SASU' };
-  const DOC_LABEL = { cni:"Pièce d'identité", domicile:'Justificatif de domicile', qualif:'Justificatif de qualification', ncnf:'Déclaration de non-condamnation', conjoint:"Attestation d'information du conjoint" };
+  const DOC_LABEL = { cni:"Pièce d'identité", domicile:'Justificatif de domicile', qualif:'Justificatif de qualification', ncnf:'Déclaration de non-condamnation', conjoint:"Attestation d'information du conjoint", statuts:'Statuts signés', 'depot-fonds':'Attestation de dépôt des fonds' };
 
   async function submitInpi(){
     if (!validateInpiStep()) return;
@@ -5263,7 +5350,9 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
     // Numéro de dossier fictif
     const ref = 'BP-' + Date.now().toString(36).toUpperCase().slice(-6) + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
     window.__inpiRef = ref;
-    const missing = REQUIRED_DOCS.filter(k => !(d.doc || []).includes(k));
+    const isSasu = d.forme === 'sasu';
+    const applicableDocs = REQUIRED_DOCS.concat(isSasu ? ['statuts','depot-fonds'] : []);
+    const missing = applicableDocs.filter(k => !(d.doc || []).includes(k));
     // Le bouton "Télécharger le PDF" appelle désormais une Edge Function qui
     // relit cette soumission en base côté serveur : on doit donc attendre la
     // confirmation d'écriture avant d'autoriser le clic, sinon le premier
@@ -5315,12 +5404,23 @@ async function resetAdminData(){    if (!confirm('Supprimer définitivement les 
             <li>${d.honneur ? '✓ Déclaration sur l\'honneur signée' : '— Non signée'}</li>
           </ul>
         </div>
+        ${isSasu ? `
+        <div class="rounded-2xl border border-black/10 p-5">
+          <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Constitution SASU</h4>
+          <p class="mt-2 text-[14px] text-neutral-800">
+            Capital social : <b>${escapeHtml(d.sasu_capital || '—')} €</b> (${escapeHtml(d.sasu_apport || 'numeraire')})<br>
+            Président : ${escapeHtml(d.sasu_president) || (escapeHtml(d.prenom) + ' ' + escapeHtml(d.nom))}<br>
+            Clôture d'exercice : ${escapeHtml(d.sasu_cloture || '31/12')}<br>
+            Banque de dépôt : ${escapeHtml(d.sasu_banque || '—')}
+          </p>
+          <p class="mt-2 text-[12px] text-neutral-500">Statuts et annonce légale restent à finaliser hors Bâtipro avant le dépôt final.</p>
+        </div>` : ''}
       </div>
 
       <div class="mt-4 rounded-2xl border border-black/10 p-5">
         <h4 class="text-[12px] font-semibold uppercase tracking-wide text-neutral-500">Pièces justificatives</h4>
         <ul class="mt-2 grid gap-1.5 sm:grid-cols-2 text-[14px]">
-          ${Object.entries(DOC_LABEL).map(([k,l])=>{
+          ${Object.entries(DOC_LABEL).filter(([k])=> isSasu || (k !== 'statuts' && k !== 'depot-fonds')).map(([k,l])=>{
             const ok = (d.doc || []).includes(k);
             return `<li class="flex items-center gap-2 ${ok?'text-neutral-800':'text-neutral-500'}"><span class="grid h-5 w-5 place-items-center rounded-full text-[11px] font-bold" style="background:${ok?'rgba(16,185,129,.15)':'rgba(245,158,11,.15)'};color:${ok?'#10b981':'#b45309'}">${ok?'✓':'!'}</span>${l}</li>`;
           }).join('')}
