@@ -1,10 +1,10 @@
+<img width="300" height="75" alt="banner" src="https://github.com/user-attachments/assets/3286a03c-7ec6-4c05-9156-a32a79daf09f" />
+
 # Bâtipro
 
 **Bâtipro** est une plateforme d'accompagnement 100 % en ligne pour la création d'entreprises du bâtiment. Elle aide les artisans du bâtiment (BTP) à préparer leur dossier d'immatriculation INPI, à choisir le bon statut juridique, et à générer des devis conformes à la réglementation du secteur.
 
 🔗 **Démo en ligne** : [batipro-ten.vercel.app](https://batipro-ten.vercel.app)
-
-![Aperçu de Bâtipro](https://github.com/user-attachments/assets/xxxxx.png)
 
 ## ✨ Fonctionnalités
 
