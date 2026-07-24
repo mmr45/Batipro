@@ -280,10 +280,6 @@
   .mdp-link-btn.mdp-clear:hover { background: #f5f5f5; color: #737373; }
   @media (prefers-reduced-motion: reduce) { .mdp-panel { animation: none; } }
 
-  /* FAQ (accordéon natif <details>) */
-  .faq-item summary::-webkit-details-marker { display: none; }
-  .faq-item summary::marker { content: ""; }
-
   /* ---------- Dashboard "Mon espace" ---------- */
   .dash-hero {
     position: relative;
@@ -784,7 +780,7 @@
       <h2 class="mt-3 font-display text-4xl font-bold md:text-5xl">Avant de vous lancer.</h2>
       <p class="mt-4 text-neutral-600">Les réponses aux questions qu'on nous pose le plus souvent. Une autre question ? Contactez-nous, on répond par email.</p>
     </div>
-    <div class="mt-14 max-w-3xl space-y-3" id="faq-list"></div>
+    <div class="mt-14 grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2" id="faq-list"></div>
   </section>
 
   <!-- Espace client -->
@@ -2860,15 +2856,12 @@ animate();
     </div>
   `).join('');
 
-  // FAQ (accordéon natif <details>, accessible, sans JS supplémentaire au clic)
+  // FAQ (grille statique 2 colonnes, question + réponse visibles directement)
   document.getElementById('faq-list').innerHTML = FAQ.map((f,i)=>`
-    <details data-reveal style="transition-delay:${i*40}ms" class="faq-item group rounded-2xl border border-black/5 bg-white/70 backdrop-blur px-6 py-1 open:bg-white open:shadow-sm">
-      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-semibold text-neutral-900">
-        ${f.q}
-        <span class="faq-chevron grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-tint text-brand transition-transform duration-200 group-open:rotate-45">${icon('arrow','h-3.5 w-3.5')}</span>
-      </summary>
-      <p class="pb-5 pr-10 text-[14px] leading-relaxed text-neutral-600">${f.a}</p>
-    </details>
+    <div data-reveal style="transition-delay:${i*40}ms" class="border-t border-black/10 pt-5">
+      <h3 class="text-[15px] font-semibold text-neutral-900">${f.q}</h3>
+      <p class="mt-2 text-[14px] leading-relaxed text-neutral-600">${f.a}</p>
+    </div>
   `).join('');
 
   // ---------- Paiement Stripe (offres Lancement / Pro) ----------
