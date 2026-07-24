@@ -4,7 +4,7 @@
 
 🔗 **Démo en ligne** : [batipro-ten.vercel.app](https://batipro-ten.vercel.app)
 
-![Aperçu de Bâtipro](COLLE_LE_LIEN_DE_L_IMAGE_ICI)
+![Aperçu de Bâtipro](![image](https://github.com/user-attachments/assets/xxxxx.png))
 
 ## ✨ Fonctionnalités
 
