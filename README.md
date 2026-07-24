@@ -4,6 +4,8 @@
 
 🔗 **Démo en ligne** : [batipro-ten.vercel.app](https://batipro-ten.vercel.app)
 
+![Aperçu de Bâtipro](COLLE_LE_LIEN_DE_L_IMAGE_ICI)
+
 ## ✨ Fonctionnalités
 
 - **Test d'éligibilité** : vérifie si le projet est viable avant de se lancer
