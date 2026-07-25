@@ -3687,8 +3687,12 @@ animate();
       }
     }
 
-    if (!submission){
-      const list = loadSubmissions().filter(s => s.type === 'assurance' && currentUser && s.email === currentUser.email);
+    if (!submission && currentUser && userId){
+      const list = loadSubmissions().filter(s => {
+        if (s.type !== 'assurance') return false;
+        if (s.user_id) return s.user_id === userId;
+        return s.email === currentUser.email;
+      });
       if (list.length){
         const last = list[list.length - 1];
         submission = { summary: last.summary, date: last.date, data: last.data || null };
