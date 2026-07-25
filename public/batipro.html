@@ -3371,6 +3371,14 @@ animate();
     const sb = window.__supabase;
     if (sb) { try { await sb.auth.signOut(); } catch(e){ console.warn('Erreur lors de la déconnexion :', e); } }
     currentUser = null;
+    // Purge impérative de tout ce qui a pu être mis en cache pour le compte
+    // précédent : sans ça, downloadInpiPdf() peut régénérer le dossier d'un
+    // autre utilisateur si le compte suivant se connecte sans rechargement
+    // complet de la page (bug corrigé le 25/07/2026).
+    window.__inpiData = null;
+    window.__inpiRef = null;
+    window.__lastQualifSubmission = null;
+    window.__assurRes = null;
     updateAuthUI();
     // Masque immédiatement "Mon espace" (sinon il ne disparaît qu'au
     // prochain rechargement de page).
@@ -3601,9 +3609,18 @@ animate();
       }
     }
 
-    // Repli localStorage si rien trouvé côté Supabase
-    if (!submission){
-      const list = loadSubmissions().filter(s => s.type === 'inpi' && currentUser && s.email === currentUser.email);
+    // Repli localStorage si rien trouvé côté Supabase.
+    // IMPORTANT : on ne fait plus confiance au seul email pour isoler les
+    // comptes (deux comptes ont pu partager un email par erreur, ou
+    // currentUser a pu être temporairement désynchronisé). On exige en plus
+    // une correspondance de user_id quand elle est disponible, et on refuse
+    // toute soumission si aucun utilisateur n'est réellement connecté.
+    if (!submission && currentUser && userId){
+      const list = loadSubmissions().filter(s => {
+        if (s.type !== 'inpi') return false;
+        if (s.user_id) return s.user_id === userId;
+        return s.email === currentUser.email;
+      });
       if (list.length){
         const last = list[list.length - 1];
         submission = { summary: last.summary, date: last.date, data: last.data || null };
