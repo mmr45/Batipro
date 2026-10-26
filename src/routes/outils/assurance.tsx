@@ -5,7 +5,7 @@ import { Paywall, RequireAuth } from "@/components/layout";
 import { seo } from "@/lib/seo";
 import { METIERS } from "@rules/metiers.ts";
 import { evaluerAssurance, type AssurInput, type AssurResult, type RisqueOption } from "@rules/assurance.ts";
-import { ASSURANCE, formatEuro } from "@rules/reglementation.ts";
+import { formatEuro } from "@rules/reglementation.ts";
 import { saveSubmission } from "@/lib/api";
 import { storageGet, storageSet } from "@/lib/utils";
 
@@ -32,10 +32,12 @@ function Page() {
   return (
     <>
       <PageHeader
+        planche="04 / 05"
+        rubrique="Pack Lancement"
         title="Assurance décennale"
         intro={
           <>
-            Obligatoire avant le premier chantier <span className="ref">{ASSURANCE.decennaleSource}</span>. Estimez vos besoins avant
+            Obligatoire avant le premier chantier <span className="ref">art. L241-1 C. assur.</span>. Estimez vos besoins avant
             de demander des devis aux assureurs, pour comparer à garanties égales.
           </>
         }
@@ -180,7 +182,7 @@ function Outil() {
           </div>
         </Card>
       ) : (
-        <Card className="bg-beton-2/40 ring-0">
+        <Card className="border-l-[3px] border-encre bg-transparent shadow-none sm:p-6">
           <p className="font-semibold">Pourquoi dimensionner avant d'appeler</p>
           <p className="mt-2 text-ardoise-2">
             Les offres « pas chères » ont souvent des plafonds bas ou des activités exclues. Avec des plafonds de référence, vous

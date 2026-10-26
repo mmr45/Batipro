@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ACRE, FACTURE_ELECTRONIQUE, TVA_FRANCHISE_PRESTATIONS, formatMontant } from "@rules/reglementation.ts";
 import { dateFr } from "@/lib/utils";
 
@@ -40,14 +40,14 @@ export const FAQ_ACCUEIL: Faq[] = [
 
 export function FaqList({ items }: { items: Faq[] }) {
   return (
-    <div className="divide-y divide-ardoise/10 rounded-md bg-papier ring-1 ring-ardoise/10">
+    <div className="border-t-2 border-encre">
       {items.map((f) => (
-        <details key={f.q} className="group px-5 py-4">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
+        <details key={f.q} className="group border-b border-encre/15">
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-6 py-4 text-[17px] font-semibold leading-snug hover:text-bleu [&::-webkit-details-marker]:hidden">
             {f.q}
-            <ChevronDown className="h-5 w-5 shrink-0 text-ardoise-3 transition-transform group-open:rotate-180" aria-hidden />
+            <Plus className="mt-0.5 h-5 w-5 shrink-0 text-encre-3 transition-transform duration-200 group-open:rotate-45 group-open:text-balise" aria-hidden />
           </summary>
-          <p className="mt-2 text-ardoise-2">{f.a}</p>
+          <p className="max-w-2xl pb-5 text-[16px] leading-relaxed text-encre-2">{f.a}</p>
         </details>
       ))}
     </div>

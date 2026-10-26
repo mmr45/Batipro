@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ButtonLink, Container, Notice, Ref } from "@/components/ui";
+import { ButtonLink, Cartouche, Container, Notice, Ref, revision } from "@/components/ui";
 import { seo } from "@/lib/seo";
 import { SITE_URL } from "@/lib/utils";
 import { evaluerAssurance } from "@rules/assurance.ts";
@@ -58,20 +58,30 @@ function Guide() {
 
   return (
     <article>
-      <div className="border-b border-ardoise/10 bg-papier">
-        <Container className="py-12">
-          <Link to="/guides" className="text-[14px] font-medium text-bleu">Guides par métier</Link>
-          <h1 className="display mt-2 max-w-4xl text-5xl sm:text-6xl">Devenir {m.label.toLowerCase()} à son compte</h1>
-          <p className="mt-4 max-w-2xl text-lg text-ardoise-2">
-            Tout ce qu'il faut pour lancer votre activité de {m.accroche}, avec les règles applicables au {new Date(REGLES_VERSION).toLocaleDateString("fr-FR")}.
-          </p>
+      <div className="border-b border-encre/10 bg-papier">
+        <Container className="grid gap-8 pb-10 pt-10 sm:pb-12 sm:pt-14 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="max-w-3xl">
+            <Link to="/guides" className="text-[14.5px] font-semibold text-bleu underline decoration-bleu/30 underline-offset-4">Guides par métier</Link>
+            <h1 className="display mt-4 text-[42px] sm:text-[62px]">Devenir {m.label.toLowerCase()} à son compte</h1>
+            <p className="mt-5 max-w-2xl text-[18px] leading-relaxed text-encre-2">
+              Tout ce qu'il faut pour lancer votre activité de {m.accroche}, avec les règles applicables au {revision()}.
+            </p>
+          </div>
+          <Cartouche
+            className="w-full max-w-sm lg:w-80"
+            cells={[
+              ["Code APE", m.ape],
+              ["Réglementé", m.reglemente ? "Oui" : "Non"],
+              ["Risque", `${m.risque}/5`],
+            ]}
+          />
         </Container>
       </div>
       <Container className="grid gap-10 py-10 lg:grid-cols-[14rem_1fr]">
         <nav aria-label="Sommaire" className="hidden lg:block">
           <ol className="sticky top-24 space-y-2 text-[14.5px]">
             {sommaire.map((s, i) => (
-              <li key={s}><a href={`#s${i + 1}`} className="text-ardoise-2 hover:text-bleu">{i + 1}. {s}</a></li>
+              <li key={s}><a href={`#s${i + 1}`} className="flex gap-2 text-encre-2 hover:text-bleu"><span className="ref !text-balise">{String(i + 1).padStart(2, "0")}</span>{s}</a></li>
             ))}
           </ol>
         </nav>
@@ -100,7 +110,7 @@ function Guide() {
             <h2>2. Les obligations du métier</h2>
             <ul className="mt-4 space-y-4">
               {exig.map((e) => (
-                <li key={e.label} className="border-l-2 border-bleu pl-4">
+                <li key={e.label} className="border-l-[3px] border-balise pl-4">
                   <p className="!mt-0 font-semibold !text-ardoise">{e.label}</p>
                   <p className="!mt-1">{e.detail}</p>
                 </li>
@@ -166,7 +176,7 @@ function Guide() {
             <p className="font-semibold">Autres métiers</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {autres.map((x) => (
-                <Link key={x.slug} to="/guides/$metier" params={{ metier: x.slug }} className="rounded-sm bg-papier px-3 py-1.5 text-[14px] ring-1 ring-ardoise/10 hover:ring-bleu">
+                <Link key={x.slug} to="/guides/$metier" params={{ metier: x.slug }} className="block rounded-sm border border-trait-fort bg-papier px-3 py-1.5 text-[14.5px] font-semibold hover:border-encre hover:bg-encre hover:text-white">
                   {x.label}
                 </Link>
               ))}

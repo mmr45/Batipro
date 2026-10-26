@@ -27,6 +27,8 @@ function Page() {
   return (
     <>
       <PageHeader
+        planche="03 / 05"
+        rubrique="Pack Lancement"
         title="Dossier de création"
         intro="Saisissez une fois ce que le Guichet unique de l'INPI va vous demander. Vous obtenez un récapitulatif à recopier, vos pièces et la déclaration de non-condamnation prête à signer."
       />
