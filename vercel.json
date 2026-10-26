@@ -13,7 +13,17 @@
       "permanent": true
     },
     {
+      "source": "/batipro",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/guide-electricien.html",
+      "destination": "/guides/electricien",
+      "permanent": true
+    },
+    {
+      "source": "/guide-electricien",
       "destination": "/guides/electricien",
       "permanent": true
     },
@@ -23,7 +33,17 @@
       "permanent": true
     },
     {
+      "source": "/guide-plombier",
+      "destination": "/guides/plombier",
+      "permanent": true
+    },
+    {
       "source": "/guide-macon.html",
+      "destination": "/guides/macon",
+      "permanent": true
+    },
+    {
+      "source": "/guide-macon",
       "destination": "/guides/macon",
       "permanent": true
     },
@@ -33,7 +53,17 @@
       "permanent": true
     },
     {
+      "source": "/guide-charpentier",
+      "destination": "/guides/charpentier",
+      "permanent": true
+    },
+    {
       "source": "/guide-couvreur.html",
+      "destination": "/guides/couvreur",
+      "permanent": true
+    },
+    {
+      "source": "/guide-couvreur",
       "destination": "/guides/couvreur",
       "permanent": true
     },
@@ -43,7 +73,17 @@
       "permanent": true
     },
     {
+      "source": "/guide-menuisier",
+      "destination": "/guides/menuisier",
+      "permanent": true
+    },
+    {
       "source": "/guide-serrurier.html",
+      "destination": "/guides/serrurier",
+      "permanent": true
+    },
+    {
+      "source": "/guide-serrurier",
       "destination": "/guides/serrurier",
       "permanent": true
     },
@@ -53,7 +93,17 @@
       "permanent": true
     },
     {
+      "source": "/guide-platrier",
+      "destination": "/guides/platrier",
+      "permanent": true
+    },
+    {
       "source": "/guide-etancheur.html",
+      "destination": "/guides/etancheur",
+      "permanent": true
+    },
+    {
+      "source": "/guide-etancheur",
       "destination": "/guides/etancheur",
       "permanent": true
     },
@@ -63,7 +113,17 @@
       "permanent": true
     },
     {
+      "source": "/guide-ramoneur",
+      "destination": "/guides/ramoneur",
+      "permanent": true
+    },
+    {
       "source": "/guide-peintre.html",
+      "destination": "/guides/peintre",
+      "permanent": true
+    },
+    {
+      "source": "/guide-peintre",
       "destination": "/guides/peintre",
       "permanent": true
     },
@@ -73,7 +133,17 @@
       "permanent": true
     },
     {
+      "source": "/guide-carreleur",
+      "destination": "/guides/carreleur",
+      "permanent": true
+    },
+    {
       "source": "/guide-solier.html",
+      "destination": "/guides/solier",
+      "permanent": true
+    },
+    {
+      "source": "/guide-solier",
       "destination": "/guides/solier",
       "permanent": true
     }
