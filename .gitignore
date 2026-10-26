@@ -38,3 +38,6 @@ dist-ssr
 
 # Supabase CLI (fichiers locaux)
 supabase/.temp/
+
+# Deno
+supabase/functions/node_modules/

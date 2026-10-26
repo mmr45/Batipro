@@ -9,37 +9,358 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as R404RouteImport } from './routes/404'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as EspaceRouteImport } from './routes/espace'
+import { Route as ReglementationRouteImport } from './routes/reglementation'
+import { Route as TarifsRouteImport } from './routes/tarifs'
+import { Route as GuidesIndexRouteImport } from './routes/guides/index'
+import { Route as GuidesMetierRouteImport } from './routes/guides/$metier'
+import { Route as LegalPageRouteImport } from './routes/legal/$page'
+import { Route as OutilsAssuranceRouteImport } from './routes/outils/assurance'
+import { Route as OutilsDevisRouteImport } from './routes/outils/devis'
+import { Route as OutilsInpiRouteImport } from './routes/outils/inpi'
+import { Route as OutilsQualificationRouteImport } from './routes/outils/qualification'
+import { Route as OutilsStatutRouteImport } from './routes/outils/statut'
 
-export interface FileRoutesByFullPath {}
-export interface FileRoutesByTo {}
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R404Route = R404RouteImport.update({
+  id: '/404',
+  path: '/404',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnexionRoute = ConnexionRouteImport.update({
+  id: '/connexion',
+  path: '/connexion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EspaceRoute = EspaceRouteImport.update({
+  id: '/espace',
+  path: '/espace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglementationRoute = ReglementationRouteImport.update({
+  id: '/reglementation',
+  path: '/reglementation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TarifsRoute = TarifsRouteImport.update({
+  id: '/tarifs',
+  path: '/tarifs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesIndexRoute = GuidesIndexRouteImport.update({
+  id: '/guides/',
+  path: '/guides/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesMetierRoute = GuidesMetierRouteImport.update({
+  id: '/guides/$metier',
+  path: '/guides/$metier',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPageRoute = LegalPageRouteImport.update({
+  id: '/legal/$page',
+  path: '/legal/$page',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutilsAssuranceRoute = OutilsAssuranceRouteImport.update({
+  id: '/outils/assurance',
+  path: '/outils/assurance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutilsDevisRoute = OutilsDevisRouteImport.update({
+  id: '/outils/devis',
+  path: '/outils/devis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutilsInpiRoute = OutilsInpiRouteImport.update({
+  id: '/outils/inpi',
+  path: '/outils/inpi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutilsQualificationRoute = OutilsQualificationRouteImport.update({
+  id: '/outils/qualification',
+  path: '/outils/qualification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutilsStatutRoute = OutilsStatutRouteImport.update({
+  id: '/outils/statut',
+  path: '/outils/statut',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/404': typeof R404Route
+  '/admin': typeof AdminRoute
+  '/connexion': typeof ConnexionRoute
+  '/espace': typeof EspaceRoute
+  '/reglementation': typeof ReglementationRoute
+  '/tarifs': typeof TarifsRoute
+  '/guides/$metier': typeof GuidesMetierRoute
+  '/legal/$page': typeof LegalPageRoute
+  '/outils/assurance': typeof OutilsAssuranceRoute
+  '/outils/devis': typeof OutilsDevisRoute
+  '/outils/inpi': typeof OutilsInpiRoute
+  '/outils/qualification': typeof OutilsQualificationRoute
+  '/outils/statut': typeof OutilsStatutRoute
+  '/guides/': typeof GuidesIndexRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/404': typeof R404Route
+  '/admin': typeof AdminRoute
+  '/connexion': typeof ConnexionRoute
+  '/espace': typeof EspaceRoute
+  '/reglementation': typeof ReglementationRoute
+  '/tarifs': typeof TarifsRoute
+  '/guides/$metier': typeof GuidesMetierRoute
+  '/legal/$page': typeof LegalPageRoute
+  '/outils/assurance': typeof OutilsAssuranceRoute
+  '/outils/devis': typeof OutilsDevisRoute
+  '/outils/inpi': typeof OutilsInpiRoute
+  '/outils/qualification': typeof OutilsQualificationRoute
+  '/outils/statut': typeof OutilsStatutRoute
+  '/guides': typeof GuidesIndexRoute
+}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/404': typeof R404Route
+  '/admin': typeof AdminRoute
+  '/connexion': typeof ConnexionRoute
+  '/espace': typeof EspaceRoute
+  '/reglementation': typeof ReglementationRoute
+  '/tarifs': typeof TarifsRoute
+  '/guides/$metier': typeof GuidesMetierRoute
+  '/legal/$page': typeof LegalPageRoute
+  '/outils/assurance': typeof OutilsAssuranceRoute
+  '/outils/devis': typeof OutilsDevisRoute
+  '/outils/inpi': typeof OutilsInpiRoute
+  '/outils/qualification': typeof OutilsQualificationRoute
+  '/outils/statut': typeof OutilsStatutRoute
+  '/guides/': typeof GuidesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: never
+  fullPaths:
+    | '/'
+    | '/404'
+    | '/admin'
+    | '/connexion'
+    | '/espace'
+    | '/reglementation'
+    | '/tarifs'
+    | '/guides/$metier'
+    | '/legal/$page'
+    | '/outils/assurance'
+    | '/outils/devis'
+    | '/outils/inpi'
+    | '/outils/qualification'
+    | '/outils/statut'
+    | '/guides/'
   fileRoutesByTo: FileRoutesByTo
-  to: never
-  id: '__root__'
+  to:
+    | '/'
+    | '/404'
+    | '/admin'
+    | '/connexion'
+    | '/espace'
+    | '/reglementation'
+    | '/tarifs'
+    | '/guides/$metier'
+    | '/legal/$page'
+    | '/outils/assurance'
+    | '/outils/devis'
+    | '/outils/inpi'
+    | '/outils/qualification'
+    | '/outils/statut'
+    | '/guides'
+  id:
+    | '__root__'
+    | '/'
+    | '/404'
+    | '/admin'
+    | '/connexion'
+    | '/espace'
+    | '/reglementation'
+    | '/tarifs'
+    | '/guides/$metier'
+    | '/legal/$page'
+    | '/outils/assurance'
+    | '/outils/devis'
+    | '/outils/inpi'
+    | '/outils/qualification'
+    | '/outils/statut'
+    | '/guides/'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  R404Route: typeof R404Route
+  AdminRoute: typeof AdminRoute
+  ConnexionRoute: typeof ConnexionRoute
+  EspaceRoute: typeof EspaceRoute
+  ReglementationRoute: typeof ReglementationRoute
+  TarifsRoute: typeof TarifsRoute
+  GuidesMetierRoute: typeof GuidesMetierRoute
+  LegalPageRoute: typeof LegalPageRoute
+  OutilsAssuranceRoute: typeof OutilsAssuranceRoute
+  OutilsDevisRoute: typeof OutilsDevisRoute
+  OutilsInpiRoute: typeof OutilsInpiRoute
+  OutilsQualificationRoute: typeof OutilsQualificationRoute
+  OutilsStatutRoute: typeof OutilsStatutRoute
+  GuidesIndexRoute: typeof GuidesIndexRoute
 }
 
-const rootRouteChildren: RootRouteChildren = {}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connexion': {
+      id: '/connexion'
+      path: '/connexion'
+      fullPath: '/connexion'
+      preLoaderRoute: typeof ConnexionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/espace': {
+      id: '/espace'
+      path: '/espace'
+      fullPath: '/espace'
+      preLoaderRoute: typeof EspaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reglementation': {
+      id: '/reglementation'
+      path: '/reglementation'
+      fullPath: '/reglementation'
+      preLoaderRoute: typeof ReglementationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tarifs': {
+      id: '/tarifs'
+      path: '/tarifs'
+      fullPath: '/tarifs'
+      preLoaderRoute: typeof TarifsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/': {
+      id: '/guides/'
+      path: '/guides'
+      fullPath: '/guides/'
+      preLoaderRoute: typeof GuidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/$metier': {
+      id: '/guides/$metier'
+      path: '/guides/$metier'
+      fullPath: '/guides/$metier'
+      preLoaderRoute: typeof GuidesMetierRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/$page': {
+      id: '/legal/$page'
+      path: '/legal/$page'
+      fullPath: '/legal/$page'
+      preLoaderRoute: typeof LegalPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outils/assurance': {
+      id: '/outils/assurance'
+      path: '/outils/assurance'
+      fullPath: '/outils/assurance'
+      preLoaderRoute: typeof OutilsAssuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outils/devis': {
+      id: '/outils/devis'
+      path: '/outils/devis'
+      fullPath: '/outils/devis'
+      preLoaderRoute: typeof OutilsDevisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outils/inpi': {
+      id: '/outils/inpi'
+      path: '/outils/inpi'
+      fullPath: '/outils/inpi'
+      preLoaderRoute: typeof OutilsInpiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outils/qualification': {
+      id: '/outils/qualification'
+      path: '/outils/qualification'
+      fullPath: '/outils/qualification'
+      preLoaderRoute: typeof OutilsQualificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outils/statut': {
+      id: '/outils/statut'
+      path: '/outils/statut'
+      fullPath: '/outils/statut'
+      preLoaderRoute: typeof OutilsStatutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  R404Route: R404Route,
+  AdminRoute: AdminRoute,
+  ConnexionRoute: ConnexionRoute,
+  EspaceRoute: EspaceRoute,
+  ReglementationRoute: ReglementationRoute,
+  TarifsRoute: TarifsRoute,
+  GuidesMetierRoute: GuidesMetierRoute,
+  LegalPageRoute: LegalPageRoute,
+  OutilsAssuranceRoute: OutilsAssuranceRoute,
+  OutilsDevisRoute: OutilsDevisRoute,
+  OutilsInpiRoute: OutilsInpiRoute,
+  OutilsQualificationRoute: OutilsQualificationRoute,
+  OutilsStatutRoute: OutilsStatutRoute,
+  GuidesIndexRoute: GuidesIndexRoute,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
+import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }
