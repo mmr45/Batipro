@@ -40,6 +40,8 @@ function Page() {
   return (
     <>
       <PageHeader
+        planche="05 / 05"
+        rubrique="Abonnement Pro"
         title="Éditeur de devis"
         intro="Les mentions légales s'ajoutent selon le client et le chantier. Les champs obligatoires bloquent la génération tant qu'ils manquent : vous ne pouvez pas envoyer un devis non conforme par oubli."
       />

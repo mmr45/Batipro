@@ -1,73 +1,260 @@
 @import "tailwindcss";
 
-@font-face { font-family: "Big Shoulders Display"; font-weight: 600; font-display: swap; src: url("/fonts/big-shoulders-display-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Big Shoulders Display"; font-weight: 700; font-display: swap; src: url("/fonts/big-shoulders-display-latin-700-normal.woff2") format("woff2"); }
-@font-face { font-family: "Big Shoulders Display"; font-weight: 800; font-display: swap; src: url("/fonts/big-shoulders-display-latin-800-normal.woff2") format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("/fonts/inter-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url("/fonts/inter-latin-500-normal.woff2") format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url("/fonts/inter-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 700; font-display: swap; src: url("/fonts/inter-latin-700-normal.woff2") format("woff2"); }
-@font-face { font-family: "IBM Plex Mono"; font-weight: 500; font-display: swap; src: url("/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); }
+/* ---------------------------------------------------------------
+   Bâtipro — « Le dossier de chantier »
+   Le site emprunte au vocabulaire d'un chantier français : le panneau
+   d'affichage du permis, les planches d'un dossier technique, les cotes
+   de dimension et le cartouche en bas de plan.
+   - Fond « enduit » : blanc minéral froid, jamais crème.
+   - Encre : bleu-noir d'imprimerie technique.
+   - Bleu Bâtipro : actions et liens.
+   - Orange balise : réservé aux cotes et à ce qui demande l'attention.
+   --------------------------------------------------------------- */
 
-/* Palette « chantier » : béton clair, bleu Bâtipro, orange balise réservé aux alertes. */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url("/fonts/archivo-latin-wdth-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url("/fonts/archivo-latin-ext-wdth-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20AB, U+20AD-20C0, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
+}
+
 @theme {
-  --color-beton: #e9ecef;
-  --color-beton-2: #dde1e6;
+  --color-enduit: #f1f2ef;
+  --color-enduit-2: #e6e8e4;
   --color-papier: #ffffff;
-  --color-ardoise: #1a1f26;
-  --color-ardoise-2: #4a525d;
-  --color-ardoise-3: #7a838f;
-  --color-bleu: #1d5fa3;
-  --color-bleu-fonce: #154a80;
-  --color-bleu-pale: #e6eef8;
-  --color-balise: #d9620f;
-  --color-balise-pale: #fdf0e6;
-  --color-vert: #2c7a4b;
-  --color-vert-pale: #e7f4ec;
-  --color-rouge: #b3261e;
-  --color-rouge-pale: #fbeaea;
+  --color-encre: #151a21;
+  --color-encre-2: #48505b;
+  --color-encre-3: #7a828d;
+  --color-trait: #d5d9de;
+  --color-trait-fort: #aab1ba;
 
-  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-bleu: #1d5fa3;
+  --color-bleu-fonce: #134a82;
+  --color-bleu-nuit: #0e2c4c;
+  --color-bleu-pale: #e4edf7;
+
+  --color-balise: #ef6418;
+  --color-balise-fonce: #b2470c;
+  --color-balise-pale: #fdeee3;
+
+  --color-vert: #23734a;
+  --color-vert-pale: #e3f2e9;
+  --color-rouge: #b3261e;
+  --color-rouge-pale: #fbe9e8;
+
+  /* Compatibilité avec les noms de la v2 */
+  --color-beton: #f1f2ef;
+  --color-beton-2: #e6e8e4;
+  --color-ardoise: #151a21;
+  --color-ardoise-2: #48505b;
+  --color-ardoise-3: #7a828d;
+
+  --font-sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Archivo", "Arial Narrow", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
 }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 5rem;
+}
 body {
-  background: var(--color-beton);
-  color: var(--color-ardoise);
+  background: var(--color-enduit);
+  color: var(--color-encre);
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.55;
+  font-stretch: 100%;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "tnum" 0;
 }
 
-h1, h2, h3 { text-wrap: balance; }
-p { text-wrap: pretty; }
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+::selection {
+  background: var(--color-balise);
+  color: white;
+}
 
-:focus-visible { outline: 3px solid var(--color-bleu); outline-offset: 2px; border-radius: 2px; }
+:focus-visible {
+  outline: 3px solid var(--color-balise);
+  outline-offset: 2px;
+}
 
-.display { font-family: var(--font-display); font-weight: 800; line-height: 0.95; letter-spacing: -0.01em; }
+@layer components {
+/* Titres « panneau » : Archivo élargi, très gras, serré. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 0.98;
+  letter-spacing: -0.022em;
+}
+.display-etroit {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-stretch: 85%;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
 
-/* Référence légale cliquable ou non : la seule utilisation du mono. */
-.ref { font-family: var(--font-mono); font-size: 0.78em; color: var(--color-ardoise-2); }
+/* Références légales et cotes : seule utilisation du mono. */
+.ref {
+  font-family: var(--font-mono);
+  font-size: 0.76em;
+  color: var(--color-encre-2);
+  letter-spacing: -0.01em;
+}
 
-.guide h2 { font-family: var(--font-display); font-weight: 800; font-size: 2.25rem; line-height: 1; }
-.prose-legal h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; margin: 2rem 0 0.5rem; }
-.prose-legal h3 { font-weight: 600; margin: 1.25rem 0 0.25rem; }
-.prose-legal p, .prose-legal li { color: var(--color-ardoise-2); max-width: 70ch; }
-.prose-legal ul { list-style: disc; padding-left: 1.25rem; margin: 0.5rem 0; }
-.prose-legal a { color: var(--color-bleu); text-decoration: underline; }
+}
+
+@layer components {
+/* Papier millimétré du « terrain » (accueil uniquement) */
+.terrain {
+  background-color: var(--color-enduit);
+  background-image:
+    linear-gradient(to right, rgb(21 26 33 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(21 26 33 / 0.06) 1px, transparent 1px),
+    linear-gradient(to right, rgb(21 26 33 / 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(21 26 33 / 0.025) 1px, transparent 1px);
+  background-size:
+    80px 80px,
+    80px 80px,
+    16px 16px,
+    16px 16px;
+}
+
+/* Feuille de papier posée : bord net, ombre portée courte, sans arrondi. */
+.feuille {
+  background: var(--color-papier);
+  box-shadow:
+    0 0 0 1px rgb(21 26 33 / 0.09),
+    0 1px 0 rgb(21 26 33 / 0.06),
+    0 10px 24px -14px rgb(21 26 33 / 0.28);
+}
+
+}
+
+/* Cote de dimension : trait qui se dessine une seule fois au chargement. */
+@keyframes trace {
+  from {
+    stroke-dashoffset: var(--len, 1200);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.cote-trace {
+  stroke-dasharray: var(--len, 1200);
+  stroke-dashoffset: var(--len, 1200);
+  animation: trace 900ms cubic-bezier(0.6, 0, 0.2, 1) 250ms forwards;
+}
+@keyframes apparait {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.cote-label {
+  opacity: 0;
+  animation: apparait 300ms ease-out 1000ms forwards;
+}
+
+.guide h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 112%;
+  font-size: 2.1rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.prose-legal h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 110%;
+  font-size: 1.55rem;
+  margin: 2.25rem 0 0.5rem;
+  letter-spacing: -0.015em;
+}
+.prose-legal h3 {
+  font-weight: 650;
+  margin: 1.25rem 0 0.25rem;
+}
+.prose-legal p,
+.prose-legal li {
+  color: var(--color-encre-2);
+  max-width: 68ch;
+}
+.prose-legal ul {
+  list-style: square;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+.prose-legal a {
+  color: var(--color-bleu);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .cote-trace {
+    stroke-dashoffset: 0;
+  }
+  .cote-label {
+    opacity: 1;
+  }
 }
 
 @media print {
-  header, footer, .no-print { display: none !important; }
-  body { background: white; }
-  .print-card { box-shadow: none !important; border: 1px solid #ccc; }
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .print-card,
+  .feuille {
+    box-shadow: none !important;
+    border: 1px solid #bbb;
+  }
 }

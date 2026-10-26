@@ -57,6 +57,8 @@ function Page() {
   return (
     <>
       <PageHeader
+        planche="02 / 05"
+        rubrique="Outil gratuit"
         title="Quel statut pour démarrer ?"
         intro="Cinq questions pour une pré-orientation entre micro-entreprise, EI au réel et SASU, avec les seuils et taux 2026."
       />
@@ -100,7 +102,7 @@ function Page() {
 
 function Reperes() {
   return (
-    <Card className="bg-beton-2/40 ring-0">
+    <Card className="border-l-[3px] border-encre bg-transparent shadow-none sm:p-6">
       <p className="font-semibold">Les repères 2026</p>
       <dl className="mt-3 grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-[14.5px]">
         <dt className="text-ardoise-2">Plafond micro, prestations</dt>

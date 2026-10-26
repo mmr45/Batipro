@@ -93,7 +93,7 @@ function Espace() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="display text-5xl">Bonjour {profile?.prenom || ""}</h1>
+          <h1 className="display text-[44px] sm:text-[56px]">Bonjour {profile?.prenom || ""}</h1>
           <p className="text-ardoise-2">{displayName(user, profile)} — {user?.email}</p>
         </div>
         {isAdmin && <ButtonLink to="/admin" variant="secondary">Administration</ButtonLink>}
@@ -187,8 +187,11 @@ function Offre({ titre, actif, texteActif, texteInactif, produit }: { titre: str
     }
   };
   return (
-    <Card className={actif ? "ring-2 ring-vert/40" : ""}>
-      <p className="text-[13px] font-semibold text-ardoise-3">{actif ? "Actif" : "Non souscrit"}</p>
+    <Card className={actif ? "shadow-[inset_0_3px_0_var(--color-vert),0_0_0_1px_rgb(21_26_33/0.09)]" : ""}>
+      <p className={"flex items-center gap-2 text-[13.5px] font-semibold " + (actif ? "text-vert" : "text-encre-3")}>
+        <span aria-hidden className={"h-2 w-2 rounded-full " + (actif ? "bg-vert" : "bg-trait-fort")} />
+        {actif ? "Actif" : "Non souscrit"}
+      </p>
       <h3 className="display text-3xl">{titre}</h3>
       <p className="mt-1 text-ardoise-2">{actif ? texteActif : texteInactif}</p>
       <div className="mt-4">

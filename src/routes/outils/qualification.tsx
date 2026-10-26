@@ -5,7 +5,6 @@ import { Button, ButtonLink, Card, Checkbox, Choices, Container, Field, Notice, 
 import { seo } from "@/lib/seo";
 import { METIERS } from "@rules/metiers.ts";
 import { DIPLOMES, evaluerQualification, type Diplome, type QualifInput, type QualifResult } from "@rules/qualification.ts";
-import { QUALIFICATION } from "@rules/reglementation.ts";
 import { useAuth } from "@/lib/auth";
 import { saveSubmission } from "@/lib/api";
 import { storageGet, storageSet } from "@/lib/utils";
@@ -46,11 +45,13 @@ function Page() {
   return (
     <>
       <PageHeader
+        planche="01 / 05"
+        rubrique="Outil gratuit"
         title="Ai-je le droit d'exercer ce métier ?"
         intro={
           <>
             La plupart des métiers du bâtiment sont réglementés : il faut un CAP/BEP ou trois ans d'expérience pour s'installer.
-            Contrôle factuel selon le <span className="ref">{QUALIFICATION.source}</span>.
+            Contrôle factuel selon le Code de l'artisanat <span className="ref">art. L121-1</span>.
           </>
         }
       />
@@ -104,7 +105,7 @@ function Page() {
           {res ? (
             <Resultat res={res} saved={saved} connected={!!user} />
           ) : (
-            <Card className="bg-beton-2/40 ring-0">
+            <Card className="border-l-[3px] border-encre bg-transparent shadow-none sm:p-6">
               <p className="font-semibold">Ce que vous obtenez</p>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-ardoise-2">
                 <li>Le verdict selon la loi, avec la raison exacte</li>
