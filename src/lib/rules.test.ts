@@ -10,7 +10,6 @@ import { evaluerStatut } from "@rules/statut.ts";
 import { evaluerAssurance } from "@rules/assurance.ts";
 import {
   DEVIS_VIDE,
-  appliquerModele,
   calculerTotaux,
   construireMentions,
   nomEmetteur,
@@ -18,7 +17,8 @@ import {
   verifierDevis,
 } from "@rules/devis.ts";
 import { METIERS } from "@rules/metiers.ts";
-import { MODELES_PAR_METIER } from "@rules/modeles-devis.ts";
+import { MODELES_PAR_METIER, appliquerModele } from "@rules/modeles-devis.ts";
+import { MENTIONS_PAR_METIER } from "@rules/mentions-metier.ts";
 
 describe("référentiel 2026", () => {
   it("garde les seuils en vigueur", () => {
@@ -137,7 +137,10 @@ describe("devis", () => {
 
 describe("modèles de devis par métier", () => {
   it("couvre chaque métier avec au moins un modèle", () => {
-    for (const m of METIERS) expect(MODELES_PAR_METIER[m.slug]?.modeles.length, m.slug).toBeGreaterThan(0);
+    for (const m of METIERS) {
+      expect(MODELES_PAR_METIER[m.slug]?.modeles.length, m.slug).toBeGreaterThan(0);
+      expect(MENTIONS_PAR_METIER[m.slug], m.slug).toBeDefined();
+    }
   });
   it("préremplit lignes, TVA, déchets et mentions du métier", () => {
     const d = appliquerModele({ ...DEVIS_VIDE, em_franchise: false, ch_nature: "reno" }, "electricien", "borne-recharge");
