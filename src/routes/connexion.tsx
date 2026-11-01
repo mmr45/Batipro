@@ -5,7 +5,7 @@ import { BadgeCheck, Check, FileSignature, ShieldCheck } from "lucide-react";
 import { Button, Checkbox, Field, Input, Notice, revision } from "@/components/ui";
 import { Logo, LogoMark } from "@/components/layout";
 import { seo } from "@/lib/seo";
-import { sb } from "@/lib/supabase";
+import { sb, SUPABASE_PUBLIC_KEY, SUPABASE_URL } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 
 type Mode = "connexion" | "inscription" | "oubli" | "nouveau";
@@ -32,6 +32,8 @@ function traduire(msg: string): string {
   if (/email not confirmed/i.test(msg)) return "Confirmez d'abord votre email avec le lien reçu.";
   if (/password should be at least|weak/i.test(msg)) return "Mot de passe trop faible : 8 caractères minimum, avec lettres et chiffres.";
   if (/rate limit/i.test(msg)) return "Trop de tentatives. Patientez quelques minutes.";
+  if (/access_denied|cancel/i.test(msg)) return "Connexion Google annulée.";
+  if (/provider is not enabled|unsupported provider/i.test(msg)) return "La connexion Google n'est pas encore activée. Utilisez votre email.";
   return msg;
 }
 
@@ -45,12 +47,36 @@ function Page() {
   }, [search.mode]);
   const [f, setF] = useState({ prenom: "", nom: "", email: "", password: "", cgu: false });
   const [busy, setBusy] = useState(false);
+  const [busyGoogle, setBusyGoogle] = useState(false);
+  // Le bouton Google n'apparaît que si le fournisseur est activé côté Supabase :
+  // sinon le visiteur tomberait sur une page d'erreur brute.
+  const [googleDispo, setGoogleDispo] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const target = search.redirect ?? "/espace";
 
   useEffect(() => {
     if (recovering) setMode("nouveau");
   }, [recovering]);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_PUBLIC_KEY }, signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((cfg: { external?: Record<string, boolean> } | null) => setGoogleDispo(cfg?.external?.google === true))
+      .catch(() => {});
+    return () => ctrl.abort();
+  }, []);
+
+  // Retour de Google avec une erreur (refus, annulation) : on l'affiche puis on nettoie l'adresse.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const hash = new URLSearchParams(url.hash.slice(1));
+    const err = url.searchParams.get("error_description") ?? hash.get("error_description") ?? url.searchParams.get("error") ?? hash.get("error");
+    if (!err) return;
+    toast.error(traduire(err));
+    for (const k of ["error", "error_code", "error_description"]) url.searchParams.delete(k);
+    window.history.replaceState(window.history.state, "", url.pathname + url.search);
+  }, []);
   useEffect(() => {
     if (user && mode !== "nouveau" && !recovering) navigate({ to: target });
   }, [user, mode, recovering, navigate, target]);
@@ -99,8 +125,15 @@ function Page() {
   }
 
   async function google() {
-    const { error } = await sb().auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}${target}` } });
-    if (error) toast.error("Connexion Google indisponible pour le moment.");
+    setBusyGoogle(true);
+    // Retour sur cette page : une erreur éventuelle s'y affiche, et la redirection
+    // vers la page demandée se fait dès que la session est ouverte.
+    const retour = `${window.location.origin}/connexion?redirect=${encodeURIComponent(target)}`;
+    const { error } = await sb().auth.signInWithOAuth({ provider: "google", options: { redirectTo: retour } });
+    if (error) {
+      setBusyGoogle(false);
+      toast.error(traduire(error.message) || "Connexion Google indisponible pour le moment.");
+    }
   }
 
   const sousTitre: Record<Mode, string> = {
@@ -120,9 +153,9 @@ function Page() {
             <p className="mt-2 text-[15px] text-encre-2">{sousTitre[mode]}</p>
 
             <div className="mt-8 space-y-4">
-              {(mode === "connexion" || mode === "inscription") && (
+              {googleDispo && (mode === "connexion" || mode === "inscription") && (
                 <>
-                  <Button variant="secondary" size="lg" className="w-full" onClick={google}>
+                  <Button variant="secondary" size="lg" className="w-full" onClick={google} loading={busyGoogle}>
                     <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden>
                       <path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z" />
                       <path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z" />
@@ -131,6 +164,13 @@ function Page() {
                     </svg>
                     Continuer avec Google
                   </Button>
+                  {mode === "inscription" && (
+                    <p className="-mt-1 text-center text-[12.5px] leading-snug text-encre-3">
+                      Avec Google, vous acceptez les{" "}
+                      <Link to="/legal/$page" params={{ page: "cgv" }} target="_blank" className="underline decoration-encre/20 underline-offset-2 hover:text-encre-2">conditions générales</Link> et la{" "}
+                      <Link to="/legal/$page" params={{ page: "confidentialite" }} target="_blank" className="underline decoration-encre/20 underline-offset-2 hover:text-encre-2">politique de confidentialité</Link>.
+                    </p>
+                  )}
                   <div className="flex items-center gap-3 text-[12.5px] font-medium text-encre-3">
                     <span className="h-px flex-1 bg-encre/[0.08]" />
                     ou avec votre email
@@ -203,6 +243,7 @@ function Page() {
           <div aria-hidden className="pointer-events-none absolute -right-32 -top-32 -z-10 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(closest-side,rgb(47_91_234/0.5),transparent)]" />
           <div aria-hidden className="pointer-events-none absolute -bottom-40 -left-20 -z-10 h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(closest-side,rgb(255_106_31/0.25),transparent)]" />
           <Logo inverse />
+          <PileDocuments />
           <div>
             <p className="display max-w-md text-[34px] leading-[1.1]">
               Votre entreprise du bâtiment, <span className="texte-degrade">de l'idée au premier devis.</span>
@@ -229,6 +270,40 @@ function Page() {
             <Check className="h-3.5 w-3.5 text-[#3ddc97]" strokeWidth={3} aria-hidden /> Règles vérifiées le {revision()}
           </p>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+/** Les trois pièces du parcours, empilées en 3D isométrique. Décoratif. */
+function PileDocuments() {
+  const feuilles = [
+    { n: 0, t: "Dossier INPI", c: "from-[#1b2550] to-[#141b38]", trait: "bg-white/25" },
+    { n: 1, t: "Attestation décennale", c: "from-[#2a3f9e] to-[#1f2f7a]", trait: "bg-white/30" },
+    { n: 2, t: "Devis D2026-0042", c: "from-[#2f5bea] to-[#5a3fd6]", trait: "bg-white/40" },
+  ];
+  return (
+    <div aria-hidden className="pointer-events-auto absolute right-28 top-28 hidden h-48 w-40 [perspective:1100px] xl:block 2xl:right-36">
+      <div className="pile-3d relative h-full w-full">
+        {feuilles.map((f) => (
+          <div
+            key={f.t}
+            style={{ "--n": f.n } as React.CSSProperties}
+            className={`bg-gradient-to-br ${f.c} p-4 shadow-[0_30px_50px_-20px_rgb(0_0_0/0.6)] ring-1 ring-inset ring-white/15`}
+          >
+            <p className="text-[11px] font-semibold text-white/85">{f.t}</p>
+            <div className="mt-3 space-y-1.5">
+              <div className={`h-1.5 w-4/5 rounded-full ${f.trait}`} />
+              <div className={`h-1.5 w-3/5 rounded-full ${f.trait}`} />
+              <div className={`h-1.5 w-2/3 rounded-full ${f.trait}`} />
+            </div>
+            {f.n === 2 && (
+              <div className="absolute bottom-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-[#3ddc97] text-nuit">
+                <Check className="h-4 w-4" strokeWidth={3} />
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

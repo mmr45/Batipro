@@ -43,7 +43,7 @@ function Page() {
               <Link
                 to="/guides/$metier"
                 params={{ metier: m.slug }}
-                className="group flex h-full flex-col rounded-[20px] bg-papier p-6 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-xs)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgb(11_18_32/0.1),var(--shadow-lg)]"
+                className="relief group relative flex h-full flex-col rounded-[20px] bg-papier p-6 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-xs)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgb(11_18_32/0.1),var(--shadow-lg)]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="text-[19px] font-semibold tracking-[-0.02em] group-hover:text-bleu">{m.label}</h2>
