@@ -3,6 +3,7 @@ import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-r
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth";
 import { SiteFooter, SiteHeader } from "@/components/layout";
+import { Effets } from "@/components/effets";
 import { ButtonLink, Container } from "@/components/ui";
 import css from "@/styles.css?url";
 
@@ -41,6 +42,7 @@ function RootLayout() {
             <Outlet />
           </main>
           <SiteFooter />
+          <Effets />
           <Toaster position="top-center" richColors closeButton toastOptions={{ style: { fontFamily: "var(--font-sans)", borderRadius: "14px" } }} />
         </AuthProvider>
         <Scripts />

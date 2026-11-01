@@ -95,9 +95,9 @@ function Page() {
               <div
                 key={o.nom}
                 className={cn(
-                  "relative flex flex-col rounded-[24px] p-7 sm:p-8",
+                  "relief relative flex flex-col rounded-[24px] p-7 sm:p-8",
                   fort
-                    ? "bord-lumineux bg-nuit text-white shadow-[0_30px_60px_-20px_rgb(11_18_32/0.45)] max-lg:my-3 lg:-my-4 lg:py-12"
+                    ? "bord-lumineux bg-nuit text-white [--reflet:rgb(255_255_255/0.1)] shadow-[0_30px_60px_-20px_rgb(11_18_32/0.45)] max-lg:my-3 lg:-my-4 lg:py-12"
                     : "bg-papier shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-sm)]",
                 )}
               >

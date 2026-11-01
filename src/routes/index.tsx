@@ -52,8 +52,11 @@ const tauxFr = (n: number) => `${String(n).replace(".", ",")} %`;
 function Hero() {
   return (
     <section className="px-2 pt-2 sm:px-3 sm:pt-3">
-      <div className="relative isolate overflow-hidden rounded-[28px] bg-nuit text-white sm:rounded-[36px]">
+      <div data-scene className="relative isolate overflow-hidden rounded-[28px] bg-nuit text-white sm:rounded-[36px]">
         <div aria-hidden className="grille-nuit masque-radial pointer-events-none absolute inset-0" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[55%] overflow-hidden">
+          <div className="sol-3d" />
+        </div>
         <div
           aria-hidden
           className="pointer-events-none absolute -top-[22rem] left-1/2 -z-10 h-[44rem] w-[80rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(47_91_234/0.55),rgb(47_91_234/0.12)_55%,transparent)]"
@@ -98,8 +101,10 @@ function Hero() {
             ))}
           </ul>
 
-          <div className="revele revele-4 relative mx-auto mt-16 max-w-5xl sm:mt-20">
-            <ApercuApp />
+          <div className="revele revele-4 scene-3d relative mx-auto mt-16 max-w-5xl sm:mt-20">
+            <div className="objet-3d">
+              <ApercuApp />
+            </div>
           </div>
         </Container>
       </div>
@@ -116,9 +121,9 @@ function ApercuApp() {
   ];
   const mentions = ["SIRET et mention EI", "Assurance décennale", "TVA 10 % attestée", "Gestion des déchets", "Médiateur conso."];
   return (
-    <div className="relative text-left">
-      {/* Cartes flottantes */}
-      <div className="absolute -left-8 bottom-28 z-20 hidden w-60 animate-float rounded-2xl bg-papier/95 p-4 text-encre shadow-[0_0_0_1px_rgb(11_18_32/0.06),var(--shadow-xl)] backdrop-blur lg:block xl:-left-28">
+    <div className="relative text-left [transform-style:preserve-3d]">
+      {/* Cartes flottantes, détachées en profondeur */}
+      <div className="flotte-3d absolute -left-8 bottom-28 z-20 hidden w-60 animate-float rounded-2xl bg-papier/95 p-4 text-encre shadow-[0_0_0_1px_rgb(11_18_32/0.06),var(--shadow-xl)] backdrop-blur lg:block xl:-left-28">
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-vert-pale text-vert">
             <BadgeCheck className="h-4 w-4" aria-hidden />
@@ -131,7 +136,7 @@ function ApercuApp() {
         <p className="mt-3 text-[12.5px] leading-snug text-encre-2">CAP Peintre applicateur de revêtements. La CMA validera l'activité.</p>
       </div>
       <div
-        className="absolute -right-8 top-16 z-20 hidden w-56 animate-float rounded-2xl bg-papier/95 p-4 text-encre shadow-[0_0_0_1px_rgb(11_18_32/0.06),var(--shadow-xl)] backdrop-blur lg:block xl:-right-28"
+        className="flotte-3d absolute -right-8 top-16 z-20 hidden w-56 animate-float rounded-2xl bg-papier/95 p-4 text-encre shadow-[0_0_0_1px_rgb(11_18_32/0.06),var(--shadow-xl)] backdrop-blur lg:block xl:-right-28"
         style={{ animationDelay: "-3.5s" }}
       >
         <p className="text-[11.5px] font-medium text-encre-3">Cotisations micro 2026</p>
@@ -303,7 +308,7 @@ function BentoCard({
     <Link
       to={to}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-[22px] bg-papier p-6 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-sm)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgb(11_18_32/0.1),var(--shadow-lg)] sm:p-7",
+        "relief group relative flex flex-col overflow-hidden rounded-[22px] bg-papier p-6 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-sm)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgb(11_18_32/0.1),var(--shadow-lg)] sm:p-7",
         className,
       )}
     >
@@ -331,7 +336,7 @@ function Bento() {
           title="Cinq outils, dans l'ordre du chantier."
           intro="Chaque étape reprend ce que vous avez saisi à la précédente. Vous ne remplissez jamais deux fois la même information."
         />
-        <div className="mt-14 grid gap-4 lg:grid-cols-6">
+        <div className="apparait mt-14 grid gap-4 lg:grid-cols-6">
           <BentoCard
             to="/outils/qualification"
             className="lg:col-span-3"
@@ -590,12 +595,12 @@ function Parcours() {
             </div>
           ))}
         </div>
-        <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <ol className="apparait mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {PARCOURS.map((p, i) => (
             <li key={p.to}>
               <Link
                 to={p.to}
-                className="group relative flex h-full flex-col rounded-2xl bg-papier p-5 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-xs)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgb(11_18_32/0.1),var(--shadow-lg)]"
+                className="relief group relative flex h-full flex-col rounded-2xl bg-papier p-5 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-xs)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgb(11_18_32/0.1),var(--shadow-lg)]"
               >
                 <div className="flex items-center justify-between">
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-encre text-[14px] font-semibold tabular-nums text-white">{i + 1}</span>
@@ -703,7 +708,7 @@ function Guides() {
             Tous les guides <ArrowRight className="h-4 w-4" aria-hidden />
           </ButtonLink>
         </div>
-        <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="apparait mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {METIERS_GUIDES.map((m) => {
             const Icon = ICONES_METIER[m.slug] ?? Hammer;
             return (
@@ -711,7 +716,7 @@ function Guides() {
                 <Link
                   to="/guides/$metier"
                   params={{ metier: m.slug }}
-                  className="group flex items-center gap-3 rounded-2xl bg-papier px-4 py-3.5 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-xs)] transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgb(11_18_32/0.1),var(--shadow-md)]"
+                  className="relief group relative flex items-center gap-3 rounded-2xl bg-papier px-4 py-3.5 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-xs)] transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgb(11_18_32/0.1),var(--shadow-md)]"
                 >
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-enduit text-encre-2 transition-colors group-hover:bg-bleu-pale group-hover:text-bleu">
                     <Icon className="h-[18px] w-[18px]" aria-hidden />
@@ -752,7 +757,7 @@ function AppelFinal() {
   return (
     <section className="px-2 pt-24 sm:px-3 sm:pt-32">
       <Container>
-        <div className="relative isolate overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#2f5bea_0%,#3d4fe0_45%,#5a3fd6_100%)] px-6 py-16 text-center text-white sm:px-12 sm:py-20">
+        <div className="apparait relative isolate overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#2f5bea_0%,#3d4fe0_45%,#5a3fd6_100%)] px-6 py-16 text-center text-white sm:px-12 sm:py-20">
           <div aria-hidden className="grille-nuit pointer-events-none absolute inset-0 opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
           <div aria-hidden className="pointer-events-none absolute -bottom-40 left-1/2 -z-10 h-80 w-[50rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(255_106_31/0.45),transparent)]" />
           <Sparkles className="mx-auto h-7 w-7 text-white/80" aria-hidden />

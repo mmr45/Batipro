@@ -406,3 +406,214 @@ input[type="range"]::-moz-range-thumb {
     0 0 0 1px rgb(11 18 32 / 0.15),
     0 2px 6px rgb(11 18 32 / 0.18);
 }
+
+/* ---------------------------------------------------------------
+   Mouvement et profondeur (v4.1)
+   - Transitions entre pages : API View Transitions (navigateur),
+     déclenchées par le routeur. L'en-tête reste immobile.
+   - Apparition au défilement : animations pilotées par le scroll,
+     en CSS pur. Sans support, le contenu est simplement affiché.
+   - Relief 3D : les cartes .relief s'inclinent sous le pointeur
+     (variables posées par <Effets />), avec un reflet lumineux.
+   Tout est coupé si l'utilisateur demande moins d'animations.
+   --------------------------------------------------------------- */
+
+@property --incl {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+@property --zoom {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+/* Transitions entre pages */
+.entete-site {
+  view-transition-name: entete;
+}
+::view-transition-old(root) {
+  animation: vt-sortie 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(root) {
+  animation: vt-entree 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes vt-sortie {
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+    filter: blur(2px);
+  }
+}
+@keyframes vt-entree {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(1.01);
+    filter: blur(6px);
+  }
+}
+
+/* Barre de progression de lecture, sous l'en-tête */
+.progression {
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--color-bleu), #6d4cff 55%, var(--color-balise));
+  pointer-events: none;
+}
+
+/* Scène 3D du héros : la maquette se redresse quand on défile,
+   et suit légèrement le pointeur (--px, --py posés par <Effets />). */
+.scene-3d {
+  perspective: 1800px;
+  perspective-origin: 50% 0%;
+}
+.scene-3d > .objet-3d {
+  transform-style: preserve-3d;
+  transform: rotateX(calc(var(--incl) + var(--py, 0) * -4deg)) rotateY(calc(var(--px, 0) * 5deg)) scale(var(--zoom));
+  transform-origin: 50% 0%;
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.objet-3d .flotte-3d {
+  translate: 0 0 90px;
+}
+
+/* Sol quadrillé en perspective, qui avance vers le visiteur */
+.sol-3d {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  bottom: 0;
+  height: 70%;
+  transform: perspective(520px) rotateX(72deg);
+  transform-origin: 50% 100%;
+  background-image:
+    linear-gradient(to right, rgb(109 140 255 / 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(109 140 255 / 0.4) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to top, black 0%, transparent 85%);
+  animation: sol-avance 3.2s linear infinite;
+}
+@keyframes sol-avance {
+  to {
+    background-position: 0 64px;
+  }
+}
+
+/* Pile de documents en 3D isométrique (page de connexion) */
+.pile-3d {
+  transform-style: preserve-3d;
+  transform: rotateX(58deg) rotateZ(-38deg);
+  animation: pile-flotte 9s ease-in-out infinite;
+}
+.pile-3d > * {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  transform: translateZ(calc(var(--n) * 34px));
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pile-3d:hover > * {
+  transform: translateZ(calc(var(--n) * 52px));
+}
+@keyframes pile-flotte {
+  0%,
+  100% {
+    transform: rotateX(58deg) rotateZ(-38deg) translateZ(0);
+  }
+  50% {
+    transform: rotateX(54deg) rotateZ(-30deg) translateZ(14px);
+  }
+}
+
+/* Cartes en relief */
+.relief {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition:
+    transform 500ms cubic-bezier(0.16, 1, 0.3, 1),
+    translate 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 300ms ease;
+}
+.relief.sous-pointeur {
+  transition:
+    transform 120ms linear,
+    translate 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 300ms ease;
+}
+.relief::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), var(--reflet, rgb(47 91 234 / 0.08)), transparent 55%);
+  transition: opacity 300ms ease;
+}
+.relief.sous-pointeur::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* Apparition au défilement */
+    .apparait {
+      animation: apparait linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    @keyframes apparait {
+      from {
+        opacity: 0;
+        transform: perspective(900px) translateY(36px) rotateX(10deg) scale(0.98);
+      }
+    }
+
+    /* La maquette du héros se redresse au défilement */
+    .scene-3d > .objet-3d {
+      animation: redresse linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 520px;
+    }
+    @keyframes redresse {
+      from {
+        --incl: 16deg;
+        --zoom: 0.94;
+      }
+      to {
+        --incl: 0deg;
+        --zoom: 1;
+      }
+    }
+
+    .progression {
+      animation: progression linear both;
+      animation-timeline: scroll(root);
+    }
+    @keyframes progression {
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  .relief,
+  .scene-3d > .objet-3d {
+    transform: none !important;
+  }
+  .sol-3d,
+  .pile-3d {
+    animation: none !important;
+  }
+}

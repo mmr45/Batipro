@@ -165,7 +165,7 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 transition-[background-color,box-shadow] duration-200",
+        "entete-site sticky top-0 z-40 transition-[background-color,box-shadow] duration-200",
         scrolled || open
           ? "bg-papier/80 shadow-[0_1px_0_rgb(11_18_32/0.07)] backdrop-blur-xl backdrop-saturate-150"
           : "bg-papier shadow-[0_1px_0_rgb(11_18_32/0.05)]",
@@ -267,6 +267,7 @@ export function SiteHeader() {
           </Container>
         </div>
       )}
+      <div aria-hidden className="progression" />
     </header>
   );
 }

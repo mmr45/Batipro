@@ -234,7 +234,7 @@ export function SectionHead({
   className?: string;
 }) {
   return (
-    <div className={cn("max-w-2xl", center && "mx-auto text-center", className)}>
+    <div className={cn("apparait max-w-2xl", center && "mx-auto text-center", className)}>
       {eyebrow && <p className={cn("eyebrow", dark && "!text-bleu-clair")}>{eyebrow}</p>}
       <h2 className={cn("display mt-3 text-[32px] sm:text-[44px]", dark && "text-white")}>{title}</h2>
       {intro && <p className={cn("mt-4 text-[17px] leading-relaxed sm:text-[18px]", dark ? "text-white/65" : "text-encre-2")}>{intro}</p>}
