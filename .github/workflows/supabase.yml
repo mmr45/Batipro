@@ -1,0 +1,79 @@
+# Déploie les Edge Functions sur Supabase à chaque merge sur main qui les touche,
+# et installe les emails d'authentification à la demande.
+# Prérequis : secret GitHub SUPABASE_ACCESS_TOKEN (supabase.com/dashboard/account/tokens).
+name: Supabase
+
+on:
+  push:
+    branches: [main]
+    paths: ["supabase/functions/**"]
+  workflow_dispatch:
+    inputs:
+      emails:
+        description: "Installer aussi les emails d'authentification (supabase/templates)"
+        type: boolean
+        default: false
+
+concurrency: supabase-production
+
+env:
+  PROJECT_REF: pznuuwydfqvsuilimjgm
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+jobs:
+  fonctions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        with:
+          version: latest
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Vérifier les types
+        working-directory: supabase/functions
+        run: deno check */index.ts
+      - name: Déployer toutes les fonctions
+        # Sans jeton, on s'arrête après la vérification des types au lieu d'échouer.
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        # verify_jwt de chaque fonction vient de supabase/config.toml.
+        run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api
+
+  emails:
+    if: github.event_name == 'workflow_dispatch' && inputs.emails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installer les modèles et les sujets
+        # Seuls les champs mailer_* sont envoyés : le reste de la config Auth n'est pas touché.
+        working-directory: supabase/templates
+        run: |
+          jq -n \
+            --rawfile confirmation confirmation.html \
+            --rawfile recovery recovery.html \
+            --rawfile magic_link magic_link.html \
+            --rawfile email_change email_change.html \
+            --rawfile invite invite.html \
+            --rawfile reauthentication reauthentication.html \
+            '{
+              mailer_subjects_confirmation: "Confirmez votre adresse email",
+              mailer_templates_confirmation_content: $confirmation,
+              mailer_subjects_recovery: "Réinitialisez votre mot de passe Bâtipro",
+              mailer_templates_recovery_content: $recovery,
+              mailer_subjects_magic_link: "Votre lien de connexion Bâtipro",
+              mailer_templates_magic_link_content: $magic_link,
+              mailer_subjects_email_change: "Confirmez votre nouvelle adresse email",
+              mailer_templates_email_change_content: $email_change,
+              mailer_subjects_invite: "Vous êtes invité sur Bâtipro",
+              mailer_templates_invite_content: $invite,
+              mailer_subjects_reauthentication: "Votre code de confirmation Bâtipro",
+              mailer_templates_reauthentication_content: $reauthentication
+            }' > payload.json
+          curl --fail-with-body -sS -X PATCH \
+            "https://api.supabase.com/v1/projects/$PROJECT_REF/config/auth" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data @payload.json > /dev/null
+          echo "Emails installés."
