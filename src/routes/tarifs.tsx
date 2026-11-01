@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check, Lock, Minus, ReceiptText, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { Button, ButtonLink, Container, Notice, PageHeader } from "@/components/ui";
+import { Button, ButtonLink, Container, Notice, PageHeader, SectionHead } from "@/components/ui";
+import { CONTACT_EMAIL, cn } from "@/lib/utils";
 import { FaqList, FAQ_ACCUEIL } from "@/components/faq";
 import { seo } from "@/lib/seo";
 import { useAuth } from "@/lib/auth";
@@ -80,85 +81,131 @@ function Page() {
   return (
     <>
       <PageHeader
-        title="Tarifs"
-        rubrique="Bordereau des prix"
-        planche="3 offres"
-        intro="Vous payez au moment où l'outil vous fait gagner du temps : une fois à la création, puis chaque mois pour vos devis."
+        title="Des prix simples, payés au bon moment."
+        rubrique="Tarifs"
+        intro="Rien pour démarrer, une fois à la création, puis chaque mois pour vos devis. Les deux offres payantes sont indépendantes."
       />
-      <Container className="py-12">
+      <Container className="py-12 sm:py-16">
         {mounted && paiement === "annule" && <Notice tone="warn" className="mb-8">Paiement annulé : aucun montant n'a été débité.</Notice>}
-        <div className="grid gap-px border border-encre/15 bg-encre/15 lg:grid-cols-3">
-          {OFFRES.map((o, i) => {
+        <div className="grid gap-5 lg:grid-cols-3 lg:items-stretch">
+          {OFFRES.map((o) => {
             const actif = o.plan ? access[o.plan] : false;
             const fort = o.plan === "dossier";
             return (
-              <div key={o.nom} className={`relative flex flex-col bg-papier p-6 sm:p-8 ${fort ? "lg:-my-3 lg:shadow-[0_0_0_3px_var(--color-encre)] lg:z-10" : ""}`}>
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="ref !text-[12.5px] !text-balise">Poste {String(i + 1).padStart(2, "0")}</span>
-                  <span className="text-[13.5px] text-encre-3">{o.pour}</span>
-                </div>
-                <h2 className="display mt-4 text-[34px]">{o.nom}</h2>
-                <p className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 border-y border-encre/10 py-4">
-                  <span className="display whitespace-nowrap text-[64px] leading-none">{o.prix}</span>
-                  <span className="text-[15px] text-encre-2">{o.rythme}</span>
+              <div
+                key={o.nom}
+                className={cn(
+                  "relative flex flex-col rounded-[24px] p-7 sm:p-8",
+                  fort
+                    ? "bord-lumineux bg-nuit text-white shadow-[0_30px_60px_-20px_rgb(11_18_32/0.45)] max-lg:my-3 lg:-my-4 lg:py-12"
+                    : "bg-papier shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-sm)]",
+                )}
+              >
+                {fort && (
+                  <>
+                    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[24px]">
+                      <div className="absolute -top-24 left-1/2 h-64 w-[30rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(47_91_234/0.5),transparent)]" />
+                    </div>
+                    <span className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center whitespace-nowrap gap-1.5 rounded-full bg-balise px-3 py-1 text-[12px] font-semibold text-white shadow-[0_4px_12px_rgb(255_106_31/0.4)]">
+                      <Sparkles className="h-3.5 w-3.5" aria-hidden /> Recommandé pour se lancer
+                    </span>
+                  </>
+                )}
+                <p className={cn("text-[14px] font-semibold", fort ? "text-bleu-clair" : "text-bleu")}>{o.pour}</p>
+                <h2 className="mt-2 text-[24px] font-semibold tracking-[-0.025em]">{o.nom}</h2>
+                <p className="mt-6">
+                  <span className="display block whitespace-nowrap text-[56px] leading-none tabular-nums">{o.prix}</span>
+                  <span className={cn("mt-2 block text-[14.5px]", fort ? "text-white/60" : "text-encre-2")}>{o.rythme}</span>
                 </p>
-                <ul className="mt-6 flex-1 space-y-2.5">
-                  {o.inclus.map((x) => (
-                    <li key={x} className="flex gap-2.5 text-[15.5px] leading-snug">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-vert" strokeWidth={2.5} aria-hidden />
-                      {x}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-8">
+                <div className="mt-7">
                   {!o.plan ? (
-                    <ButtonLink to="/outils/qualification" variant="secondary" className="w-full">Commencer gratuitement</ButtonLink>
+                    <ButtonLink to="/outils/qualification" variant="secondary" size="lg" className="w-full">Commencer gratuitement</ButtonLink>
                   ) : actif ? (
-                    <ButtonLink to="/espace" variant="secondary" className="w-full">Déjà actif, voir mon espace</ButtonLink>
+                    <ButtonLink to="/espace" variant={fort ? "inverse" : "secondary"} size="lg" className="w-full">Déjà actif, voir mon espace</ButtonLink>
                   ) : (
-                    <Button variant={fort ? "encre" : "primary"} className="w-full" loading={busy === o.plan} onClick={() => acheter(o.plan!)}>
+                    <Button variant={fort ? "inverse" : "encre"} size="lg" className="w-full" loading={busy === o.plan} onClick={() => acheter(o.plan!)}>
                       {o.plan === "pro" ? "S'abonner au Pro" : "Acheter le Pack Lancement"}
                     </Button>
                   )}
                 </div>
+                <div className={cn("my-7 h-px", fort ? "bg-white/10" : "bg-encre/[0.07]")} />
+                <ul className="flex-1 space-y-3">
+                  {o.inclus.map((x) => (
+                    <li key={x} className="flex gap-3 text-[15px] leading-snug">
+                      <span className={cn("mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full", fort ? "bg-white/10 text-[#3ddc97]" : "bg-vert-pale text-vert")}>
+                        <Check className="h-3 w-3" strokeWidth={3.5} aria-hidden />
+                      </span>
+                      <span className={fort ? "text-white/85" : undefined}>{x}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             );
           })}
         </div>
-        <p className="mt-6 max-w-3xl text-[14px] leading-relaxed text-encre-3">
-          Prix finaux, sans frais cachés. Paiement sécurisé par Stripe, facture envoyée par email. Le Pack Lancement et l'abonnement Pro
-          sont indépendants. Pour le Pack Lancement, le contenu numérique est fourni immédiatement : vous renoncez à votre droit de
-          rétractation en validant le paiement.
+
+        <div className="mt-10 grid gap-3 sm:grid-cols-3">
+          {[
+            { I: Lock, t: "Paiement sécurisé par Stripe", d: "Vos coordonnées bancaires ne transitent jamais par Bâtipro." },
+            { I: ReceiptText, t: "Facture envoyée par email", d: "Avec votre numéro de TVA si vous en avez un." },
+            { I: ShieldCheck, t: "Sans engagement", d: "L'abonnement Pro se résilie en un clic." },
+          ].map(({ I, t, d }) => (
+            <div key={t} className="flex gap-3 rounded-2xl bg-papier/60 p-4 shadow-[inset_0_0_0_1px_rgb(11_18_32/0.06)]">
+              <I className="mt-0.5 h-5 w-5 shrink-0 text-encre-3" aria-hidden />
+              <div>
+                <p className="text-[14.5px] font-semibold">{t}</p>
+                <p className="text-[13.5px] text-encre-2">{d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 max-w-3xl text-[13.5px] leading-relaxed text-encre-3">
+          Prix finaux, sans frais cachés. Pour le Pack Lancement, le contenu numérique est fourni immédiatement : vous renoncez à votre
+          droit de rétractation en validant le paiement.
         </p>
 
-        <h2 className="display mt-20 text-[30px] sm:text-[36px]">Le détail, poste par poste</h2>
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full min-w-[40rem] border-t-2 border-encre text-left text-[15px]">
-            <thead>
-              <tr className="border-b border-encre/15 text-[13.5px] text-encre-3">
-                <th scope="col" className="py-3 pr-4 font-medium">Désignation</th>
-                <th scope="col" className="w-32 py-3 text-center font-medium">Gratuit</th>
-                <th scope="col" className="w-32 py-3 text-center font-medium">Lancement</th>
-                <th scope="col" className="w-32 py-3 text-center font-medium">Pro</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-encre/10">
-              {lignes.map(([k, ...v]) => (
-                <tr key={k}>
-                  <th scope="row" className="py-3 pr-4 font-medium">{k}</th>
-                  {v.map((on, j) => (
-                    <td key={j} className="py-3 text-center">
-                      {on ? <Check className="mx-auto h-4 w-4 text-vert" strokeWidth={2.75} aria-label="Inclus" /> : <span className="text-encre-3" aria-label="Non inclus">—</span>}
-                    </td>
-                  ))}
+        <div className="mt-24">
+          <SectionHead eyebrow="Comparatif" title="Le détail, ligne par ligne." />
+          <div className="mt-8 overflow-x-auto rounded-2xl bg-papier shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-sm)]">
+            <table className="w-full min-w-[40rem] text-left text-[15px]">
+              <thead>
+                <tr className="border-b border-encre/[0.07] text-[13.5px]">
+                  <th scope="col" className="px-6 py-4 font-medium text-encre-3">Fonctionnalité</th>
+                  <th scope="col" className="w-36 py-4 text-center font-semibold">Gratuit</th>
+                  <th scope="col" className="w-36 bg-bleu-pale/50 py-4 text-center font-semibold text-bleu-fonce">Lancement</th>
+                  <th scope="col" className="w-36 py-4 text-center font-semibold">Pro</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-encre/[0.05]">
+                {lignes.map(([k, ...v]) => (
+                  <tr key={k} className="transition-colors hover:bg-enduit/50">
+                    <th scope="row" className="px-6 py-3.5 font-medium">{k}</th>
+                    {v.map((on, j) => (
+                      <td key={j} className={cn("py-3.5 text-center", j === 1 && "bg-bleu-pale/30")}>
+                        {on ? (
+                          <span className="mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-vert-pale text-vert">
+                            <Check className="h-3 w-3" strokeWidth={3.5} aria-label="Inclus" />
+                          </span>
+                        ) : (
+                          <Minus className="mx-auto h-4 w-4 text-encre/20" aria-label="Non inclus" />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div className="mt-20 grid gap-10 lg:grid-cols-[1fr_1.6fr]">
-          <h2 className="display text-[30px] sm:text-[36px]">Questions fréquentes</h2>
+        <div className="mt-24 grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+          <div>
+            <SectionHead eyebrow="FAQ" title="Questions fréquentes" />
+            <p className="mt-4 text-[15px] text-encre-2">
+              Une autre question ?{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-bleu hover:text-bleu-fonce">Écrivez-nous</a>.
+            </p>
+          </div>
           <FaqList items={FAQ_ACCUEIL} />
         </div>
       </Container>

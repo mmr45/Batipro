@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Download } from "lucide-react";
-import { Button, ButtonLink, Card, Container, Field, Input, Notice, Spinner } from "@/components/ui";
+import { ArrowRight, BadgeCheck, CheckCircle2, Download, FileSignature, FileText, Lock, Plus, Scale, Settings, ShieldCheck } from "lucide-react";
+import { Badge, Button, ButtonLink, Card, Container, Field, IconTile, Input, Notice, Spinner } from "@/components/ui";
+import { cn } from "@/lib/utils";
 import { RequireAuth } from "@/components/layout";
 import { seo } from "@/lib/seo";
 import { displayName, useAuth } from "@/lib/auth";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/espace")({
 
 function Page() {
   return (
-    <Container className="py-10">
+    <Container className="py-10 sm:py-14">
       <RequireAuth>
         <Espace />
       </RequireAuth>
@@ -90,33 +91,43 @@ function Espace() {
   }, [attente, access, offre, refresh]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="display text-[44px] sm:text-[56px]">Bonjour {profile?.prenom || ""}</h1>
-          <p className="text-ardoise-2">{displayName(user, profile)} — {user?.email}</p>
+    <div className="space-y-12">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#4f7bff,#1f3fc4)] text-[20px] font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25),var(--shadow-md)]">
+            {(profile?.prenom?.[0] ?? user?.email?.[0] ?? "?").toUpperCase()}
+          </span>
+          <div>
+            <h1 className="display text-[30px] sm:text-[38px]">Bonjour{profile?.prenom ? ` ${profile.prenom}` : ""}</h1>
+            <p className="text-[14.5px] text-encre-2">{displayName(user, profile)} · {user?.email}</p>
+          </div>
         </div>
-        {isAdmin && <ButtonLink to="/admin" variant="secondary">Administration</ButtonLink>}
+        <div className="flex flex-wrap gap-2">
+          {isAdmin && <ButtonLink to="/admin" variant="secondary">Administration</ButtonLink>}
+          <ButtonLink to="/outils/devis" variant="encre"><Plus className="h-4 w-4" aria-hidden /> Nouveau devis</ButtonLink>
+        </div>
       </div>
       {attente && <Notice tone="info" title="Paiement en cours de confirmation">Votre accès s'active automatiquement dans quelques secondes.</Notice>}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Offre
           titre="Pack Lancement"
+          icon={<FileText aria-hidden />}
           actif={access.dossier}
-          texteActif="Acheté — dossier de création et assurance débloqués."
+          texteActif="Acheté : dossier de création et assurance débloqués."
           texteInactif="89 € une fois : dossier INPI complet et dimensionnement de la décennale."
           produit="dossier"
         />
         <Offre
           titre="Abonnement Pro"
+          icon={<FileSignature aria-hidden />}
           actif={access.pro}
           texteActif={
             access.proCancelAtPeriodEnd && access.proPeriodEnd
               ? `Résilié : accès jusqu'au ${dateFr(access.proPeriodEnd)}.`
               : access.proPeriodEnd
-                ? `Actif — prochain renouvellement le ${dateFr(access.proPeriodEnd)}.`
-                : "Actif."
+                ? `Prochain renouvellement le ${dateFr(access.proPeriodEnd)}.`
+                : "Devis conformes illimités."
           }
           texteInactif="19 € par mois, sans engagement : devis conformes illimités."
           produit="pro"
@@ -124,43 +135,70 @@ function Espace() {
       </div>
 
       <section>
-        <h2 className="display text-3xl">Mon parcours</h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="display text-[24px] sm:text-[28px]">Mon parcours</h2>
+            {res && (
+              <p className="mt-1 text-[14.5px] text-encre-2">
+                {[res.qualif, res.statut, res.inpi, res.assurance].filter(Boolean).length} étape(s) sur 4 terminée(s)
+              </p>
+            )}
+          </div>
+          {res && (
+            <div className="h-2 w-48 overflow-hidden rounded-full bg-enduit-2" aria-hidden>
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-bleu to-[#6d4cff] transition-[width] duration-700"
+                style={{ width: `${([res.qualif, res.statut, res.inpi, res.assurance].filter(Boolean).length / 4) * 100}%` }}
+              />
+            </div>
+          )}
+        </div>
         {!res ? (
-          <Spinner />
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {[0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-[118px] rounded-2xl" />)}
+          </div>
         ) : (
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <Etape titre="Qualification" r={res.qualif} to="/outils/qualification" />
-            <Etape titre="Statut juridique" r={res.statut} to="/outils/statut" />
-            <Etape titre="Dossier de création" r={res.inpi} to="/outils/inpi" verrou={!access.dossier}>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            <Etape titre="Qualification" icon={<BadgeCheck aria-hidden />} r={res.qualif} to="/outils/qualification" />
+            <Etape titre="Statut juridique" icon={<Scale aria-hidden />} r={res.statut} to="/outils/statut" />
+            <Etape titre="Dossier de création" icon={<FileText aria-hidden />} r={res.inpi} to="/outils/inpi" verrou={!access.dossier}>
               {res.inpi && access.dossier && <TelechargerInpi />}
             </Etape>
-            <Etape titre="Assurance décennale" r={res.assurance} to="/outils/assurance" verrou={!access.dossier} />
+            <Etape titre="Assurance décennale" icon={<ShieldCheck aria-hidden />} r={res.assurance} to="/outils/assurance" verrou={!access.dossier} />
           </div>
         )}
       </section>
 
       <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 className="display text-3xl">Mes devis</h2>
-          <ButtonLink to="/outils/devis">Nouveau devis</ButtonLink>
+          <div>
+            <h2 className="display text-[24px] sm:text-[28px]">Mes devis</h2>
+            <p className="mt-1 text-[14.5px] text-encre-2">Chaque devis généré est archivé avec son numéro.</p>
+          </div>
+          <ButtonLink to="/outils/devis" variant="secondary"><Plus className="h-4 w-4" aria-hidden /> Nouveau devis</ButtonLink>
         </div>
-        <Card className="mt-4 overflow-x-auto p-0 sm:p-0">
+        <Card className="mt-5 overflow-x-auto p-0 sm:p-0">
           {devis === null ? (
             <div className="px-5"><Spinner /></div>
           ) : devis.length === 0 ? (
-            <p className="p-5 text-ardoise-2">Aucun devis émis pour l'instant. Chaque devis généré est archivé ici avec son numéro.</p>
+            <div className="flex flex-col items-center px-6 py-14 text-center">
+              <IconTile tone="orange" className="h-12 w-12 rounded-2xl"><FileSignature aria-hidden /></IconTile>
+              <p className="mt-4 font-semibold">Aucun devis pour l'instant</p>
+              <p className="mt-1 max-w-sm text-[14.5px] text-encre-2">Votre premier devis conforme se prépare en quelques minutes, mentions légales comprises.</p>
+              <ButtonLink to="/outils/devis" className="mt-5">Créer mon premier devis</ButtonLink>
+            </div>
           ) : (
             <table className="w-full min-w-[36rem] text-left text-[14.5px]">
-              <thead className="border-b border-ardoise/10 text-[13px] text-ardoise-3">
+              <thead className="border-b border-encre/[0.07] bg-enduit/50 text-[12.5px] text-encre-3">
                 <tr><th className="px-5 py-3 font-medium">Numéro</th><th className="font-medium">Client</th><th className="font-medium">Date</th><th className="text-right font-medium">TTC</th><th className="px-5" /></tr>
               </thead>
-              <tbody className="divide-y divide-ardoise/10">
+              <tbody className="divide-y divide-encre/[0.05]">
                 {devis.map((d) => (
-                  <tr key={d.id}>
-                    <td className="px-5 py-3 font-semibold">{d.numero}</td>
-                    <td>{d.client_nom}<span className="block text-[13px] text-ardoise-3">{d.intitule}</span></td>
-                    <td>{dateFr(d.created_at)}</td>
-                    <td className="text-right tabular-nums">{formatEuro(Number(d.total_ttc))}</td>
+                  <tr key={d.id} className="transition-colors hover:bg-enduit/40">
+                    <td className="px-5 py-3.5"><span className="ref rounded-md bg-enduit px-2 py-1 !text-[12px] !text-encre">{d.numero}</span></td>
+                    <td>{d.client_nom}<span className="block text-[13px] text-encre-3">{d.intitule}</span></td>
+                    <td className="text-encre-2">{dateFr(d.created_at)}</td>
+                    <td className="text-right font-semibold tabular-nums">{formatEuro(Number(d.total_ttc))}</td>
                     <td className="px-5 text-right"><TelechargerDevis id={d.id} /></td>
                   </tr>
                 ))}
@@ -175,7 +213,7 @@ function Espace() {
   );
 }
 
-function Offre({ titre, actif, texteActif, texteInactif, produit }: { titre: string; actif: boolean; texteActif: string; texteInactif: string; produit: "dossier" | "pro" }) {
+function Offre({ titre, icon, actif, texteActif, texteInactif, produit }: { titre: string; icon: React.ReactNode; actif: boolean; texteActif: string; texteInactif: string; produit: "dossier" | "pro" }) {
   const [busy, setBusy] = useState(false);
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -187,35 +225,47 @@ function Offre({ titre, actif, texteActif, texteInactif, produit }: { titre: str
     }
   };
   return (
-    <Card className={actif ? "shadow-[inset_0_3px_0_var(--color-vert),0_0_0_1px_rgb(21_26_33/0.09)]" : ""}>
-      <p className={"flex items-center gap-2 text-[13.5px] font-semibold " + (actif ? "text-vert" : "text-encre-3")}>
-        <span aria-hidden className={"h-2 w-2 rounded-full " + (actif ? "bg-vert" : "bg-trait-fort")} />
-        {actif ? "Actif" : "Non souscrit"}
-      </p>
-      <h3 className="display text-3xl">{titre}</h3>
-      <p className="mt-1 text-ardoise-2">{actif ? texteActif : texteInactif}</p>
-      <div className="mt-4">
-        {actif ? (
-          produit === "pro" && <Button variant="secondary" loading={busy} onClick={() => run(openBillingPortal)}>Gérer l'abonnement et les factures</Button>
-        ) : (
-          <Button loading={busy} onClick={() => run(() => startCheckout(produit))}>{produit === "pro" ? "S'abonner" : "Acheter le pack"}</Button>
-        )}
-        {actif && produit === "dossier" && <Button variant="ghost" loading={busy} onClick={() => run(openBillingPortal)}>Mes factures</Button>}
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[20px] p-6 sm:p-7",
+        actif ? "bg-papier shadow-[0_0_0_1px_rgb(15_138_95/0.25),var(--shadow-md)]" : "bg-papier shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-sm)]",
+      )}
+    >
+      {actif && <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[radial-gradient(closest-side,rgb(15_138_95/0.12),transparent)]" />}
+      <div className="flex items-start justify-between gap-3">
+        <IconTile tone={actif ? "vert" : produit === "pro" ? "orange" : "bleu"}>{icon}</IconTile>
+        <Badge tone={actif ? "vert" : "neutre"} dot>{actif ? "Actif" : "Non souscrit"}</Badge>
       </div>
-    </Card>
+      <h3 className="mt-5 text-[20px] font-semibold tracking-[-0.02em]">{titre}</h3>
+      <p className="mt-1 text-[14.5px] text-encre-2">{actif ? texteActif : texteInactif}</p>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {actif ? (
+          <Button variant="secondary" loading={busy} onClick={() => run(openBillingPortal)}>
+            <Settings className="h-4 w-4" aria-hidden /> {produit === "pro" ? "Gérer l'abonnement et les factures" : "Mes factures"}
+          </Button>
+        ) : (
+          <Button variant="encre" loading={busy} onClick={() => run(() => startCheckout(produit))}>{produit === "pro" ? "S'abonner" : "Acheter le pack"} <ArrowRight className="h-4 w-4" aria-hidden /></Button>
+        )}
+      </div>
+    </div>
   );
 }
 
-function Etape({ titre, r, to, verrou, children }: { titre: string; r: Resume; to: "/outils/qualification" | "/outils/statut" | "/outils/inpi" | "/outils/assurance"; verrou?: boolean; children?: React.ReactNode }) {
+function Etape({ titre, icon, r, to, verrou, children }: { titre: string; icon: React.ReactNode; r: Resume; to: "/outils/qualification" | "/outils/statut" | "/outils/inpi" | "/outils/assurance"; verrou?: boolean; children?: React.ReactNode }) {
   return (
-    <Card>
-      <h3 className="font-semibold">{titre}</h3>
-      <p className="mt-1 text-[14.5px] text-ardoise-2">{r ? `${r.summary} — ${dateFr(r.created_at)}` : verrou ? "Inclus dans le Pack Lancement." : "Pas encore fait."}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Link to={to} className="text-[14.5px] font-semibold text-bleu underline underline-offset-4">{r ? "Refaire ou modifier" : "Commencer"}</Link>
-        {children}
+    <div className="flex gap-4 rounded-2xl bg-papier p-5 shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-xs)]">
+      <IconTile tone={r ? "vert" : verrou ? "violet" : "bleu"}>{r ? <CheckCircle2 aria-hidden /> : verrou ? <Lock aria-hidden /> : icon}</IconTile>
+      <div className="min-w-0 flex-1">
+        <h3 className="font-semibold">{titre}</h3>
+        <p className="mt-0.5 text-[14px] text-encre-2">{r ? `${r.summary} · ${dateFr(r.created_at)}` : verrou ? "Inclus dans le Pack Lancement." : "Pas encore fait."}</p>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Link to={to} className="inline-flex items-center gap-1 text-[14px] font-semibold text-bleu hover:text-bleu-fonce">
+            {r ? "Refaire ou modifier" : "Commencer"} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+          {children}
+        </div>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -223,7 +273,7 @@ function TelechargerInpi() {
   const [busy, setBusy] = useState(false);
   return (
     <button
-      className="ml-auto inline-flex items-center gap-1 text-[14.5px] font-semibold text-bleu disabled:opacity-50"
+      className="inline-flex items-center gap-1 text-[14px] font-semibold text-encre-2 hover:text-encre disabled:opacity-50"
       disabled={busy}
       onClick={async () => {
         setBusy(true);
@@ -313,8 +363,8 @@ function Compte() {
 
   return (
     <section>
-      <h2 className="display text-3xl">Mon compte</h2>
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <h2 className="display text-[24px] sm:text-[28px]">Mon compte</h2>
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <Card className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Prénom" htmlFor="p_pre"><Input id="p_pre" value={p.prenom} onChange={(e) => setP({ ...p, prenom: e.target.value })} /></Field>
@@ -330,9 +380,9 @@ function Compte() {
             <Button variant="secondary" loading={busy === "pw"} onClick={resetPassword}>Changer de mot de passe</Button>
           </div>
         </Card>
-        <Card className="space-y-3 lg:col-span-2">
-          <h3 className="font-semibold">Supprimer mon compte</h3>
-          <p className="text-[14.5px] text-ardoise-2">
+        <Card className="space-y-3 shadow-[0_0_0_1px_rgb(209_44_44/0.18),var(--shadow-xs)] lg:col-span-2">
+          <h3 className="font-semibold text-rouge">Supprimer mon compte</h3>
+          <p className="text-[14.5px] text-encre-2">
             Efface définitivement votre compte, vos résultats, vos pièces justificatives et vos devis archivés, et résilie l'abonnement.
             Téléchargez d'abord les devis que vous devez conserver pour votre comptabilité.
           </p>

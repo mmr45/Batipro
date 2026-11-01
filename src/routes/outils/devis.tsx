@@ -40,12 +40,12 @@ function Page() {
   return (
     <>
       <PageHeader
-        planche="05 / 05"
+        etape={5}
         rubrique="Abonnement Pro"
         title="Éditeur de devis"
         intro="Les mentions légales s'ajoutent selon le client et le chantier. Les champs obligatoires bloquent la génération tant qu'ils manquent : vous ne pouvez pas envoyer un devis non conforme par oubli."
       />
-      <Container className="py-10">
+      <Container className="py-10 sm:py-14">
         <RequireAuth>
           <Paywall product="pro" description="Devis conformes en illimité, numérotation continue et archive de tous vos devis émis.">
             <Editeur />
@@ -129,11 +129,11 @@ function Editeur() {
   const individuelle = estIndividuelle(d.em_forme);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_22rem]">
+    <div className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
       <div className="space-y-6">
         <Card className="space-y-4">
-          <h2 className="display text-3xl">Votre entreprise</h2>
-          <p className="text-[14px] text-ardoise-3">Mémorisé sur cet appareil pour vos prochains devis.</p>
+          <h2 className="display text-[24px] sm:text-[26px]">Votre entreprise</h2>
+          <p className="text-[14px] text-encre-3">Mémorisé sur cet appareil pour vos prochains devis.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Nom ou raison sociale" htmlFor="em_nom" hint={individuelle ? `Apparaîtra comme « ${nomEmetteur(d) || "Nom EI"} » (mention EI obligatoire).` : undefined}>
               <Input id="em_nom" value={d.em_nom} onChange={(e) => set({ em_nom: e.target.value })} />
@@ -161,9 +161,9 @@ function Editeur() {
             {!d.em_franchise && <Field label="N° de TVA intracommunautaire" htmlFor="em_tva"><Input id="em_tva" value={d.em_tva_intra} onChange={(e) => set({ em_tva_intra: e.target.value })} placeholder="FR00 123456789" /></Field>}
             <Field label="Qualification (facultatif)" htmlFor="em_q" hint="RGE, Qualibat… indispensable pour que votre client touche MaPrimeRénov'."><Input id="em_q" value={d.em_qualification} onChange={(e) => set({ em_qualification: e.target.value })} /></Field>
           </div>
-          <div className="border-t border-ardoise/10 pt-4">
+          <div className="border-t border-encre/10 pt-4">
             <p className="font-semibold">Assurance décennale</p>
-            <p className="text-[13px] text-ardoise-3">Recopiez votre attestation : ces quatre informations sont obligatoires sur chaque devis.</p>
+            <p className="text-[13px] text-encre-3">Recopiez votre attestation : ces quatre informations sont obligatoires sur chaque devis.</p>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
               <Field label="Assureur" htmlFor="as_n"><Input id="as_n" value={d.em_assureur_nom} onChange={(e) => set({ em_assureur_nom: e.target.value })} /></Field>
               <Field label="Adresse de l'assureur" htmlFor="as_a"><Input id="as_a" value={d.em_assureur_adresse} onChange={(e) => set({ em_assureur_adresse: e.target.value })} /></Field>
@@ -171,17 +171,17 @@ function Editeur() {
               <Field label="Couverture géographique" htmlFor="as_z"><Input id="as_z" value={d.em_assureur_zone} onChange={(e) => set({ em_assureur_zone: e.target.value })} /></Field>
             </div>
           </div>
-          <div className="border-t border-ardoise/10 pt-4">
+          <div className="border-t border-encre/10 pt-4">
             <p className="font-semibold">Médiateur de la consommation</p>
-            <p className="text-[13px] text-ardoise-3">Obligatoire face à un particulier. Adhésion via votre fédération (CAPEB, FFB) ou un médiateur agréé par la CECMC.</p>
+            <p className="text-[13px] text-encre-3">Obligatoire face à un particulier. Adhésion via votre fédération (CAPEB, FFB) ou un médiateur agréé par la CECMC.</p>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
               <Field label="Nom du médiateur" htmlFor="me_n"><Input id="me_n" value={d.em_mediateur_nom} onChange={(e) => set({ em_mediateur_nom: e.target.value })} /></Field>
               <Field label="Site internet" htmlFor="me_s"><Input id="me_s" value={d.em_mediateur_site} onChange={(e) => set({ em_mediateur_site: e.target.value })} /></Field>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3 border-t border-ardoise/10 pt-4">
-            {d.em_logo_dataurl && <img src={d.em_logo_dataurl} alt="Logo" className="h-12 rounded-sm ring-1 ring-ardoise/10" />}
-            <label className="cursor-pointer rounded-sm border border-ardoise/20 px-3 py-2 text-[14px] font-semibold hover:border-ardoise/50">
+          <div className="flex flex-wrap items-center gap-3 border-t border-encre/10 pt-4">
+            {d.em_logo_dataurl && <img src={d.em_logo_dataurl} alt="Logo" className="h-12 rounded-lg ring-1 ring-encre/10" />}
+            <label className="cursor-pointer rounded-[10px] bg-papier px-3.5 py-2 text-[14px] font-semibold shadow-[0_0_0_1px_rgb(11_18_32/0.12),0_1px_2px_rgb(11_18_32/0.05)] transition-colors hover:bg-enduit">
               {d.em_logo_dataurl ? "Changer le logo" : "Ajouter mon logo"}
               <input type="file" accept="image/png,image/jpeg" className="sr-only" onChange={async (e) => { const f = e.target.files?.[0]; if (f) set({ em_logo_dataurl: await resizeLogo(f) }); }} />
             </label>
@@ -190,7 +190,7 @@ function Editeur() {
         </Card>
 
         <Card className="space-y-4">
-          <h2 className="display text-3xl">Le client</h2>
+          <h2 className="display text-[24px] sm:text-[26px]">Le client</h2>
           <Choices name="cl_type" value={d.cl_type} onChange={(v) => set({ cl_type: v })} options={[{ value: "particulier", label: "Particulier" }, { value: "pro", label: "Professionnel" }]} />
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={d.cl_type === "pro" ? "Raison sociale" : "Nom et prénom"} htmlFor="cl_nom"><Input id="cl_nom" value={d.cl_nom} onChange={(e) => set({ cl_nom: e.target.value })} /></Field>
@@ -211,7 +211,7 @@ function Editeur() {
         </Card>
 
         <Card className="space-y-4">
-          <h2 className="display text-3xl">Le chantier</h2>
+          <h2 className="display text-[24px] sm:text-[26px]">Le chantier</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Intitulé des travaux" htmlFor="ch_i" className="sm:col-span-2"><Input id="ch_i" value={d.ch_intitule} onChange={(e) => set({ ch_intitule: e.target.value })} placeholder="Ex. : Réfection peinture séjour et couloir" /></Field>
             <Field label="Adresse du chantier" htmlFor="ch_a" className="sm:col-span-2" hint="Vide = adresse du client."><Input id="ch_a" value={d.ch_adresse} onChange={(e) => set({ ch_adresse: e.target.value })} /></Field>
@@ -231,10 +231,10 @@ function Editeur() {
         </Card>
 
         <Card className="space-y-4">
-          <h2 className="display text-3xl">Prestations</h2>
+          <h2 className="display text-[24px] sm:text-[26px]">Prestations</h2>
           <div className="space-y-3">
             {d.lignes.map((l, i) => (
-              <div key={i} className="grid grid-cols-2 gap-2 rounded-sm bg-beton/50 p-3 sm:grid-cols-[1fr_5rem_5.5rem_6.5rem_5.5rem_auto] sm:items-end">
+              <div key={i} className="grid grid-cols-2 gap-2 rounded-xl bg-enduit/70 p-3.5 shadow-[inset_0_0_0_1px_rgb(11_18_32/0.04)] sm:grid-cols-[1fr_5rem_5.5rem_6.5rem_5.5rem_auto] sm:items-end">
                 <Field label="Désignation" htmlFor={`l${i}d`} className="col-span-2 sm:col-span-1">
                   <Textarea id={`l${i}d`} className="min-h-0" rows={2} value={l.designation} onChange={(e) => setLigne(i, { designation: e.target.value })} />
                 </Field>
@@ -258,8 +258,8 @@ function Editeur() {
         </Card>
 
         <Card className="space-y-4">
-          <h2 className="display text-3xl">Déchets de chantier</h2>
-          <p className="text-[14px] text-ardoise-2">Mention obligatoire sur les devis de construction, rénovation et démolition depuis le 1er juillet 2021.</p>
+          <h2 className="display text-[24px] sm:text-[26px]">Déchets de chantier</h2>
+          <p className="text-[14px] text-encre-2">Mention obligatoire sur les devis de construction, rénovation et démolition depuis le 1er juillet 2021.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Quantité estimée" htmlFor="de_q"><Input id="de_q" value={d.de_quantite} onChange={(e) => set({ de_quantite: e.target.value })} placeholder="Ex. : 0,5 m³ ou 200 kg" /></Field>
             <Field label="Coût de gestion estimé (€ HT)" htmlFor="de_c"><Input id="de_c" inputMode="decimal" value={d.de_cout} onChange={(e) => set({ de_cout: Number(e.target.value.replace(",", ".")) || 0 })} /></Field>
@@ -269,7 +269,7 @@ function Editeur() {
         </Card>
 
         <Card className="space-y-4">
-          <h2 className="display text-3xl">Conditions</h2>
+          <h2 className="display text-[24px] sm:text-[26px]">Conditions</h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Acompte (%)" htmlFor="co_a" hint="Souvent 20 à 30 %."><Input id="co_a" inputMode="numeric" value={d.co_acompte_pct} onChange={(e) => set({ co_acompte_pct: Number(e.target.value) || 0 })} /></Field>
             <Field label="Validité (jours)" htmlFor="co_v"><Input id="co_v" inputMode="numeric" value={d.co_validite_jours} onChange={(e) => set({ co_validite_jours: Number(e.target.value) || 30 })} /></Field>
@@ -291,7 +291,7 @@ function Editeur() {
         <Card>
           <details>
             <summary className="cursor-pointer font-semibold">Voir les {mentions.length} mentions qui seront imprimées</summary>
-            <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[13.5px] text-ardoise-2">
+            <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[13.5px] text-encre-2">
               {mentions.map((m) => <li key={m}>{m}</li>)}
             </ul>
           </details>
@@ -302,11 +302,11 @@ function Editeur() {
         <Card className="space-y-4">
           <div className="space-y-1.5 text-[14.5px]">
             <Row k="Total HT" v={formatEuro(totaux.totalHT)} />
-            {d.em_franchise ? <p className="text-[13px] text-ardoise-3">TVA non applicable (art. 293 B CGI)</p> : totaux.tvaParTaux.map((t) => <Row key={t.taux} k={`TVA ${String(t.taux).replace(".", ",")} %`} v={formatEuro(t.montant)} />)}
-            <div className="border-t border-ardoise/10 pt-2"><Row k="Total TTC" v={formatEuro(totaux.totalTTC)} strong /></div>
+            {d.em_franchise ? <p className="text-[13px] text-encre-3">TVA non applicable (art. 293 B CGI)</p> : totaux.tvaParTaux.map((t) => <Row key={t.taux} k={`TVA ${String(t.taux).replace(".", ",")} %`} v={formatEuro(t.montant)} />)}
+            <div className="border-t border-encre/10 pt-2"><Row k="Total TTC" v={formatEuro(totaux.totalTTC)} strong /></div>
             {totaux.acompte > 0 && <Row k={`Acompte ${d.co_acompte_pct} %`} v={formatEuro(totaux.acompte)} />}
           </div>
-          <div id="controle" className="border-t border-ardoise/10 pt-4">
+          <div id="controle" className="border-t border-encre/10 pt-4">
             <p className="flex items-center gap-2 font-semibold">
               {bloquants.length === 0 ? <CheckCircle2 className="h-5 w-5 text-vert" aria-hidden /> : <XCircle className="h-5 w-5 text-rouge" aria-hidden />}
               {bloquants.length === 0 ? "Mentions obligatoires complètes" : `${bloquants.length} mention${bloquants.length > 1 ? "s" : ""} à compléter`}
@@ -327,7 +327,7 @@ function Editeur() {
               <Button variant="secondary" className="w-full" onClick={nouveauDevis}>Nouveau devis</Button>
             </div>
           )}
-          <p className="text-[12.5px] text-ardoise-3">Chaque génération crée un nouveau numéro, conservé dans votre espace.</p>
+          <p className="text-[12.5px] text-encre-3">Chaque génération crée un nouveau numéro, conservé dans votre espace.</p>
         </Card>
       </aside>
     </div>
@@ -337,8 +337,8 @@ function Editeur() {
 function Row({ k, v, strong }: { k: string; v: string; strong?: boolean }) {
   return (
     <div className="flex justify-between gap-3">
-      <span className={strong ? "font-semibold" : "text-ardoise-2"}>{k}</span>
-      <span className={`tabular-nums ${strong ? "display text-2xl" : ""}`}>{v}</span>
+      <span className={strong ? "font-semibold" : "text-encre-2"}>{k}</span>
+      <span className={`tabular-nums ${strong ? "display text-[22px]" : ""}`}>{v}</span>
     </div>
   );
 }

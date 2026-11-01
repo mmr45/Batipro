@@ -57,14 +57,22 @@ function Page() {
   return (
     <>
       <PageHeader
-        planche="02 / 05"
+        etape={2}
         rubrique="Outil gratuit"
         title="Quel statut pour démarrer ?"
         intro="Cinq questions pour une pré-orientation entre micro-entreprise, EI au réel et SASU, avec les seuils et taux 2026."
       />
-      <Container className="grid gap-8 py-10 lg:grid-cols-[1fr_1fr]">
-        <form onSubmit={submit} className="space-y-7">
-          <p className="text-[14px] text-ardoise-3">{answered} réponse{answered > 1 ? "s" : ""} sur 5</p>
+      <Container className="grid gap-8 py-10 sm:py-14 lg:grid-cols-[1fr_1fr] lg:items-start">
+        <form onSubmit={submit} className="feuille space-y-7 p-5 sm:p-8">
+          <div>
+            <div className="flex items-center justify-between text-[13px] font-medium">
+              <span className="text-encre-2">Progression</span>
+              <span className="tabular-nums text-encre-3">{answered} / 5</span>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-enduit-2" aria-hidden>
+              <div className="h-full rounded-full bg-gradient-to-r from-bleu to-[#6d4cff] transition-[width] duration-500" style={{ width: `${(answered / 5) * 100}%` }} />
+            </div>
+          </div>
           <Field label="Chiffre d'affaires prévu la première année">
             <Choices name="ca" value={f.ca} onChange={(v) => setF({ ...f, ca: v })} options={TRANCHES_CA} />
           </Field>
@@ -90,11 +98,11 @@ function Page() {
           <Field label="Allez-vous acheter beaucoup de matériaux ou d'outillage ?" hint="En micro, vous ne déduisez pas vos achats et ne récupérez pas la TVA.">
             <Choices name="achats" value={f.achats} onChange={(v) => setF({ ...f, achats: v })} options={ouiNon} />
           </Field>
-          <Button type="submit" disabled={!complete}>
+          <Button type="submit" size="lg" disabled={!complete} className="w-full sm:w-auto">
             Voir mon orientation
           </Button>
         </form>
-        <div>{res ? <Resultat r={res} /> : <Reperes />}</div>
+        <div className="lg:sticky lg:top-24">{res ? <Resultat r={res} /> : <Reperes />}</div>
       </Container>
     </>
   );
@@ -102,16 +110,16 @@ function Page() {
 
 function Reperes() {
   return (
-    <Card className="border-l-[3px] border-encre bg-transparent shadow-none sm:p-6">
+    <Card className="bg-[linear-gradient(160deg,var(--color-bleu-pale),var(--color-papier)_60%)] sm:p-7">
       <p className="font-semibold">Les repères 2026</p>
       <dl className="mt-3 grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-[14.5px]">
-        <dt className="text-ardoise-2">Plafond micro, prestations</dt>
+        <dt className="text-encre-2">Plafond micro, prestations</dt>
         <dd className="font-semibold">{formatMontant(MICRO_PLAFOND_PRESTATIONS.valeur)}</dd>
-        <dt className="text-ardoise-2">Franchise de TVA, prestations</dt>
+        <dt className="text-encre-2">Franchise de TVA, prestations</dt>
         <dd className="font-semibold">{formatMontant(TVA_FRANCHISE_PRESTATIONS.base)}</dd>
-        <dt className="text-ardoise-2">Cotisations micro, artisan</dt>
+        <dt className="text-encre-2">Cotisations micro, artisan</dt>
         <dd className="font-semibold">{String(MICRO_TAUX_2026.prestationsArtisan).replace(".", ",")} % du CA</dd>
-        <dt className="text-ardoise-2">ACRE micro depuis le {dateFr(ACRE.dateChangement)}</dt>
+        <dt className="text-encre-2">ACRE micro depuis le {dateFr(ACRE.dateChangement)}</dt>
         <dd className="font-semibold">−{ACRE.reductionMicro} %</dd>
       </dl>
     </Card>
@@ -124,11 +132,11 @@ function Resultat({ r }: { r: StatutResult }) {
   return (
     <Card className="space-y-5">
       <div>
-        <p className="text-[14px] text-ardoise-2">Pré-orientation, confiance {r.confiance} %</p>
-        <h2 className="display text-4xl">{r.label}</h2>
-        <p className="mt-1 text-ardoise-2">{r.resume}</p>
+        <p className="text-[14px] text-encre-2">Pré-orientation, confiance {r.confiance} %</p>
+        <h2 className="display text-[30px] sm:text-[34px]">{r.label}</h2>
+        <p className="mt-1 text-encre-2">{r.resume}</p>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-beton" aria-hidden>
+      <div className="h-2 overflow-hidden rounded-full bg-enduit" aria-hidden>
         <div className="h-full bg-bleu" style={{ width: `${r.confiance}%` }} />
       </div>
       <ul className="list-disc space-y-1 pl-5">
@@ -147,9 +155,9 @@ function Resultat({ r }: { r: StatutResult }) {
         </Notice>
       )}
       {r.statut === "micro" && (
-        <div className="rounded-sm bg-beton/60 p-4">
+        <div className="rounded-xl bg-enduit/70 p-4">
           <p className="font-semibold">Exemple pour {formatMontant(e.exempleCA)} encaissés sur un an</p>
-          <p className="mt-1 text-ardoise-2">
+          <p className="mt-1 text-encre-2">
             Cotisations : {formatEuro(e.cotisationsAnnuelles, 0)} ({String(e.tauxCotisations).replace(".", ",")} %), ou{" "}
             {formatEuro(e.cotisationsAvecAcre, 0)} avec l'ACRE la première période ({String(e.tauxAvecAcre).replace(".", ",")} %).
             S'y ajoutent la taxe de chambre de métiers ({String(MICRO_TAUX_2026.taxeCmaArtisan).replace(".", ",")} %) et l'impôt
@@ -157,7 +165,7 @@ function Resultat({ r }: { r: StatutResult }) {
           </p>
         </div>
       )}
-      <p className="text-[14px] text-ardoise-3">
+      <p className="text-[14px] text-encre-3">
         Écart avec les autres options : {autres.map((k) => `${STATUT_LABEL[k]} (${r.scores[k] - r.scores[r.statut]} pts)`).join(", ")}.
       </p>
       <div className="no-print flex flex-wrap gap-2">

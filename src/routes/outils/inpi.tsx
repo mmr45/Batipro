@@ -27,12 +27,12 @@ function Page() {
   return (
     <>
       <PageHeader
-        planche="03 / 05"
+        etape={3}
         rubrique="Pack Lancement"
         title="Dossier de création"
         intro="Saisissez une fois ce que le Guichet unique de l'INPI va vous demander. Vous obtenez un récapitulatif à recopier, vos pièces et la déclaration de non-condamnation prête à signer."
       />
-      <Container className="py-10">
+      <Container className="py-10 sm:py-14">
         <RequireAuth>
           <Paywall product="dossier" description="Le dossier de création, avec stockage sécurisé de vos pièces, fait partie du Pack Lancement.">
             <Formulaire />
@@ -132,7 +132,7 @@ function Formulaire() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
+    <div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start">
       <Card className="space-y-6">
         <ol className="flex flex-wrap gap-2" aria-label="Étapes">
           {ETAPES.map((e, i) => (
@@ -140,7 +140,7 @@ function Formulaire() {
               <button
                 type="button"
                 onClick={() => i < step && setStep(i)}
-                className={`rounded-sm px-3 py-1.5 text-[13.5px] font-medium ${i === step ? "bg-bleu text-white" : i < step ? "bg-bleu-pale text-bleu" : "bg-beton text-ardoise-3"}`}
+                className={`rounded-full px-3 py-1.5 text-[13px] font-semibold ${i === step ? "bg-bleu text-white" : i < step ? "bg-bleu-pale text-bleu" : "bg-enduit text-encre-3"}`}
                 aria-current={i === step ? "step" : undefined}
               >
                 {i + 1}. {e}
@@ -238,15 +238,15 @@ function Formulaire() {
           <div className="space-y-6">
             <div className="space-y-3">
               {PIECES.filter((p) => requises.includes(p.key) || files[p.key]?.length).map((p) => (
-                <div key={p.key} className="rounded-sm border border-ardoise/15 p-3.5">
+                <div key={p.key} className="rounded-xl bg-papier p-4 shadow-[0_0_0_1px_rgb(11_18_32/0.08)]">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <p className="font-semibold">
-                        {p.label} {requises.includes(p.key) && <span className="text-[13px] font-normal text-ardoise-3">(demandée)</span>}
+                        {p.label} {requises.includes(p.key) && <span className="text-[13px] font-normal text-encre-3">(demandée)</span>}
                       </p>
-                      <p className="text-[13px] text-ardoise-3">{p.aide}</p>
+                      <p className="text-[13px] text-encre-3">{p.aide}</p>
                     </div>
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-sm border border-ardoise/20 px-3 py-2 text-[14px] font-semibold hover:border-ardoise/50">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-[10px] bg-papier px-3.5 py-2 text-[14px] font-semibold shadow-[0_0_0_1px_rgb(11_18_32/0.12),0_1px_2px_rgb(11_18_32/0.05)] transition-colors hover:bg-enduit">
                       <Upload className="h-4 w-4" aria-hidden /> Ajouter
                       <input type="file" accept="application/pdf,image/jpeg,image/png" className="sr-only" onChange={(e) => e.target.files?.[0] && upload(p.key, e.target.files[0])} />
                     </label>
@@ -255,14 +255,14 @@ function Formulaire() {
                     <div key={n} className="mt-2 flex items-center gap-2 text-[14px]">
                       <FileText className="h-4 w-4 text-bleu" aria-hidden />
                       <span className="flex-1 truncate">{n.replace(/^\d+-/, "")}</span>
-                      <button type="button" onClick={() => remove(p.key, n)} aria-label={`Supprimer ${n}`} className="p-1 text-ardoise-3 hover:text-rouge">
+                      <button type="button" onClick={() => remove(p.key, n)} aria-label={`Supprimer ${n}`} className="p-1 text-encre-3 hover:text-rouge">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
                 </div>
               ))}
-              <p className="text-[13px] text-ardoise-3">Fichiers stockés dans un espace privé chiffré, visibles par vous seul. PDF, JPEG ou PNG, 5 Mo maximum.</p>
+              <p className="text-[13px] text-encre-3">Fichiers stockés dans un espace privé chiffré, visibles par vous seul. PDF, JPEG ou PNG, 5 Mo maximum.</p>
             </div>
             {d.forme !== "sasu" && (
               <>
@@ -276,7 +276,7 @@ function Formulaire() {
           </div>
         )}
 
-        <div className="flex justify-between border-t border-ardoise/10 pt-5">
+        <div className="flex justify-between border-t border-encre/10 pt-5">
           <Button variant="secondary" disabled={step === 0} onClick={() => setStep(step - 1)}>
             Précédent
           </Button>
@@ -293,15 +293,15 @@ function Formulaire() {
         )}
       </Card>
 
-      <aside className="space-y-3">
-        <p className="font-semibold">Après le dossier</p>
-        <ol className="space-y-3">
+      <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-encre-3">Après le dossier</p>
+        <ol className="relative space-y-5 before:absolute before:bottom-3 before:left-[13px] before:top-3 before:w-px before:bg-encre/10">
           {etapesApres(d).map((e, i) => (
-            <li key={e.titre} className="flex gap-3">
-              <span className="display w-6 shrink-0 text-2xl text-bleu">{i + 1}</span>
+            <li key={e.titre} className="relative flex gap-3.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-papier text-[12.5px] font-semibold tabular-nums text-bleu shadow-[0_0_0_1px_rgb(47_91_234/0.25)]">{i + 1}</span>
               <span>
                 <span className="block text-[14.5px] font-semibold">{e.titre}</span>
-                <span className="block text-[13.5px] text-ardoise-2">{e.detail}</span>
+                <span className="block text-[13.5px] text-encre-2">{e.detail}</span>
               </span>
             </li>
           ))}

@@ -41,6 +41,17 @@ scripts/sitemap.ts            Génère public/sitemap.xml
 - **Sécurité** : le navigateur ne peut écrire ni dans `entitlements`, ni dans `devis`. Les PDF payants sont générés côté
   serveur après vérification des droits avec la clé `service_role`.
 
+## Design
+
+- **Typographie unique** : Inter (axe optique) pour tout le texte, JetBrains Mono pour les références légales et les
+  numéros. Les fichiers sont servis depuis `public/fonts/` (aucun appel à Google Fonts). La même Inter est embarquée dans
+  les PDF (`supabase/functions/_shared/fonts.ts`), demandée à Stripe Checkout et utilisée par les emails
+  (`supabase/templates/`).
+- **Jetons** : couleurs, rayons et ombres dans `src/styles.css` (`@theme`). Bleu `#2F5BEA` pour l'action, orange
+  `#FF6A1F` pour l'accent, nuit `#070C19` pour les grands aplats.
+- **Composants** : `src/components/ui.tsx` (boutons, champs, badges, en-têtes de page, fil du parcours) et
+  `src/components/layout.tsx` (en-tête avec menu Outils, pied de page, verrous de connexion et de paiement).
+
 ## Mettre une règle à jour
 
 Toutes les valeurs légales (seuils micro, franchise TVA, taux, ACRE, mentions de devis…) sont dans

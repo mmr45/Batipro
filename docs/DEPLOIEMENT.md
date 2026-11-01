@@ -95,3 +95,15 @@ depuis Stripe ensuite), génération d'un devis et du dossier. Puis mergez.
 
 Complétez `src/lib/editeur.ts` (forme juridique, SIRET, adresse, médiateur) dès que l'immatriculation est faite : c'est
 obligatoire pour vendre en ligne.
+
+## 10. Design v4 : polices et marque partout
+
+La v4 unifie la typographie (Inter, et JetBrains Mono pour les références légales) et la palette sur le site, les PDF,
+Stripe et les emails. Après le merge :
+
+1. **Fonctions** : `npx supabase functions deploy create-checkout generate-devis-pdf generate-inpi-pdf`
+   (Checkout en Inter aux couleurs du site ; PDF en Inter avec la nouvelle palette et le nouveau logo).
+2. **Emails Supabase** : coller les modèles de `supabase/templates/` dans Authentication → Emails (mode d'emploi dans
+   [supabase/templates/README.md](../supabase/templates/README.md)).
+3. **Stripe → Paramètres → Marque** (reçus, factures, portail client) : icône `public/icon-512.png`, logo
+   `public/logo.svg` exporté en PNG, couleur de marque `#2F5BEA`, couleur d'accent `#0B1220`.

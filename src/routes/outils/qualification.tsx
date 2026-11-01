@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, CircleAlert, CircleX, Printer } from "lucide-react";
+import { Check, CheckCircle2, CircleAlert, CircleX, Printer } from "lucide-react";
 import { Button, ButtonLink, Card, Checkbox, Choices, Container, Field, Notice, PageHeader, Select } from "@/components/ui";
 import { seo } from "@/lib/seo";
 import { METIERS } from "@rules/metiers.ts";
@@ -45,7 +45,7 @@ function Page() {
   return (
     <>
       <PageHeader
-        planche="01 / 05"
+        etape={1}
         rubrique="Outil gratuit"
         title="Ai-je le droit d'exercer ce métier ?"
         intro={
@@ -55,8 +55,8 @@ function Page() {
           </>
         }
       />
-      <Container className="grid gap-8 py-10 lg:grid-cols-[1fr_1.1fr]">
-        <form onSubmit={submit} className="space-y-6">
+      <Container className="grid gap-8 py-10 sm:py-14 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+        <form onSubmit={submit} className="feuille space-y-6 p-5 sm:p-8">
           <Field label="Votre métier" htmlFor="metier">
             <Select id="metier" required value={f.metier} onChange={(e) => setF({ ...f, metier: e.target.value })}>
               <option value="">Choisissez…</option>
@@ -96,21 +96,26 @@ function Page() {
             onChange={(v) => setF({ ...f, diplomeUE: v })}
             label="J'ai une qualification équivalente obtenue dans un autre pays de l'UE ou de l'EEE"
           />
-          <Button type="submit" disabled={!f.metier} className="w-full sm:w-auto">
+          <Button type="submit" size="lg" disabled={!f.metier} className="w-full sm:w-auto">
             Vérifier ma qualification
           </Button>
         </form>
 
-        <div>
+        <div className="lg:sticky lg:top-24">
           {res ? (
             <Resultat res={res} saved={saved} connected={!!user} />
           ) : (
-            <Card className="border-l-[3px] border-encre bg-transparent shadow-none sm:p-6">
+            <Card className="bg-[linear-gradient(160deg,var(--color-bleu-pale),var(--color-papier)_60%)] sm:p-7">
               <p className="font-semibold">Ce que vous obtenez</p>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-ardoise-2">
-                <li>Le verdict selon la loi, avec la raison exacte</li>
-                <li>Les obligations propres à votre métier (habilitations, amiante, carte BTP)</li>
-                <li>Les solutions si vous n'êtes pas encore qualifié</li>
+              <ul className="mt-4 space-y-3 text-[15px] text-encre-2">
+                {["Le verdict selon la loi, avec la raison exacte", "Les obligations propres à votre métier (habilitations, amiante, carte BTP)", "Les solutions si vous n'êtes pas encore qualifié"].map((t) => (
+                  <li key={t} className="flex gap-3">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-papier text-bleu shadow-[0_0_0_1px_rgb(47_91_234/0.2)]">
+                      <Check className="h-3 w-3" strokeWidth={3.5} aria-hidden />
+                    </span>
+                    {t}
+                  </li>
+                ))}
               </ul>
             </Card>
           )}
@@ -128,11 +133,11 @@ function Resultat({ res, saved, connected }: { res: QualifResult; saved: boolean
   }[res.status];
   return (
     <Card className="space-y-5">
-      <div className={`-m-5 mb-0 flex items-start gap-3 rounded-t-md p-5 sm:-m-6 sm:mb-0 sm:p-6 ${meta.bg}`}>
+      <div className={`-m-5 mb-0 flex items-start gap-3 rounded-t-[20px] p-5 sm:-m-7 sm:mb-0 sm:p-7 ${meta.bg}`}>
         <meta.Icon className={`h-7 w-7 shrink-0 ${meta.cls}`} aria-hidden />
         <div>
-          <p className="text-[13px] font-medium text-ardoise-2">{res.metierLabel}</p>
-          <h2 className="display text-3xl">{res.titre}</h2>
+          <p className="text-[13px] font-medium text-encre-2">{res.metierLabel}</p>
+          <h2 className="display text-[24px] sm:text-[26px]">{res.titre}</h2>
         </div>
       </div>
       <ul className="space-y-1.5">
@@ -143,7 +148,7 @@ function Resultat({ res, saved, connected }: { res: QualifResult; saved: boolean
       {res.conseils.length > 0 && (
         <div>
           <p className="font-semibold">À faire</p>
-          <ul className="mt-1 list-disc space-y-1 pl-5 text-ardoise-2">
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-encre-2">
             {res.conseils.map((c) => (
               <li key={c}>{c}</li>
             ))}
@@ -154,9 +159,9 @@ function Resultat({ res, saved, connected }: { res: QualifResult; saved: boolean
         <p className="font-semibold">Obligations propres à ce métier</p>
         <ul className="mt-2 space-y-3">
           {res.exigences.map((e) => (
-            <li key={e.label} className="border-l-2 border-bleu pl-3">
+            <li key={e.label} className="rounded-xl bg-enduit/70 p-3.5">
               <p className="font-medium">{e.label}</p>
-              <p className="text-[14px] text-ardoise-2">{e.detail}</p>
+              <p className="text-[14px] text-encre-2">{e.detail}</p>
             </li>
           ))}
         </ul>
@@ -167,7 +172,7 @@ function Resultat({ res, saved, connected }: { res: QualifResult; saved: boolean
       {connected ? (
         saved && <p className="text-[14px] text-vert">Résultat enregistré dans votre espace.</p>
       ) : (
-        <p className="text-[14px] text-ardoise-2">
+        <p className="text-[14px] text-encre-2">
           <Link to="/connexion" search={{ mode: "inscription", redirect: "/outils/qualification" }} className="font-semibold text-bleu underline">
             Créez un compte gratuit
           </Link>{" "}

@@ -40,14 +40,19 @@ export const FAQ_ACCUEIL: Faq[] = [
 
 export function FaqList({ items }: { items: Faq[] }) {
   return (
-    <div className="border-t-2 border-encre">
+    <div className="space-y-2">
       {items.map((f) => (
-        <details key={f.q} className="group border-b border-encre/15">
-          <summary className="flex cursor-pointer list-none items-start justify-between gap-6 py-4 text-[17px] font-semibold leading-snug hover:text-bleu [&::-webkit-details-marker]:hidden">
+        <details
+          key={f.q}
+          className="group rounded-2xl bg-papier shadow-[0_0_0_1px_rgb(11_18_32/0.07)] transition-shadow open:shadow-[0_0_0_1px_rgb(11_18_32/0.09),var(--shadow-md)]"
+        >
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-6 rounded-2xl px-5 py-4 text-[16px] font-semibold leading-snug tracking-[-0.01em] transition-colors hover:text-bleu sm:px-6 [&::-webkit-details-marker]:hidden">
             {f.q}
-            <Plus className="mt-0.5 h-5 w-5 shrink-0 text-encre-3 transition-transform duration-200 group-open:rotate-45 group-open:text-balise" aria-hidden />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-enduit text-encre-2 transition-[transform,background-color,color] duration-200 group-open:rotate-45 group-open:bg-bleu group-open:text-white">
+              <Plus className="h-4 w-4" aria-hidden />
+            </span>
           </summary>
-          <p className="max-w-2xl pb-5 text-[16px] leading-relaxed text-encre-2">{f.a}</p>
+          <p className="max-w-2xl px-5 pb-5 text-[15px] leading-relaxed text-encre-2 sm:px-6">{f.a}</p>
         </details>
       ))}
     </div>

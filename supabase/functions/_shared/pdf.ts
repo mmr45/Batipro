@@ -1,48 +1,48 @@
 // Petit moteur de mise en page au-dessus de pdf-lib : pages A4, marges,
 // retour à la ligne automatique, saut de page, en-tête et pied de page.
 import { PDFDocument, PDFFont, PDFImage, PDFPage, StandardFonts, rgb, type RGB } from "npm:pdf-lib@1.17.1";
+import fontkit from "npm:@pdf-lib/fontkit@1.1.1";
 import { LOGO_BATIPRO_PNG_BASE64 } from "./logo.ts";
+import { INTER_REGULAR_TTF_BASE64, INTER_SEMIBOLD_TTF_BASE64 } from "./fonts.ts";
 
 export const A4: [number, number] = [595.28, 841.89];
 export const MARGE = 44;
 export const LARGEUR = A4[0] - MARGE * 2;
 
+// Palette alignée sur le site (src/styles.css).
 export const C = {
-  encre: rgb(0.09, 0.1, 0.12),
-  gris: rgb(0.38, 0.4, 0.44),
-  grisClair: rgb(0.6, 0.62, 0.65),
-  filet: rgb(0.86, 0.87, 0.89),
-  fond: rgb(0.965, 0.968, 0.975),
-  marque: rgb(0.114, 0.373, 0.639), // #1D5FA3
-  marqueClair: rgb(0.91, 0.94, 0.98),
-  orange: rgb(0.85, 0.47, 0.02),
+  encre: rgb(0.043, 0.071, 0.125), // #0B1220
+  gris: rgb(0.278, 0.318, 0.4), // #475166
+  grisClair: rgb(0.478, 0.518, 0.6), // #7A8499
+  filet: rgb(0.894, 0.906, 0.925), // #E4E7EC
+  fond: rgb(0.965, 0.969, 0.976), // #F6F7F9
+  marque: rgb(0.184, 0.357, 0.918), // #2F5BEA
+  marqueClair: rgb(0.933, 0.949, 0.996), // #EEF2FE
+  orange: rgb(0.769, 0.29, 0.047), // #C44A0C (orange foncé, lisible sur blanc)
   blanc: rgb(1, 1, 1),
 };
 
 /**
- * Les polices standard PDF (Helvetica, encodage WinAnsi) ne savent pas
+ * Les PDF utilisent Inter, sous-ensemble Latin-1 (voir fonts.ts), et
+ * Helvetica en secours. Ni l'une ni l'autre ne savent
  * afficher tous les caractères Unicode : on remplace les plus courants
  * et on supprime ceux qui feraient planter pdf-lib.
  */
 export function clean(input: unknown): string {
   const s = String(input ?? "")
-    .replace(/[    ]/g, " ")
-    .replace(/[‘’ʼ]/g, "'")
-    .replace(/[“”«»]/g, '"')
-    .replace(/[–—]/g, "-")
-    .replace(/²/g, "2")
-    .replace(/³/g, "3")
+    .replace(/[\u202F\u2007\u2009\u200A]/g, " ")
+    .replace(/ʼ/g, "’")
     .replace(/≥/g, ">=")
     .replace(/≤/g, "<=")
-    .replace(/…/g, "...")
     .replace(/→/g, "->")
     .replace(/[✓✔]/g, "v")
     .replace(/\r/g, "");
-  // Ne garde que les caractères encodables en WinAnsi (Latin-1 + quelques extras).
+  // Ne garde que les caractères encodables en WinAnsi (Latin-1 + quelques extras) :
+  // Inter les contient tous, et Helvetica, la police de secours, aussi.
   return [...s]
     .filter((ch) => {
       const c = ch.codePointAt(0)!;
-      return c === 10 || (c >= 32 && c <= 126) || (c >= 160 && c <= 255) || "€œŒšŠžŽŸ‚ƒ„†‡ˆ‰‹›•˜™".includes(ch);
+      return c === 10 || (c >= 32 && c <= 126) || (c >= 160 && c <= 255) || "€œŒšŠžŽŸ‚ƒ„†‡ˆ‰‹›•˜™‘’“”–—…".includes(ch);
     })
     .join("");
 }
@@ -89,8 +89,16 @@ export class Pdf {
   static async create(piedDePage = ""): Promise<Pdf> {
     const p = new Pdf();
     p.doc = await PDFDocument.create();
-    p.font = await p.doc.embedFont(StandardFonts.Helvetica);
-    p.bold = await p.doc.embedFont(StandardFonts.HelveticaBold);
+    try {
+      // Inter, comme sur le site ; sous-ensemble pour garder des PDF légers.
+      p.doc.registerFontkit(fontkit);
+      p.font = await p.doc.embedFont(base64ToBytes(INTER_REGULAR_TTF_BASE64), { subset: true });
+      p.bold = await p.doc.embedFont(base64ToBytes(INTER_SEMIBOLD_TTF_BASE64), { subset: true });
+    } catch (e) {
+      console.error("Inter indisponible, repli sur Helvetica", e);
+      p.font = await p.doc.embedFont(StandardFonts.Helvetica);
+      p.bold = await p.doc.embedFont(StandardFonts.HelveticaBold);
+    }
     p.piedDePage = piedDePage;
     p.newPage();
     return p;

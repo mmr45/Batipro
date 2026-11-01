@@ -30,6 +30,14 @@ serve(async (req) => {
     line_items: [{ price, quantity: 1 }],
     metadata: meta,
     locale: "fr",
+    // Même typographie (Inter) et mêmes couleurs que le site. Le logo reste
+    // celui des réglages de marque du compte Stripe.
+    branding_settings: {
+      font_family: "inter",
+      border_style: "rounded",
+      button_color: "#2f5bea",
+      background_color: "#ffffff",
+    },
     allow_promotion_codes: true,
     billing_address_collection: "required",
     customer_update: { address: "auto", name: "auto" },
