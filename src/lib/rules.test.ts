@@ -10,6 +10,7 @@ import { evaluerStatut } from "@rules/statut.ts";
 import { evaluerAssurance } from "@rules/assurance.ts";
 import {
   DEVIS_VIDE,
+  appliquerModele,
   calculerTotaux,
   construireMentions,
   nomEmetteur,
@@ -17,6 +18,7 @@ import {
   verifierDevis,
 } from "@rules/devis.ts";
 import { METIERS } from "@rules/metiers.ts";
+import { MODELES_PAR_METIER } from "@rules/modeles-devis.ts";
 
 describe("référentiel 2026", () => {
   it("garde les seuils en vigueur", () => {
@@ -130,5 +132,52 @@ describe("devis", () => {
     expect(d.cl_type).toBe("particulier");
     expect(d.lignes[0].tva).toBe(20);
     expect(d.lignes[0].quantite).toBe(3);
+  });
+});
+
+describe("modèles de devis par métier", () => {
+  it("couvre chaque métier avec au moins un modèle", () => {
+    for (const m of METIERS) expect(MODELES_PAR_METIER[m.slug]?.modeles.length, m.slug).toBeGreaterThan(0);
+  });
+  it("préremplit lignes, TVA, déchets et mentions du métier", () => {
+    const d = appliquerModele({ ...DEVIS_VIDE, em_franchise: false, ch_nature: "reno" }, "electricien", "borne-recharge");
+    expect(d.em_metier).toBe("electricien");
+    expect(d.lignes.length).toBe(4);
+    expect(d.lignes.every((l) => l.tva === 10)).toBe(true);
+    const m = construireMentions(d).join("\n");
+    expect(m).toContain("NF C 15-100");
+    expect(m).toContain("IRVE");
+    expect(m).not.toContain("Consuel");
+  });
+  it("met les travaux d'économie d'énergie à 5,5 % en rénovation", () => {
+    const d = appliquerModele({ ...DEVIS_VIDE, ch_nature: "reno" }, "plombier", "pompe-a-chaleur");
+    expect(d.lignes.every((l) => l.tva === 5.5 && l.energie)).toBe(true);
+    expect(appliquerModele({ ...DEVIS_VIDE, ch_nature: "neuf" }, "plombier", "pompe-a-chaleur").lignes[0].tva).toBe(20);
+    expect(normaliserDevis(d).lignes[0].energie).toBe(true);
+  });
+  it("n'imprime pas la mention amiante en construction neuve", () => {
+    const d = appliquerModele({ ...DEVIS_VIDE, ch_nature: "neuf" }, "peintre");
+    expect(construireMentions(d).join("\n")).not.toContain("L4412-2");
+    expect(construireMentions({ ...d, ch_nature: "reno" }).join("\n")).toContain("L4412-2");
+  });
+  it("applique la remise sur chaque base de TVA", () => {
+    const t = calculerTotaux({
+      ...DEVIS_VIDE,
+      em_franchise: false,
+      co_remise_pct: 10,
+      co_acompte_pct: 0,
+      lignes: [
+        { designation: "a", unite: "u", quantite: 1, prixUnitaireHT: 100, tva: 10 },
+        { designation: "b", unite: "u", quantite: 1, prixUnitaireHT: 100, tva: 20 },
+      ],
+    });
+    expect(t.totalHTBrut).toBe(200);
+    expect(t.remise).toBe(20);
+    expect(t.totalHT).toBe(180);
+    expect(t.totalTVA).toBe(27);
+    expect(t.totalTTC).toBe(207);
+  });
+  it("refuse un métier inconnu", () => {
+    expect(normaliserDevis({ em_metier: "pirate" }).em_metier).toBe("");
   });
 });

@@ -14,6 +14,8 @@ import {
   mentionTvaReduite,
   type NatureTravaux,
 } from "./reglementation.ts";
+import { METIERS, getMetier } from "./metiers.ts";
+import { mentionsMetier, modelesMetier, tvaLigne, type ModeleDevis } from "./modeles-devis.ts";
 
 export type FormeJuridique = "micro" | "ei" | "eurl" | "sarl" | "sasu" | "sas" | "autre";
 
@@ -36,10 +38,13 @@ export interface LigneDevis {
   quantite: number;
   prixUnitaireHT: number;
   tva: TauxTva;
+  /** Ligne éligible au taux de 5,5 % (rénovation énergétique). */
+  energie?: boolean;
 }
 
 export interface DevisData {
   // Émetteur
+  em_metier: string; // slug de metiers.ts, "" = non choisi
   em_nom: string;
   em_forme: FormeJuridique;
   em_capital: string;
@@ -81,6 +86,7 @@ export interface DevisData {
   lignes: LigneDevis[];
   // Conditions
   co_acompte_pct: number;
+  co_remise_pct: number;
   co_validite_jours: number;
   co_delai_paiement_jours: number;
   co_moyens: string[];
@@ -89,6 +95,7 @@ export interface DevisData {
 }
 
 export const DEVIS_VIDE: DevisData = {
+  em_metier: "",
   em_nom: "",
   em_forme: "micro",
   em_capital: "",
@@ -129,6 +136,7 @@ export const DEVIS_VIDE: DevisData = {
     { designation: "Fournitures et matériaux", unite: "forfait", quantite: 1, prixUnitaireHT: 450, tva: 10 },
   ],
   co_acompte_pct: 30,
+  co_remise_pct: 0,
   co_validite_jours: 30,
   co_delai_paiement_jours: 0,
   co_moyens: ["virement"],
@@ -146,6 +154,10 @@ export const MOYENS_PAIEMENT: { value: string; label: string }[] = [
 const r2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
 export interface TotauxDevis {
+  /** Total HT avant remise. */
+  totalHTBrut: number;
+  remise: number;
+  /** Total HT net (après remise). */
   totalHT: number;
   tvaParTaux: { taux: number; base: number; montant: number }[];
   totalTVA: number;
@@ -158,11 +170,22 @@ export function tauxEffectif(d: Pick<DevisData, "em_franchise">, ligne: LigneDev
   return d.em_franchise ? 0 : Number(ligne.tva) || 0;
 }
 
-export function calculerTotaux(d: Pick<DevisData, "lignes" | "em_franchise" | "co_acompte_pct" | "de_cout">): TotauxDevis {
+export function totalLigne(l: Pick<LigneDevis, "quantite" | "prixUnitaireHT">): number {
+  return r2((Number(l.quantite) || 0) * (Number(l.prixUnitaireHT) || 0));
+}
+
+export function calculerTotaux(
+  d: Pick<DevisData, "lignes" | "em_franchise" | "co_acompte_pct" | "de_cout"> & Partial<Pick<DevisData, "co_remise_pct">>,
+): TotauxDevis {
   const map = new Map<number, { base: number; montant: number }>();
+  // La remise globale s'applique proportionnellement à chaque base de TVA.
+  const coef = 1 - Math.min(100, Math.max(0, Number(d.co_remise_pct) || 0)) / 100;
+  let totalHTBrut = 0;
   let totalHT = 0;
   for (const l of d.lignes) {
-    const ht = r2((Number(l.quantite) || 0) * (Number(l.prixUnitaireHT) || 0));
+    const brut = totalLigne(l);
+    const ht = brut * coef;
+    totalHTBrut += brut;
     totalHT += ht;
     const t = tauxEffectif(d, l);
     const cur = map.get(t) ?? { base: 0, montant: 0 };
@@ -179,7 +202,8 @@ export function calculerTotaux(d: Pick<DevisData, "lignes" | "em_franchise" | "c
   const totalTTC = r2(totalHT + totalTVA);
   const pct = Math.min(100, Math.max(0, Number(d.co_acompte_pct) || 0));
   const acompte = r2((totalTTC * pct) / 100);
-  return { totalHT, tvaParTaux, totalTVA, totalTTC, acompte, solde: r2(totalTTC - acompte) };
+  totalHTBrut = r2(totalHTBrut);
+  return { totalHTBrut, remise: r2(totalHTBrut - totalHT), totalHT, tvaParTaux, totalTVA, totalTTC, acompte, solde: r2(totalTTC - acompte) };
 }
 
 export function estIndividuelle(forme: FormeJuridique): boolean {
@@ -255,6 +279,9 @@ export function construireMentions(d: DevisData): string[] {
   );
   for (const t of [...reduits].sort()) m.push(`Attestation du client (TVA ${String(t).replace(".", ",")} %) : ${mentionTvaReduite(t)}`);
 
+  // Mentions propres au métier choisi (normes, certificats, autorisations).
+  m.push(...mentionsMetier(d));
+
   m.push(
     `Gestion des déchets (${DECHETS.source}) : quantité estimée ${d.de_quantite || "[à préciser]"} ; ` +
       `${d.de_modalites || "modalités de tri et d'évacuation à préciser"} ; ` +
@@ -321,6 +348,7 @@ export function normaliserDevis(input: unknown): DevisData {
   const logo = src.em_logo_dataurl;
   out.em_logo_dataurl =
     typeof logo === "string" && /^data:image\/(png|jpeg);base64,/.test(logo) && logo.length < 1_500_000 ? logo : "";
+  out.em_metier = METIERS.some((m) => m.slug === src.em_metier) ? (src.em_metier as string) : "";
   out.em_forme = FORMES.some((f) => f.value === src.em_forme) ? (src.em_forme as FormeJuridique) : "micro";
   out.cl_type = src.cl_type === "pro" ? "pro" : "particulier";
   out.ch_nature = (["reno", "energie", "neuf", "pro"] as const).includes(src.ch_nature as NatureTravaux)
@@ -330,6 +358,7 @@ export function normaliserDevis(input: unknown): DevisData {
   out.cl_hors_etablissement = b("cl_hors_etablissement");
   out.co_devis_gratuit = b("co_devis_gratuit");
   out.co_acompte_pct = n("co_acompte_pct", 0, 100);
+  out.co_remise_pct = n("co_remise_pct", 0, 100);
   out.co_validite_jours = n("co_validite_jours", 1, 365);
   out.co_delai_paiement_jours = n("co_delai_paiement_jours", 0, 365);
   out.de_cout = n("de_cout", 0, 10_000_000);
@@ -343,6 +372,7 @@ export function normaliserDevis(input: unknown): DevisData {
         quantite: Math.max(0, Math.min(1e6, Number(l?.quantite) || 0)),
         prixUnitaireHT: Math.max(-1e7, Math.min(1e7, Number(l?.prixUnitaireHT) || 0)),
         tva: (TAUX_TVA_LIGNE as readonly number[]).includes(Number(l?.tva)) ? (Number(l?.tva) as TauxTva) : 20,
+        ...(l?.energie === true ? { energie: true } : {}),
       }))
     : out.lignes;
   return out;
@@ -350,4 +380,42 @@ export function normaliserDevis(input: unknown): DevisData {
 
 export function tauxParDefaut(nature: NatureTravaux): TauxTva {
   return TVA_PAR_NATURE[nature] as TauxTva;
+}
+
+/** Taux d'une ligne pour une nature de travaux, en tenant compte de son éligibilité énergie. */
+export function tauxPourLigne(nature: NatureTravaux, ligne: Pick<LigneDevis, "energie">): TauxTva {
+  return tvaLigne(nature, ligne.energie) as TauxTva;
+}
+
+/** Libellé du métier tel qu'imprimé sur le devis. */
+export function libelleMetier(slug: string): string {
+  const m = getMetier(slug);
+  return m && m.slug !== "autre" ? m.label : "";
+}
+
+/**
+ * Préremplit un devis à partir d'un modèle du métier : prestations, unités,
+ * TVA selon la nature des locaux, intitulé, durée et gestion des déchets.
+ * Les informations de l'entreprise et du client sont conservées.
+ */
+export function appliquerModele(d: DevisData, slug: string, modeleId?: string): DevisData {
+  const ref = modelesMetier(slug);
+  if (!ref) return { ...d, em_metier: slug };
+  const modele: ModeleDevis = ref.modeles.find((m) => m.id === modeleId) ?? ref.modeles[0];
+  return {
+    ...d,
+    em_metier: slug,
+    ch_intitule: modele.intitule || d.ch_intitule,
+    ch_duree: modele.duree || d.ch_duree,
+    de_quantite: ref.dechets.quantite || d.de_quantite,
+    de_modalites: ref.dechets.modalites || d.de_modalites,
+    lignes: modele.lignes.map((l) => ({
+      designation: l.designation,
+      unite: l.unite,
+      quantite: l.quantite,
+      prixUnitaireHT: l.prixUnitaireHT,
+      tva: tauxPourLigne(d.ch_nature, l),
+      ...(l.energie ? { energie: true } : {}),
+    })),
+  };
 }
