@@ -4,7 +4,6 @@
 // l'utilisateur est invité à les télécharger avant.
 import { adminClient, json, readJson, requireUser, serve, HttpError } from "../_shared/http.ts";
 import { stripe } from "../_shared/stripe.ts";
-import { PIECES } from "../_shared/rules/inpi.ts";
 
 serve(async (req) => {
   const user = await requireUser(req);
@@ -27,12 +26,27 @@ serve(async (req) => {
     }
   }
 
+  // Tous les fichiers du dossier du compte, quel que soit le sous-dossier.
   const paths: string[] = [];
-  for (const p of PIECES) {
-    const { data: files } = await db.storage.from("justificatifs").list(`${user.id}/${p.key}`, { limit: 100 });
-    for (const f of files ?? []) paths.push(`${user.id}/${p.key}/${f.name}`);
+  const bucket = db.storage.from("justificatifs");
+  const pending = [user.id];
+  while (pending.length && paths.length < 5000) {
+    const dir = pending.shift()!;
+    for (let offset = 0; ; offset += 100) {
+      const { data: entries, error } = await bucket.list(dir, { limit: 100, offset });
+      if (error) throw new HttpError(500, "Suppression des fichiers impossible, réessayez.");
+      for (const e of entries ?? []) {
+        // Un dossier n'a pas d'id dans la réponse de l'API Storage.
+        if (e.id) paths.push(`${dir}/${e.name}`);
+        else pending.push(`${dir}/${e.name}`);
+      }
+      if (!entries || entries.length < 100) break;
+    }
   }
-  if (paths.length) await db.storage.from("justificatifs").remove(paths);
+  for (let i = 0; i < paths.length; i += 100) {
+    const { error } = await bucket.remove(paths.slice(i, i + 100));
+    if (error) throw new HttpError(500, "Suppression des fichiers impossible, réessayez.");
+  }
 
   const { error } = await db.auth.admin.deleteUser(user.id);
   if (error) throw new HttpError(500, "Suppression du compte impossible, contactez-nous.");

@@ -6,15 +6,22 @@ const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
   .map((s) => s.trim())
   .filter(Boolean);
 
+/** Domaines autorisés à appeler les fonctions depuis un navigateur. */
+export function isAllowedOrigin(origin: string): boolean {
+  if (!origin) return false;
+  return (
+    ALLOWED_ORIGINS.includes(origin) ||
+    origin === "https://batipro-ten.vercel.app" ||
+    /^http:\/\/localhost:\d+$/.test(origin) ||
+    // Prévisualisations Vercel du projet uniquement (batipro-xxx.vercel.app)
+    /^https:\/\/batipro(-[a-z0-9-]+)?\.vercel\.app$/.test(origin)
+  );
+}
+
 export function corsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") ?? "";
-  const allowed =
-    ALLOWED_ORIGINS.length === 0 ||
-    ALLOWED_ORIGINS.includes(origin) ||
-    /^http:\/\/localhost:\d+$/.test(origin) ||
-    /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin);
   return {
-    "Access-Control-Allow-Origin": allowed && origin ? origin : ALLOWED_ORIGINS[0] ?? "*",
+    "Access-Control-Allow-Origin": isAllowedOrigin(origin) ? origin : ALLOWED_ORIGINS[0] ?? "https://batipro-ten.vercel.app",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Expose-Headers": "content-disposition, x-devis-numero",
@@ -81,8 +88,10 @@ export async function hasEntitlement(userId: string, key: ProductKey): Promise<b
 export function siteUrl(req: Request): string {
   const env = Deno.env.get("SITE_URL");
   if (env) return env.replace(/\/$/, "");
-  const origin = req.headers.get("Origin");
-  if (origin && /^https?:\/\//.test(origin)) return origin;
+  // L'en-tête Origin n'est repris que s'il est autorisé : les adresses de retour
+  // Stripe ne peuvent pas pointer vers un site tiers.
+  const origin = req.headers.get("Origin") ?? "";
+  if (isAllowedOrigin(origin)) return origin;
   return "https://batipro-ten.vercel.app";
 }
 
