@@ -251,7 +251,7 @@ function Page() {
             <ul className="mt-10 space-y-4">
               {[
                 { I: BadgeCheck, t: "Qualification et statut vérifiés", d: "Selon le Code de l'artisanat et les taux 2026." },
-                { I: ShieldCheck, t: "Dossier INPI et décennale prêts", d: "Toutes vos pièces réunies en un seul PDF." },
+                { I: ShieldCheck, t: "Dossier INPI et décennale prêts", d: "Réponses et pièces prêtes pour le Guichet unique." },
                 { I: FileSignature, t: "Devis conformes en quelques minutes", d: "Les mentions obligatoires générées pour vous." },
               ].map(({ I, t, d }) => (
                 <li key={t} className="flex gap-4">

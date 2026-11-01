@@ -10,14 +10,29 @@ import { sb } from "@/lib/supabase";
 import { downloadPdf, lastSubmission, saveSubmission } from "@/lib/api";
 import { storageGet, storageSet } from "@/lib/utils";
 import { METIERS, getMetier } from "@rules/metiers.ts";
-import { FORME_INPI_LABEL, INPI_VIDE, PIECES, etapesApres, piecesRequises, type InpiData, type PieceKey } from "@rules/inpi.ts";
+import {
+  CONJOINT_LABEL,
+  FORME_INPI_LABEL,
+  INPI_VIDE,
+  PIECES,
+  aUnConjoint,
+  aidePiece,
+  coutsCreation,
+  etapesApres,
+  ficheSaisie,
+  metierReglemente,
+  piecesRequises,
+  pointsDeVigilance,
+  type InpiData,
+  type PieceKey,
+} from "@rules/inpi.ts";
 import { ACRE } from "@rules/reglementation.ts";
 
 export const Route = createFileRoute("/outils/inpi")({
   head: () =>
     seo({
       title: "Préparer son dossier d'immatriculation INPI",
-      description: "Toutes les informations du Guichet unique INPI, vos pièces justificatives et la déclaration de non-condamnation, réunies dans un seul PDF.",
+      description: "Une fiche de saisie dans l'ordre du Guichet unique INPI, vos pièces converties en PDF et la déclaration de non-condamnation pré-remplie.",
       path: "/outils/inpi",
     }),
   component: Page,
@@ -30,10 +45,14 @@ function Page() {
         etape={3}
         rubrique="Pack Lancement"
         title="Dossier de création"
-        intro="Saisissez une fois ce que le Guichet unique de l'INPI va vous demander. Vous obtenez un récapitulatif à recopier, vos pièces et la déclaration de non-condamnation prête à signer."
+        intro="Répondez une fois aux questions que le Guichet unique de l'INPI va vous poser. Vous obtenez une fiche de saisie rangée dans l'ordre du formulaire, vos pièces converties en PDF (une par case à téléverser) et la déclaration de non-condamnation pré-remplie."
       />
       <Container className="py-10 sm:py-14">
         <RequireAuth>
+          <Notice tone="info" className="mb-6" title="Bâtipro n'est pas l'INPI">
+            La déclaration se fait sur procedures.inpi.fr, le seul site officiel. Elle est gratuite pour un entrepreneur individuel et vous pouvez la
+            remplir sans nous. Ce dossier vous fait gagner du temps et évite les refus pour pièce manquante, mais Bâtipro ne transmet rien à votre place.
+          </Notice>
           <Paywall product="dossier" description="Le dossier de création, avec stockage sécurisé de vos pièces, fait partie du Pack Lancement.">
             <Formulaire />
           </Paywall>
@@ -88,13 +107,19 @@ function Formulaire() {
 
   const metier = getMetier(d.metier);
   const requises = piecesRequises(d);
+  const vigilance = pointsDeVigilance(d, Object.keys(files) as PieceKey[]);
 
   function valide(): string | null {
     if (step === 0 && (!d.civilite || !d.prenom || !d.nom || !d.dateNaissance || !d.villeNaissance)) return "Complétez votre identité et votre naissance.";
+    if (step === 0 && (!d.perePrenom || !d.pereNom || !d.merePrenom || !d.mereNomNaissance))
+      return "Indiquez votre filiation : elle figure obligatoirement sur la déclaration de non-condamnation.";
+    if (step === 1 && d.forme === "sasu" && !d.denomination.trim()) return "Indiquez la dénomination de la SASU.";
+    if (step === 1 && metierReglemente(d.metier) && d.qualifPar === "salarie" && !d.qualifNom.trim()) return "Indiquez le nom du salarié qualifié.";
     if (step === 1 && (!d.metier || !d.activite || !d.dateDebut)) return "Indiquez le métier, l'activité et la date de début.";
     if (step === 1 && d.forme === "sasu" && !(Number(d.capital) >= 1)) return "Le capital d'une SASU est d'au moins 1 €.";
     if (step === 2 && (!d.adresse || !/^\d{5}$/.test(d.codePostal) || !d.ville)) return "Adresse du siège incomplète (code postal à 5 chiffres).";
-    if (step === 3 && !d.honneur) return "Cochez l'attestation sur l'honneur.";
+    if (step === 2 && d.local !== "domicile" && (!d.adressePerso || !d.villePerso)) return "Indiquez aussi votre adresse personnelle : le Guichet unique la demande.";
+    if (step === 3 && !d.honneur) return "Cochez la case de confirmation.";
     return null;
   }
 
@@ -122,7 +147,7 @@ function Formulaire() {
     try {
       const ok = await saveSubmission("inpi", `${FORME_INPI_LABEL[d.forme]} — ${d.prenom} ${d.nom}`, d);
       if (!ok) throw new Error("Enregistrement du dossier impossible.");
-      await downloadPdf("generate-inpi-pdf", {}, "dossier-creation.pdf");
+      await downloadPdf("generate-inpi-pdf", {}, "dossier-creation.zip");
       setDone(true);
     } catch (e) {
       toast.error((e as Error).message);
@@ -175,6 +200,19 @@ function Formulaire() {
                 <option value="marie_separation">Marié(e), séparation de biens</option>
               </Select>
             </Field>
+            {aUnConjoint(d) && (
+              <Field label="Votre conjoint ou partenaire travaille-t-il avec vous ?" htmlFor="cj" hint="Entreprise individuelle uniquement. S'il participe régulièrement à l'activité, il doit avoir un statut.">
+                <Select id="cj" value={d.conjointRole} onChange={(e) => set({ conjointRole: e.target.value as InpiData["conjointRole"] })}>
+                  {(Object.keys(CONJOINT_LABEL) as InpiData["conjointRole"][]).map((k) => <option key={k} value={k}>{CONJOINT_LABEL[k]}</option>)}
+                </Select>
+              </Field>
+            )}
+            <p className="pt-2 text-[14px] font-semibold sm:col-span-2">Filiation</p>
+            <p className="-mt-3 text-[13px] text-encre-3 sm:col-span-2">Demandée par la déclaration de non-condamnation que le Guichet unique exige.</p>
+            <Field label="Prénom du père" htmlFor="pp"><Input id="pp" value={d.perePrenom} onChange={(e) => set({ perePrenom: e.target.value })} /></Field>
+            <Field label="Nom du père" htmlFor="pnm"><Input id="pnm" value={d.pereNom} onChange={(e) => set({ pereNom: e.target.value })} /></Field>
+            <Field label="Prénom de la mère" htmlFor="mp"><Input id="mp" value={d.merePrenom} onChange={(e) => set({ merePrenom: e.target.value })} /></Field>
+            <Field label="Nom de naissance de la mère" htmlFor="mnm"><Input id="mnm" value={d.mereNomNaissance} onChange={(e) => set({ mereNomNaissance: e.target.value })} /></Field>
           </div>
         )}
 
@@ -193,12 +231,48 @@ function Formulaire() {
             <Field label="Description de l'activité" htmlFor="act" className="sm:col-span-2" hint="Soyez précis : c'est cette description que l'assureur décennale lira.">
               <Textarea id="act" value={d.activite} onChange={(e) => set({ activite: e.target.value })} placeholder={metier ? `Travaux de ${metier.accroche}` : ""} />
             </Field>
-            <Field label="Nom commercial (facultatif)" htmlFor="den" hint={d.forme === "sasu" ? "Dénomination sociale de la SASU." : "Par défaut, votre nom personnel."}>
+            <Field label={d.forme === "sasu" ? "Dénomination sociale" : "Nom commercial (facultatif)"} htmlFor="den" hint={d.forme === "sasu" ? "Le nom de la société, tel qu'il figure dans les statuts." : "Par défaut, vous exercez sous votre nom personnel."}>
               <Input id="den" value={d.denomination} onChange={(e) => set({ denomination: e.target.value })} />
             </Field>
             <Field label="Code APE indicatif" hint="Attribué définitivement par l'INSEE.">
               <p className="py-2.5 font-medium">{metier ? `${metier.ape} — ${metier.apeLabel}` : "—"}</p>
             </Field>
+            {d.metier && metierReglemente(d.metier) && (
+              <>
+                <Field label="Qui détient la qualification ?" htmlFor="qp" hint="Métier réglementé : l'activité doit être exercée ou contrôlée par une personne qualifiée.">
+                  <Select id="qp" value={d.qualifPar} onChange={(e) => set({ qualifPar: e.target.value as InpiData["qualifPar"] })}>
+                    <option value="moi">Moi, le dirigeant</option>
+                    <option value="salarie">Un salarié qualifié</option>
+                  </Select>
+                </Field>
+                <Field label="Comment est-elle justifiée ?" htmlFor="qj">
+                  <Select id="qj" value={d.qualifPreuve} onChange={(e) => set({ qualifPreuve: e.target.value as InpiData["qualifPreuve"] })}>
+                    <option value="diplome">Diplôme ou titre du métier (CAP, BEP, BP…)</option>
+                    <option value="experience">3 ans d'expérience dans le métier</option>
+                  </Select>
+                </Field>
+                {d.qualifPar === "salarie" && (
+                  <Field label="Nom et prénom du salarié qualifié" htmlFor="qn" className="sm:col-span-2">
+                    <Input id="qn" value={d.qualifNom} onChange={(e) => set({ qualifNom: e.target.value })} />
+                  </Field>
+                )}
+              </>
+            )}
+            {d.forme === "micro" ? (
+              <Field label="Déclaration du chiffre d'affaires" htmlFor="per" hint="Vous pourrez changer plus tard sur autoentrepreneur.urssaf.fr.">
+                <Select id="per" value={d.periodicite} onChange={(e) => set({ periodicite: e.target.value as InpiData["periodicite"] })}>
+                  <option value="trimestrielle">Trimestrielle</option>
+                  <option value="mensuelle">Mensuelle</option>
+                </Select>
+              </Field>
+            ) : (
+              <Field label="Régime de TVA" htmlFor="tva" hint="La franchise évite de facturer la TVA tant que vous restez sous le seuil ; à valider avec votre comptable.">
+                <Select id="tva" value={d.tva} onChange={(e) => set({ tva: e.target.value as InpiData["tva"] })}>
+                  <option value="franchise">Franchise en base de TVA</option>
+                  <option value="reel">Réel simplifié (je facture la TVA)</option>
+                </Select>
+              </Field>
+            )}
             {d.forme === "sasu" && (
               <>
                 <Field label="Capital social (€)" htmlFor="cap" hint="1 € minimum, mais un capital crédible rassure banques et fournisseurs.">
@@ -231,20 +305,35 @@ function Formulaire() {
             <Field label="Type de local" className="sm:col-span-3">
               <Choices name="local" columns={3} value={d.local} onChange={(v) => set({ local: v })} options={[{ value: "domicile", label: "Mon domicile" }, { value: "local_pro", label: "Un local professionnel" }, { value: "domiciliation", label: "Une société de domiciliation" }]} />
             </Field>
+            {d.local === "domicile" && (
+              <p className="text-[13px] text-encre-3 sm:col-span-3">
+                Locataire ou en copropriété ? Vérifiez que le bail ou le règlement ne l'interdit pas. Sinon, la loi permet quand même d'y fixer l'adresse de
+                l'entreprise pendant 5 ans (art. L123-11-1 du Code de commerce), sans y recevoir de clients ni y stocker de marchandises.
+              </p>
+            )}
+            {d.local !== "domicile" && (
+              <>
+                <Field label="Votre adresse personnelle" htmlFor="adrp" className="sm:col-span-3" hint="Le Guichet unique la demande en plus de celle de l'entreprise.">
+                  <Input id="adrp" value={d.adressePerso} onChange={(e) => set({ adressePerso: e.target.value })} />
+                </Field>
+                <Field label="Code postal" htmlFor="cpp"><Input id="cpp" inputMode="numeric" maxLength={5} value={d.codePostalPerso} onChange={(e) => set({ codePostalPerso: e.target.value })} /></Field>
+                <Field label="Ville" htmlFor="vilp" className="sm:col-span-2"><Input id="vilp" value={d.villePerso} onChange={(e) => set({ villePerso: e.target.value })} /></Field>
+              </>
+            )}
           </div>
         )}
 
         {step === 3 && (
           <div className="space-y-6">
             <div className="space-y-3">
-              {PIECES.filter((p) => requises.includes(p.key) || files[p.key]?.length).map((p) => (
+              {PIECES.filter((p) => !p.generee && (requises.includes(p.key) || files[p.key]?.length)).map((p) => (
                 <div key={p.key} className="rounded-xl bg-papier p-4 shadow-[0_0_0_1px_rgb(11_18_32/0.08)]">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <p className="font-semibold">
                         {p.label} {requises.includes(p.key) && <span className="text-[13px] font-normal text-encre-3">(demandée)</span>}
                       </p>
-                      <p className="text-[13px] text-encre-3">{p.aide}</p>
+                      <p className="text-[13px] text-encre-3">{aidePiece(p, d)}</p>
                     </div>
                     <label className="inline-flex cursor-pointer items-center gap-2 rounded-[10px] bg-papier px-3.5 py-2 text-[14px] font-semibold shadow-[0_0_0_1px_rgb(11_18_32/0.12),0_1px_2px_rgb(11_18_32/0.05)] transition-colors hover:bg-enduit">
                       <Upload className="h-4 w-4" aria-hidden /> Ajouter
@@ -262,7 +351,11 @@ function Formulaire() {
                   ))}
                 </div>
               ))}
-              <p className="text-[13px] text-encre-3">Fichiers stockés dans un espace privé chiffré, visibles par vous seul. PDF, JPEG ou PNG, 5 Mo maximum.</p>
+              <p className="text-[13px] text-encre-3">
+                La déclaration de non-condamnation et de filiation est pré-remplie dans le dossier : il vous restera à la dater et la signer. Vos photos
+                sont converties en PDF, une pièce par fichier, comme le demande le Guichet unique.
+              </p>
+              <p className="text-[13px] text-encre-3">Fichiers stockés dans un espace privé, visibles par vous seul, effacés avec votre compte. PDF, JPEG ou PNG, 5 Mo maximum.</p>
             </div>
             {d.forme !== "sasu" && (
               <>
@@ -272,7 +365,48 @@ function Formulaire() {
                 )}
               </>
             )}
-            <Checkbox id="honneur" checked={d.honneur} onChange={(v) => set({ honneur: v })} label="Je certifie l'exactitude des informations et n'avoir fait l'objet d'aucune condamnation m'interdisant d'exercer." />
+            {vigilance.length > 0 && (
+              <Notice tone="warn" title="À vérifier avant de déposer">
+                <ul className="list-disc space-y-1 pl-5">
+                  {vigilance.map((v) => <li key={v}>{v}</li>)}
+                </ul>
+              </Notice>
+            )}
+            <details className="rounded-xl bg-papier p-4 shadow-[0_0_0_1px_rgb(11_18_32/0.08)]">
+              <summary className="cursor-pointer font-semibold">Aperçu de la fiche de saisie</summary>
+              <div className="mt-4 space-y-5">
+                {ficheSaisie(d).map((r) => (
+                  <div key={r.titre}>
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-bleu">{r.titre}</p>
+                    <dl className="mt-2 grid gap-x-4 gap-y-1.5 text-[14px] sm:grid-cols-[14rem_1fr]">
+                      {r.lignes.map((l) => (
+                        <div key={l.q} className="contents">
+                          <dt className="text-encre-3">{l.q}</dt>
+                          <dd className="font-medium">{l.r}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ))}
+                <div>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-bleu">Coûts officiels</p>
+                  <dl className="mt-2 grid gap-x-4 gap-y-1.5 text-[14px] sm:grid-cols-[1fr_auto]">
+                    {coutsCreation(d.forme).map((c) => (
+                      <div key={c.libelle} className="contents">
+                        <dt className="text-encre-3">{c.libelle}</dt>
+                        <dd className="font-medium">{c.montant}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+            </details>
+            <Checkbox
+              id="honneur"
+              checked={d.honneur}
+              onChange={(v) => set({ honneur: v })}
+              label="J'ai compris que Bâtipro ne transmet rien à l'INPI : je vérifie ces informations et je fais moi-même la déclaration sur procedures.inpi.fr."
+            />
           </div>
         )}
 
@@ -283,12 +417,14 @@ function Formulaire() {
           {step < 3 ? (
             <Button onClick={() => { const e = valide(); if (e) toast.error(e); else setStep(step + 1); }}>Continuer</Button>
           ) : (
-            <Button loading={busy} onClick={generer}>Générer mon dossier PDF</Button>
+            <Button loading={busy} onClick={generer}>Générer mon dossier</Button>
           )}
         </div>
         {done && (
           <Notice tone="ok" title="Dossier généré">
-            Il est aussi disponible depuis votre espace. Suivez les étapes à droite pour le déposer.
+            Le fichier .zip contient la fiche de saisie, la déclaration à signer et vos pièces en PDF. Il est aussi disponible depuis votre espace.
+            Suivez les étapes à droite, puis rendez-vous sur{" "}
+            <a href="https://procedures.inpi.fr" target="_blank" rel="noreferrer" className="font-semibold underline">procedures.inpi.fr</a>.
           </Notice>
         )}
       </Card>

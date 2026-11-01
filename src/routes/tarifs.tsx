@@ -35,7 +35,7 @@ const OFFRES = [
     prix: "89 €",
     rythme: "une seule fois",
     pour: "Créer l'entreprise",
-    inclus: ["Dossier de création pour le Guichet unique INPI", "Stockage sécurisé des pièces justificatives", "Déclaration de non-condamnation pré-remplie", "Dimensionnement décennale et RC Pro", "Facture envoyée par email"],
+    inclus: ["Fiche de saisie dans l'ordre du Guichet unique INPI", "Pièces converties en PDF, une par case à téléverser", "Déclaration de non-condamnation et de filiation pré-remplie", "Dimensionnement décennale et RC Pro", "Facture envoyée par email"],
     plan: "dossier" as const,
   },
   {
@@ -70,8 +70,8 @@ function Page() {
     ["Test de qualification par métier", true, true, true],
     ["Simulateur de statut et cotisations 2026", true, true, true],
     ["Guides métiers", true, true, true],
-    ["Dossier de création pour le Guichet unique INPI", false, true, false],
-    ["Pièces justificatives stockées et jointes au PDF", false, true, false],
+    ["Fiche de saisie pour le Guichet unique INPI", false, true, false],
+    ["Pièces converties en PDF, prêtes à téléverser", false, true, false],
     ["Dimensionnement décennale et RC Pro", false, true, false],
     ["Devis conformes en illimité", false, false, true],
     ["Numérotation continue et archive des devis", false, false, true],
@@ -161,7 +161,9 @@ function Page() {
         </div>
         <p className="mt-6 max-w-3xl text-[13.5px] leading-relaxed text-encre-3">
           Prix finaux, sans frais cachés. Pour le Pack Lancement, le contenu numérique est fourni immédiatement : vous renoncez à votre
-          droit de rétractation en validant le paiement.
+          droit de rétractation en validant le paiement. Bâtipro est un service privé, indépendant de l'INPI : la déclaration de création
+          se fait sur procedures.inpi.fr, gratuitement pour un entrepreneur individuel, et reste possible sans Bâtipro. Les frais légaux
+          d'une société (greffe, annonce légale) ne sont pas compris.
         </p>
 
         <div className="mt-24">

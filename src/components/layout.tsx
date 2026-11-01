@@ -62,7 +62,7 @@ export function Logo({ inverse }: { inverse?: boolean }) {
 export const OUTILS = [
   { to: "/outils/qualification", label: "Test de qualification", desc: "Savoir si la CMA validera votre métier", Icon: BadgeCheck, offre: "Gratuit" },
   { to: "/outils/statut", label: "Simulateur de statut", desc: "Micro, EI ou SASU : cotisations et net", Icon: Scale, offre: "Gratuit" },
-  { to: "/outils/inpi", label: "Dossier de création", desc: "Tout le Guichet unique INPI en un PDF", Icon: FileText, offre: "Lancement" },
+  { to: "/outils/inpi", label: "Dossier de création", desc: "Vos réponses au Guichet unique INPI, prêtes à reporter", Icon: FileText, offre: "Lancement" },
   { to: "/outils/assurance", label: "Assurance décennale", desc: "Plafonds et budget avant d'appeler", Icon: ShieldCheck, offre: "Lancement" },
   { to: "/outils/devis", label: "Éditeur de devis", desc: "Mentions légales générées selon le chantier", Icon: FileSignature, offre: "Pro" },
 ] as const;
@@ -393,7 +393,7 @@ const OFFRES = {
     prix: "89 €",
     rythme: "une seule fois",
     cta: "Débloquer le Pack Lancement",
-    points: ["Dossier INPI complet en PDF", "Pièces justificatives stockées", "Dimensionnement de la décennale"],
+    points: ["Fiche de saisie pour le Guichet unique INPI", "Pièces converties en PDF, prêtes à téléverser", "Dimensionnement de la décennale"],
   },
   pro: {
     titre: "Abonnement Pro",

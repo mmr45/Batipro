@@ -51,7 +51,7 @@ serve(async (req) => {
       submit: {
         message:
           mode === "payment"
-            ? "Accès immédiat au contenu numérique : en validant, vous demandez son exécution sans attendre et renoncez à votre droit de rétractation (art. L221-28 13° du Code de la consommation)."
+            ? "Accès immédiat au contenu numérique : en validant, vous demandez son exécution sans attendre et renoncez à votre droit de rétractation (art. L221-28 13° du Code de la consommation). Bâtipro est un service privé, indépendant de l'INPI : la déclaration officielle reste à faire par vous sur procedures.inpi.fr."
             : "Abonnement sans engagement, résiliable à tout moment depuis votre espace. L'accès démarre dès la validation du paiement.",
       },
     },

@@ -1,7 +1,19 @@
 import { PDFDocument } from "npm:pdf-lib@1.17.1";
-import { C, LARGEUR, MARGE, Pdf, dateFr } from "./pdf.ts";
-import { FORME_INPI_LABEL, LOCAL_LABEL, PIECES, etapesApres, piecesRequises, type InpiData, type PieceKey } from "./rules/inpi.ts";
-import { getMetier } from "./rules/metiers.ts";
+import { A4, C, LARGEUR, MARGE, Pdf, dateFr } from "./pdf.ts";
+import {
+  COUTS_SOURCE,
+  DELAIS,
+  FORMAT_PIECES,
+  FORME_INPI_LABEL,
+  PIECES,
+  coutsCreation,
+  etapesApres,
+  ficheSaisie,
+  piecesRequises,
+  pointsDeVigilance,
+  type InpiData,
+  type PieceKey,
+} from "./rules/inpi.ts";
 
 export interface PieceJointe {
   key: PieceKey;
@@ -10,138 +22,146 @@ export interface PieceJointe {
   bytes: Uint8Array;
 }
 
-export async function buildInpiPdf(d: InpiData, ref: string, pieces: PieceJointe[]): Promise<Uint8Array> {
-  const pdf = await Pdf.create(`Bâtipro — Dossier de création ${ref} — document préparatoire, non transmis à l'INPI`);
+/** Libellé / valeur sur deux colonnes, les deux pouvant passer à la ligne. */
+function ligne(pdf: Pdf, label: string, value: string, lw: number, aide?: string) {
+  const size = 9.5;
+  const lh = size * 1.38;
+  const gauche = pdf.wrap(label, size, lw - 10);
+  const droite = pdf.wrap(value || "—", size, LARGEUR - lw);
+  const n = Math.max(gauche.length, droite.length);
+  pdf.ensure(lh * n);
+  for (let i = 0; i < n; i++) {
+    if (gauche[i]) pdf.page.drawText(gauche[i], { x: MARGE, y: pdf.y - size, size, font: pdf.font, color: C.gris });
+    if (droite[i]) pdf.page.drawText(droite[i], { x: MARGE + lw, y: pdf.y - size, size, font: pdf.font, color: C.encre });
+    pdf.y -= lh;
+  }
+  if (aide) pdf.text(aide, { size: 7.8, color: C.grisClair, x: MARGE + lw });
+  pdf.space(2.5);
+}
+
+const INDEPENDANCE =
+  "Bâtipro est un service privé, indépendant de l'INPI, de l'INSEE et des Chambres de Métiers. Il ne transmet aucune déclaration : vous la faites vous-même, sur procedures.inpi.fr, seul site officiel.";
+
+/** Fiche de saisie : réponses à reporter sur le Guichet unique, pièces, coûts et étapes. */
+export async function buildFichePdf(d: InpiData, ref: string, deposees: PieceKey[]): Promise<Uint8Array> {
+  const pdf = await Pdf.create(`Bâtipro — ${ref} — document préparatoire, non transmis à l'INPI`);
   const logo = await pdf.logo();
   const top = pdf.y;
   if (logo) pdf.drawImageFit(logo, MARGE, top, 36, 36);
-  pdf.at("Dossier de création d'entreprise", MARGE + 46, top - 15, { size: 15, bold: true });
-  pdf.at(`Réf. ${ref} — préparé le ${dateFr(new Date())}`, MARGE + 46, top - 29, { size: 8.5, color: C.gris });
+  pdf.at("Fiche de saisie — Guichet unique INPI", MARGE + 46, top - 15, { size: 15, bold: true });
+  pdf.at(`${FORME_INPI_LABEL[d.forme]} · Réf. ${ref} · préparée le ${dateFr(new Date())}`, MARGE + 46, top - 29, { size: 8.5, color: C.gris });
   pdf.y = top - 48;
   pdf.text(
-    "Ce récapitulatif reprend toutes les informations demandées par le Guichet unique de l'INPI (procedures.inpi.fr). Il ne vaut pas immatriculation : la déclaration officielle se fait en ligne sur le Guichet unique, puis la Chambre de Métiers et de l'Artisanat contrôle votre qualification.",
-    { size: 8.8, color: C.gris },
+    "Ouvrez procedures.inpi.fr à côté de cette fiche et reportez les réponses rubrique par rubrique. Les intitulés du site peuvent légèrement varier : en cas de doute, la notice du Guichet unique fait foi.",
+    { size: 9, color: C.gris },
   );
+  pdf.space(2);
+  pdf.text(INDEPENDANCE, { size: 8.2, color: C.grisClair });
   pdf.space(4);
 
-  const metier = getMetier(d.metier);
-  pdf.heading("1. Le dirigeant");
-  pdf.field("Identité", `${d.civilite} ${d.prenom} ${d.nom}`.trim());
-  if (d.nomUsage) pdf.field("Nom d'usage", d.nomUsage);
-  pdf.field("Naissance", `${d.dateNaissance ? dateFr(d.dateNaissance) : "—"} à ${d.villeNaissance || "—"} (${d.paysNaissance || "—"})`);
-  pdf.field("Nationalité", d.nationalite);
-  pdf.field("Contact", [d.email, d.telephone].filter(Boolean).join(" — "));
-  pdf.field(
-    "Situation matrimoniale",
-    {
-      celibataire: "Célibataire",
-      marie_communaute: "Marié(e) sous un régime de communauté",
-      marie_separation: "Marié(e) sous séparation de biens",
-      pacse: "Pacsé(e)",
-      "": "—",
-    }[d.situationMatrimoniale],
-  );
-
-  pdf.heading("2. L'entreprise");
-  pdf.field("Forme juridique", FORME_INPI_LABEL[d.forme]);
-  pdf.field("Dénomination / nom commercial", d.denomination || (d.forme === "sasu" ? "—" : `${d.prenom} ${d.nom} (nom personnel)`));
-  pdf.field("Métier", metier?.label ?? d.metier);
-  pdf.field("Activité déclarée", d.activite);
-  pdf.field("Code APE indicatif", d.ape || (metier ? `${metier.ape} — ${metier.apeLabel}` : ""));
-  pdf.field("Début d'activité", d.dateDebut ? dateFr(d.dateDebut) : "—");
-  if (d.forme === "sasu") {
-    pdf.field("Capital social", `${d.capital || "—"} €`);
-    pdf.field("Nature des apports", { numeraire: "Numéraire", nature: "En nature", mixte: "Numéraire et nature" }[d.apports]);
-    pdf.field("Président", `${d.prenom} ${d.nom}`);
-    pdf.field("Clôture de l'exercice", d.cloture);
-    pdf.field("Banque de dépôt", d.banque);
-  } else {
-    pdf.field("Options", [d.versementLiberatoire ? "Versement libératoire de l'impôt" : "", d.acre ? "Demande d'ACRE" : ""].filter(Boolean).join(", ") || "Aucune");
+  const vigilance = pointsDeVigilance(d, deposees);
+  if (vigilance.length) {
+    pdf.heading("À régler avant de commencer");
+    for (const v of vigilance) pdf.text(`• ${v}`, { size: 9.2, color: C.orange });
   }
 
-  pdf.heading("3. Le siège");
-  pdf.field("Adresse", `${d.adresse}, ${d.codePostal} ${d.ville}`);
-  pdf.field("Type de local", LOCAL_LABEL[d.local]);
-  if (d.local === "domicile")
-    pdf.text("Le domicile peut accueillir le siège sans limite de durée pour un entrepreneur individuel ; vérifiez votre bail ou règlement de copropriété si une activité y est exercée.", { size: 8.2, color: C.gris });
+  ficheSaisie(d).forEach((rub, i) => {
+    pdf.heading(`${i + 1}. ${rub.titre}`);
+    for (const l of rub.lignes) ligne(pdf, l.q, l.r, 170, l.aide);
+  });
 
-  pdf.heading("4. Pièces justificatives");
-  const requises = piecesRequises(d);
-  for (const p of PIECES.filter((x) => requises.includes(x.key) || pieces.some((pj) => pj.key === x.key))) {
-    const jointes = pieces.filter((pj) => pj.key === p.key);
-    pdf.field(p.label, jointes.length ? `Jointe (${jointes.map((j) => j.nom).join(", ")})` : requises.includes(p.key) ? "À fournir sur le Guichet unique" : "—", 190);
+  pdf.heading("Pièces justificatives");
+  pdf.text(`${FORMAT_PIECES.regle} ${FORMAT_PIECES.tailleMaxMo} Mo maximum par fichier.`, { size: 8.5, color: C.gris });
+  pdf.space(3);
+  for (const k of piecesRequises(d)) {
+    const p = PIECES.find((x) => x.key === k)!;
+    const etat = p.generee ? "Dans ce dossier, à signer" : deposees.includes(k) ? "Prête (dossier « pieces »)" : "À préparer";
+    ligne(pdf, p.label, etat, 300);
   }
-  pdf.field("Déclaration de non-condamnation", "Jointe ci-après, à signer", 190);
 
-  pdf.heading("5. Prochaines étapes");
+  pdf.heading("Coûts et délais");
+  for (const c of coutsCreation(d.forme)) ligne(pdf, c.libelle, c.montant, 330);
+  pdf.space(3);
+  pdf.text(DELAIS, { size: 8.5, color: C.gris });
+  pdf.text(`Montants indicatifs (${COUTS_SOURCE.source}), vérifiés le ${dateFr(COUTS_SOURCE.verifieLe)}.`, { size: 7.5, color: C.grisClair });
+
+  pdf.heading("Étapes, dans l'ordre");
   etapesApres(d).forEach((e, i) => {
     pdf.text(`${i + 1}. ${e.titre}`, { size: 9.5, bold: true });
     pdf.text(e.detail, { size: 8.8, color: C.gris, x: MARGE + 12 });
     pdf.space(3);
   });
 
-  // ---------- Déclaration de non-condamnation ----------
-  pdf.newPage();
+  pdf.space(6);
+  pdf.text(
+    "Ce document est une aide à la préparation. Il ne constitue pas un conseil juridique ou fiscal personnalisé et ne vaut pas immatriculation. Vous restez responsable de l'exactitude des informations déclarées.",
+    { size: 7.8, color: C.grisClair },
+  );
+  return pdf.finalize();
+}
+
+/** Déclaration de non-condamnation et de filiation, à signer à la main. */
+export async function buildDncPdf(d: InpiData): Promise<Uint8Array> {
+  const pdf = await Pdf.create("Déclaration à dater et signer à la main, puis à téléverser en PDF sur procedures.inpi.fr");
+  const blanc = "……………………………";
   pdf.text("Déclaration sur l'honneur de non-condamnation", { size: 14, bold: true });
-  pdf.text("et de filiation", { size: 11, color: C.gris });
+  pdf.text("et attestation de filiation", { size: 11, color: C.gris });
   pdf.space(14);
+  const ident = `${d.civilite} ${d.prenom} ${d.nom}`.trim() || blanc;
+  const domicile = d.local === "domicile" || !d.adressePerso ? [d.adresse, d.codePostal, d.ville] : [d.adressePerso, d.codePostalPerso, d.villePerso];
+  const qualite = d.forme === "sasu" ? `en qualité de Président de la société ${d.denomination || blanc} (en cours de constitution)` : "en qualité d'entrepreneur individuel";
   const body = [
-    `Je soussigné(e) ${d.civilite} ${d.prenom} ${d.nom}${d.nomUsage ? ` (nom d'usage : ${d.nomUsage})` : ""},`,
-    `né(e) le ${d.dateNaissance ? dateFr(d.dateNaissance) : "……………"} à ${d.villeNaissance || "……………"} (${d.paysNaissance || "……"}),`,
-    `de nationalité ${d.nationalite || "……………"},`,
-    `demeurant ${d.adresse || "……………"}, ${d.codePostal} ${d.ville},`,
+    `Je soussigné(e) ${ident}${d.nomUsage ? ` (nom d'usage : ${d.nomUsage})` : ""},`,
+    `né(e) le ${d.dateNaissance ? dateFr(d.dateNaissance) : blanc} à ${d.villeNaissance || blanc} (${d.paysNaissance || blanc}),`,
+    `de nationalité ${d.nationalite || blanc},`,
+    `demeurant ${domicile.filter(Boolean).join(" ") || blanc},`,
+    `agissant ${qualite},`,
     "",
-    "Fils / fille de (nom et prénom du père) : ……………………………………………………",
-    "et de (nom de naissance et prénom de la mère) : ……………………………………………",
+    `fils / fille de : ${[d.perePrenom, d.pereNom.toUpperCase()].filter(Boolean).join(" ") || blanc} (père)`,
+    `et de : ${[d.merePrenom, d.mereNomNaissance.toUpperCase()].filter(Boolean).join(" ") || blanc} (mère, nom de naissance),`,
     "",
-    "déclare sur l'honneur, n'avoir fait l'objet d'aucune condamnation pénale ni de sanction civile ou administrative de nature à m'interdire de gérer, administrer ou diriger une personne morale ou d'exercer une activité commerciale ou artisanale.",
+    "déclare sur l'honneur n'avoir fait l'objet d'aucune condamnation pénale ni de sanction civile ou administrative de nature à m'interdire de gérer, administrer ou diriger une personne morale ou d'exercer une activité commerciale ou artisanale.",
   ];
   for (const l of body) {
     if (!l) pdf.space(8);
     else pdf.text(l, { size: 10.5, lineHeight: 15.5 });
   }
   pdf.space(30);
-  pdf.text(`Fait à ……………………………, le ……………………………`, { size: 10.5 });
+  pdf.text(`Fait à ${d.ville || blanc}, le ${blanc}`, { size: 10.5 });
   pdf.space(24);
-  pdf.text("Signature :", { size: 10.5 });
-
-  // ---------- Pièces jointes ----------
-  if (pieces.length) {
-    pdf.newPage();
-    pdf.text("Annexes — pièces justificatives", { size: 14, bold: true });
-    pdf.space(6);
-    pieces.forEach((p, i) =>
-      pdf.text(`${i + 1}. ${PIECES.find((x) => x.key === p.key)?.label ?? p.key} — ${p.nom}`, { size: 9.5 }),
-    );
-  }
-  const imagePages: { p: PieceJointe }[] = [];
-  for (const p of pieces) {
-    if (p.mime === "image/png" || p.mime === "image/jpeg") imagePages.push({ p });
-  }
-  for (const { p } of imagePages) {
-    try {
-      const img = p.mime === "image/png" ? await pdf.doc.embedPng(p.bytes) : await pdf.doc.embedJpg(p.bytes);
-      pdf.newPage();
-      pdf.text(PIECES.find((x) => x.key === p.key)?.label ?? p.key, { size: 10, bold: true });
-      pdf.space(6);
-      pdf.drawImageFit(img, MARGE, pdf.y, LARGEUR, pdf.y - MARGE - 30);
-    } catch (e) {
-      console.warn("Image illisible", p.nom, e);
-    }
-  }
-
-  // Les PDF joints sont ajoutés tels quels à la fin (après numérotation).
-  const out = await PDFDocument.load(await pdf.finalize());
-  for (const p of pieces.filter((x) => x.mime === "application/pdf")) {
-    try {
-      const src = await PDFDocument.load(p.bytes, { ignoreEncryption: true });
-      const copied = await out.copyPages(src, src.getPageIndices().slice(0, 20));
-      copied.forEach((pg) => out.addPage(pg));
-    } catch (e) {
-      console.warn("PDF illisible", p.nom, e);
-    }
-  }
-  return out.save();
+  pdf.text("Signature manuscrite :", { size: 10.5 });
+  pdf.space(70);
+  pdf.text("Une fausse déclaration expose à des sanctions pénales (art. 441-7 du Code pénal).", { size: 8, color: C.grisClair });
+  return pdf.finalize();
 }
 
-export { LARGEUR };
+/** Convertit une pièce déposée en un PDF autonome, prêt pour sa case du Guichet unique. */
+export async function pieceEnPdf(p: PieceJointe): Promise<Uint8Array | null> {
+  if (p.mime === "application/pdf") {
+    try {
+      // Rouvre et réenregistre : vérifie que le fichier est lisible.
+      const src = await PDFDocument.load(p.bytes, { ignoreEncryption: true });
+      if (src.isEncrypted) return p.bytes;
+      return await src.save();
+    } catch (e) {
+      console.warn("PDF illisible", p.nom, e);
+      return null;
+    }
+  }
+  if (p.mime !== "image/png" && p.mime !== "image/jpeg") return null;
+  try {
+    const doc = await PDFDocument.create();
+    const img = p.mime === "image/png" ? await doc.embedPng(p.bytes) : await doc.embedJpg(p.bytes);
+    const page = doc.addPage(A4);
+    const maxW = LARGEUR;
+    const maxH = A4[1] - MARGE * 2;
+    const s = Math.min(maxW / img.width, maxH / img.height, 1);
+    const w = img.width * s;
+    const h = img.height * s;
+    page.drawImage(img, { x: (A4[0] - w) / 2, y: A4[1] - MARGE - h, width: w, height: h });
+    return await doc.save();
+  } catch (e) {
+    console.warn("Image illisible", p.nom, e);
+    return null;
+  }
+}
