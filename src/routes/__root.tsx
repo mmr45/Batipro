@@ -15,7 +15,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: css },
-      { rel: "preload", href: "/fonts/archivo-latin-wdth-normal.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
+      { rel: "preload", href: "/fonts/inter-latin-opsz-normal.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "icon", href: "/favicon.ico", sizes: "any" },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
@@ -33,7 +33,7 @@ function RootLayout() {
       </head>
       <body>
         <AuthProvider>
-          <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:bg-papier focus:px-3 focus:py-2 focus:font-semibold">
+          <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-papier focus:px-3 focus:py-2 focus:font-semibold focus:shadow-lg">
             Aller au contenu
           </a>
           <SiteHeader />
@@ -41,7 +41,7 @@ function RootLayout() {
             <Outlet />
           </main>
           <SiteFooter />
-          <Toaster position="top-center" richColors closeButton />
+          <Toaster position="top-center" richColors closeButton toastOptions={{ style: { fontFamily: "var(--font-sans)", borderRadius: "14px" } }} />
         </AuthProvider>
         <Scripts />
       </body>
@@ -51,14 +51,15 @@ function RootLayout() {
 
 export function NotFound() {
   return (
-    <div className="terrain border-b border-encre/10">
-      <Container className="py-24 sm:py-32">
-        <p className="ref !text-[13px] !text-balise">Erreur 404</p>
-        <h1 className="display mt-3 max-w-3xl text-[48px] sm:text-[72px]">Cette page n'est pas sur le plan.</h1>
-        <p className="mt-5 max-w-xl text-[18px] text-encre-2">L'adresse n'existe pas, ou elle a changé lors de la refonte du site.</p>
-        <div className="mt-8 flex flex-wrap gap-2">
-          <ButtonLink to="/" variant="encre">Retour à l'accueil</ButtonLink>
-          <ButtonLink to="/guides" variant="secondary">Voir les guides métiers</ButtonLink>
+    <div className="relative overflow-hidden border-b border-encre/[0.06] bg-papier">
+      <div aria-hidden className="terrain masque-radial pointer-events-none absolute inset-0 bg-transparent" />
+      <Container className="relative py-24 text-center sm:py-36">
+        <p className="display texte-degrade-clair text-[96px] leading-none sm:text-[140px]">404</p>
+        <h1 className="display mx-auto mt-6 max-w-3xl text-[36px] sm:text-[52px]">Cette page n'est pas sur le plan.</h1>
+        <p className="mx-auto mt-4 max-w-xl text-[18px] text-encre-2">L'adresse n'existe pas, ou elle a changé lors de la refonte du site.</p>
+        <div className="mt-9 flex flex-wrap justify-center gap-2">
+          <ButtonLink to="/" variant="encre" size="lg">Retour à l'accueil</ButtonLink>
+          <ButtonLink to="/guides" variant="secondary" size="lg">Voir les guides métiers</ButtonLink>
         </div>
       </Container>
     </div>

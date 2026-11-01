@@ -32,7 +32,7 @@ function Page() {
   return (
     <>
       <PageHeader
-        planche="04 / 05"
+        etape={4}
         rubrique="Pack Lancement"
         title="Assurance décennale"
         intro={
@@ -42,7 +42,7 @@ function Page() {
           </>
         }
       />
-      <Container className="py-10">
+      <Container className="py-10 sm:py-14">
         <RequireAuth>
           <Paywall product="dossier" description="Le dimensionnement de l'assurance décennale et de la RC Pro fait partie du Pack Lancement, avec le dossier de création.">
             <Outil />
@@ -68,8 +68,8 @@ function Outil() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_1.15fr]">
-      <form onSubmit={submit} className="space-y-6">
+    <div className="grid gap-8 lg:grid-cols-[1fr_1.15fr] lg:items-start">
+      <form onSubmit={submit} className="feuille space-y-6 p-5 sm:p-8">
         <Field label="Métier principal" htmlFor="metier">
           <Select id="metier" required value={f.metier} onChange={(e) => setF({ ...f, metier: e.target.value })}>
             <option value="">Choisissez…</option>
@@ -133,7 +133,7 @@ function Outil() {
             ))}
           </div>
         </Field>
-        <Button type="submit" disabled={!f.metier}>
+        <Button type="submit" size="lg" disabled={!f.metier} className="w-full sm:w-auto">
           Calculer mes garanties
         </Button>
       </form>
@@ -141,26 +141,26 @@ function Outil() {
       {res ? (
         <Card className="space-y-5">
           <div>
-            <p className="text-[14px] text-ardoise-2">{res.metierLabel}, risque {res.niveauRisque}/5</p>
-            <h2 className="display text-4xl">
+            <p className="text-[14px] text-encre-2">{res.metierLabel}, risque {res.niveauRisque}/5</p>
+            <h2 className="display text-[30px] sm:text-[34px]">
               {formatEuro(res.primeBasse, 0)} à {formatEuro(res.primeHaute, 0)} par an
             </h2>
-            <p className="text-ardoise-2">Ordre de grandeur de la prime décennale + RC Pro, hors franchise.</p>
+            <p className="text-encre-2">Ordre de grandeur de la prime décennale + RC Pro, hors franchise.</p>
           </div>
           <table className="w-full text-left text-[14.5px]">
-            <tbody className="divide-y divide-ardoise/10">
+            <tbody className="divide-y divide-encre/10">
               {res.garanties.map((g) => (
                 <tr key={g.label}>
                   <th scope="row" className="py-2.5 pr-3 align-top font-medium">
                     {g.label}
-                    <span className="block text-[13px] font-normal text-ardoise-3">{g.note}</span>
+                    <span className="block text-[13px] font-normal text-encre-3">{g.note}</span>
                   </th>
                   <td className="py-2.5 align-top font-semibold whitespace-nowrap">{g.valeur}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <ul className="list-disc space-y-1 pl-5 text-[14px] text-ardoise-2">
+          <ul className="list-disc space-y-1 pl-5 text-[14px] text-encre-2">
             {res.raisons.map((r) => (
               <li key={r}>{r}</li>
             ))}
@@ -182,9 +182,9 @@ function Outil() {
           </div>
         </Card>
       ) : (
-        <Card className="border-l-[3px] border-encre bg-transparent shadow-none sm:p-6">
+        <Card className="bg-[linear-gradient(160deg,var(--color-bleu-pale),var(--color-papier)_60%)] sm:p-7">
           <p className="font-semibold">Pourquoi dimensionner avant d'appeler</p>
-          <p className="mt-2 text-ardoise-2">
+          <p className="mt-2 text-encre-2">
             Les offres « pas chères » ont souvent des plafonds bas ou des activités exclues. Avec des plafonds de référence, vous
             comparez des contrats équivalents et vous repérez les exclusions.
           </p>

@@ -66,20 +66,20 @@ function Admin() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map(([k, n]) => (
           <Card key={k}>
-            <p className="text-[14px] text-ardoise-2">{k}</p>
-            <p className="display text-5xl">{n}</p>
+            <p className="text-[14px] text-encre-2">{k}</p>
+            <p className="display text-[40px]">{n}</p>
           </Card>
         ))}
       </div>
       <Card className="overflow-x-auto p-0 sm:p-0">
         <table className="w-full min-w-[44rem] text-left text-[14px]">
-          <thead className="border-b border-ardoise/10 text-[13px] text-ardoise-3">
+          <thead className="border-b border-encre/10 text-[13px] text-encre-3">
             <tr><th className="px-5 py-3 font-medium">Compte</th><th className="font-medium">Inscrit le</th><th className="font-medium">Lancement</th><th className="font-medium">Pro</th><th className="font-medium">Soumissions</th><th className="px-5 font-medium">Devis</th></tr>
           </thead>
-          <tbody className="divide-y divide-ardoise/10">
+          <tbody className="divide-y divide-encre/10">
             {rows.map((r) => (
               <tr key={r.user_id}>
-                <td className="px-5 py-2.5">{[r.prenom, r.nom].filter(Boolean).join(" ") || "—"}<span className="block text-ardoise-3">{r.email}</span></td>
+                <td className="px-5 py-2.5">{[r.prenom, r.nom].filter(Boolean).join(" ") || "—"}<span className="block text-encre-3">{r.email}</span></td>
                 <td>{dateFr(r.created_at)}</td>
                 <td>{r.dossier ? "Oui" : "—"}</td>
                 <td>{r.pro ? "Oui" : "—"}</td>

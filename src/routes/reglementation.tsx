@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Container, PageHeader, Ref } from "@/components/ui";
+import { Container, PageHeader } from "@/components/ui";
 import { seo } from "@/lib/seo";
 import { dateFr } from "@/lib/utils";
 import {
@@ -86,20 +86,48 @@ function Page() {
     <>
       <PageHeader
         title="Les règles appliquées"
-        intro={`Toutes les valeurs utilisées par les outils et imprimées sur vos documents. Dernière vérification le ${dateFr(REGLES_VERSION)}.`}
+        rubrique="Règles 2026"
+        intro={`Toutes les valeurs utilisées par les outils et imprimées sur vos documents, avec leur source. Dernière vérification le ${dateFr(REGLES_VERSION)}.`}
       />
-      <Container className="space-y-10 py-10">
-        {groupes.map((g) => (
-          <section key={g.titre}>
-            <h2 className="display text-3xl">{g.titre}</h2>
-            <div className="mt-3 overflow-x-auto rounded-md bg-papier ring-1 ring-ardoise/10">
-              <table className="w-full min-w-[40rem] text-left text-[14.5px]">
-                <tbody className="divide-y divide-ardoise/10">
+      <Container className="grid gap-12 py-12 sm:py-16 lg:grid-cols-[13rem_1fr]">
+        <nav aria-label="Rubriques" className="hidden lg:block">
+          <ol className="sticky top-24 space-y-0.5 border-l border-encre/10 text-[14px]">
+            {groupes.map((g, i) => (
+              <li key={g.titre}>
+                <a href={`#r${i}`} className="-ml-px block border-l border-transparent py-1.5 pl-4 text-encre-2 transition-colors hover:border-bleu hover:text-encre">
+                  {g.titre}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <div className="min-w-0 space-y-12">
+        {groupes.map((g, i) => (
+          <section key={g.titre} id={`r${i}`}>
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 className="display text-[24px] sm:text-[26px]">{g.titre}</h2>
+              <span className="text-[13px] font-medium text-encre-3">{g.lignes.length} règles</span>
+            </div>
+            <div className="mt-4 overflow-x-auto rounded-2xl bg-papier shadow-[0_0_0_1px_rgb(11_18_32/0.07),var(--shadow-sm)]">
+              <table className="w-full min-w-[44rem] table-fixed text-left text-[14.5px]">
+                <colgroup>
+                  <col className="w-[36%]" />
+                  <col className="w-[28%]" />
+                  <col />
+                </colgroup>
+                <thead className="border-b border-encre/[0.07] bg-enduit/50 text-[12.5px] text-encre-3">
+                  <tr>
+                    <th scope="col" className="px-5 py-2.5 font-medium">Règle</th>
+                    <th scope="col" className="px-3 py-2.5 font-medium">Valeur</th>
+                    <th scope="col" className="px-5 py-2.5 font-medium">Source</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-encre/[0.05]">
                   {g.lignes.map(([k, v, s]) => (
-                    <tr key={k}>
-                      <th scope="row" className="w-2/5 px-5 py-3 font-medium">{k}</th>
-                      <td className="px-3 py-3 font-semibold">{v}</td>
-                      <td className="px-5 py-3 [&_.ref]:whitespace-normal"><Ref>{s}</Ref></td>
+                    <tr key={k} className="align-top transition-colors hover:bg-enduit/40">
+                      <th scope="row" className="px-5 py-3.5 font-medium">{k}</th>
+                      <td className="px-3 py-3.5 font-semibold tabular-nums">{v}</td>
+                      <td className="px-5 py-3.5 text-[13px] leading-snug"><span className="ref !text-[12px]">{s}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -107,10 +135,11 @@ function Page() {
             </div>
           </section>
         ))}
-        <p className="max-w-3xl text-[14px] text-ardoise-3">
+        <p className="max-w-3xl text-[14px] text-encre-3">
           Ces informations sont générales. En cas de doute sur votre situation, l'Urssaf, le service des impôts des entreprises et la
           Chambre de Métiers et de l'Artisanat restent les interlocuteurs officiels.
         </p>
+        </div>
       </Container>
     </>
   );

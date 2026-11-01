@@ -1,94 +1,150 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------
-   Bâtipro — « Le dossier de chantier »
-   Le site emprunte au vocabulaire d'un chantier français : le panneau
-   d'affichage du permis, les planches d'un dossier technique, les cotes
-   de dimension et le cartouche en bas de plan.
-   - Fond « enduit » : blanc minéral froid, jamais crème.
-   - Encre : bleu-noir d'imprimerie technique.
-   - Bleu Bâtipro : actions et liens.
-   - Orange balise : réservé aux cotes et à ce qui demande l'attention.
+   Bâtipro — système de design v4
+   SaaS B2B pour les artisans du bâtiment : net, précis, rassurant.
+   - Typographie unique : Inter (axe optique) pour tout le texte,
+     JetBrains Mono pour les références légales et les numéros.
+     La même Inter est utilisée par Stripe Checkout, les emails et
+     les PDF générés, pour une marque cohérente de bout en bout.
+   - Surfaces claires, filets fins, ombres douces superposées.
+   - Bleu Bâtipro pour l'action, orange chantier pour l'accent,
+     nuit profonde pour les grands aplats.
    --------------------------------------------------------------- */
 
 @font-face {
-  font-family: "Archivo";
+  font-family: "Inter";
   font-style: normal;
   font-display: swap;
   font-weight: 100 900;
-  font-stretch: 62% 125%;
-  src: url("/fonts/archivo-latin-wdth-normal.woff2") format("woff2-variations");
+  src: url("/fonts/inter-latin-opsz-normal.woff2") format("woff2-variations");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Archivo";
+  font-family: "Inter";
   font-style: normal;
   font-display: swap;
   font-weight: 100 900;
-  font-stretch: 62% 125%;
-  src: url("/fonts/archivo-latin-ext-wdth-normal.woff2") format("woff2-variations");
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20AB, U+20AD-20C0, U+2C60-2C7F, U+A720-A7FF;
+  src: url("/fonts/inter-latin-ext-opsz-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
-  font-family: "IBM Plex Mono";
-  font-weight: 500;
+  font-family: "JetBrains Mono";
+  font-style: normal;
   font-display: swap;
-  src: url("/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2");
+  font-weight: 100 800;
+  src: url("/fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @theme {
-  --color-enduit: #f1f2ef;
-  --color-enduit-2: #e6e8e4;
-  --color-papier: #ffffff;
-  --color-encre: #151a21;
-  --color-encre-2: #48505b;
-  --color-encre-3: #7a828d;
-  --color-trait: #d5d9de;
-  --color-trait-fort: #aab1ba;
+  /* Surfaces */
+  --color-enduit: #f6f7f9; /* fond de page */
+  --color-enduit-2: #eef0f4; /* fond secondaire, zones en retrait */
+  --color-papier: #ffffff; /* cartes */
 
-  --color-bleu: #1d5fa3;
-  --color-bleu-fonce: #134a82;
-  --color-bleu-nuit: #0e2c4c;
-  --color-bleu-pale: #e4edf7;
+  /* Texte (échelle « slate » légèrement bleutée) */
+  --color-encre: #0b1220;
+  --color-encre-2: #475166;
+  --color-encre-3: #7a8499;
+  --color-trait: #e4e7ec;
+  --color-trait-fort: #cfd4dd;
 
-  --color-balise: #ef6418;
-  --color-balise-fonce: #b2470c;
-  --color-balise-pale: #fdeee3;
+  /* Marque */
+  --color-bleu: #2f5bea;
+  --color-bleu-fonce: #2148c8;
+  --color-bleu-nuit: #0a1530;
+  --color-bleu-pale: #eef2fe;
+  --color-bleu-clair: #8eabff;
 
-  --color-vert: #23734a;
-  --color-vert-pale: #e3f2e9;
-  --color-rouge: #b3261e;
-  --color-rouge-pale: #fbe9e8;
+  --color-balise: #ff6a1f;
+  --color-balise-fonce: #c44a0c;
+  --color-balise-pale: #fff1e8;
 
-  /* Compatibilité avec les noms de la v2 */
-  --color-beton: #f1f2ef;
-  --color-beton-2: #e6e8e4;
-  --color-ardoise: #151a21;
-  --color-ardoise-2: #48505b;
-  --color-ardoise-3: #7a828d;
+  --color-vert: #0f8a5f;
+  --color-vert-pale: #e7f6ef;
+  --color-rouge: #d12c2c;
+  --color-rouge-pale: #fdecec;
 
-  --font-sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Archivo", "Arial Narrow", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-nuit: #070c19;
+  --color-nuit-2: #0e1528;
 
-  --radius-sm: 2px;
-  --radius-md: 3px;
+  /* Alias historiques (anciens noms encore présents dans certaines pages) */
+  --color-beton: #f6f7f9;
+  --color-beton-2: #eef0f4;
+  --color-ardoise: #0b1220;
+  --color-ardoise-2: #475166;
+  --color-ardoise-3: #7a8499;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
+
+  --shadow-xs: 0 1px 2px rgb(11 18 32 / 0.05);
+  --shadow-sm: 0 1px 2px rgb(11 18 32 / 0.04), 0 1px 3px rgb(11 18 32 / 0.06);
+  --shadow-md: 0 1px 2px rgb(11 18 32 / 0.04), 0 4px 12px -2px rgb(11 18 32 / 0.08);
+  --shadow-lg: 0 2px 4px rgb(11 18 32 / 0.04), 0 12px 32px -8px rgb(11 18 32 / 0.14);
+  --shadow-xl: 0 4px 8px rgb(11 18 32 / 0.04), 0 24px 64px -16px rgb(11 18 32 / 0.22);
+
+  --animate-fade-up: fade-up 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-float: float 7s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 5.5rem;
+  scroll-behavior: smooth;
 }
 body {
   background: var(--color-enduit);
   color: var(--color-encre);
   font-family: var(--font-sans);
-  font-size: 17px;
-  line-height: 1.55;
-  font-stretch: 100%;
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: "ss01", "tnum" 0;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* cv11 : « a » simple étage ; ss03 : flèches arrondies ; cv05 : « l » avec queue */
+  font-feature-settings: "cv11", "ss03", "cv05";
+  font-optical-sizing: auto;
 }
 
 h1,
@@ -100,146 +156,192 @@ p {
   text-wrap: pretty;
 }
 ::selection {
-  background: var(--color-balise);
-  color: white;
+  background: rgb(47 91 234 / 0.18);
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-balise);
+  outline: 2px solid var(--color-bleu);
   outline-offset: 2px;
+  border-radius: 6px;
 }
 
 @layer components {
-/* Titres « panneau » : Archivo élargi, très gras, serré. */
-.display {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-stretch: 118%;
-  line-height: 0.98;
-  letter-spacing: -0.022em;
-}
-.display-etroit {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-stretch: 85%;
-  line-height: 1.02;
-  letter-spacing: -0.01em;
-}
-
-/* Références légales et cotes : seule utilisation du mono. */
-.ref {
-  font-family: var(--font-mono);
-  font-size: 0.76em;
-  color: var(--color-encre-2);
-  letter-spacing: -0.01em;
-}
-
-}
-
-@layer components {
-/* Papier millimétré du « terrain » (accueil uniquement) */
-.terrain {
-  background-color: var(--color-enduit);
-  background-image:
-    linear-gradient(to right, rgb(21 26 33 / 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(21 26 33 / 0.06) 1px, transparent 1px),
-    linear-gradient(to right, rgb(21 26 33 / 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(21 26 33 / 0.025) 1px, transparent 1px);
-  background-size:
-    80px 80px,
-    80px 80px,
-    16px 16px,
-    16px 16px;
-}
-
-/* Feuille de papier posée : bord net, ombre portée courte, sans arrondi. */
-.feuille {
-  background: var(--color-papier);
-  box-shadow:
-    0 0 0 1px rgb(21 26 33 / 0.09),
-    0 1px 0 rgb(21 26 33 / 0.06),
-    0 10px 24px -14px rgb(21 26 33 / 0.28);
-}
-
-}
-
-/* Cote de dimension : trait qui se dessine une seule fois au chargement. */
-@keyframes trace {
-  from {
-    stroke-dashoffset: var(--len, 1200);
+  /* Titres : Inter en taille optique « display », serré. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 650;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
   }
-  to {
-    stroke-dashoffset: 0;
+  .display-etroit {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  /* Petit sur-titre au-dessus des sections */
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--color-bleu);
+  }
+
+  /* Références légales et numéros : seule utilisation du mono. */
+  .ref {
+    font-family: var(--font-mono);
+    font-size: 0.78em;
+    font-weight: 450;
+    color: var(--color-encre-3);
+    letter-spacing: -0.01em;
+  }
+
+  /* Texte en dégradé pour les accroches */
+  .texte-degrade {
+    background: linear-gradient(100deg, #9db8ff 0%, #ffffff 45%, #ffc29e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .texte-degrade-clair {
+    background: linear-gradient(100deg, var(--color-bleu) 10%, #6d4cff 55%, var(--color-balise) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Carte standard */
+  .feuille {
+    background: var(--color-papier);
+    border-radius: var(--radius-2xl);
+    box-shadow:
+      0 0 0 1px rgb(11 18 32 / 0.06),
+      var(--shadow-md);
+  }
+
+  /* Fond quadrillé estompé (en-têtes, sections claires) */
+  .terrain {
+    background-color: var(--color-enduit);
+    background-image:
+      linear-gradient(to right, rgb(11 18 32 / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(11 18 32 / 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    background-position: center top;
+  }
+  .masque-bas {
+    mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+  }
+  .masque-radial {
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 75%);
+  }
+
+  /* Grille sur fond sombre */
+  .grille-nuit {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.06) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* Bordure lumineuse dégradée (cartes mises en avant) */
+  .bord-lumineux {
+    position: relative;
+    isolation: isolate;
+  }
+  .bord-lumineux::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(160deg, rgb(47 91 234 / 0.9), rgb(109 76 255 / 0.5) 40%, rgb(255 106 31 / 0.8));
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-enduit-2) 25%, #f7f8fa 50%, var(--color-enduit-2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
   }
 }
-.cote-trace {
-  stroke-dasharray: var(--len, 1200);
-  stroke-dashoffset: var(--len, 1200);
-  animation: trace 900ms cubic-bezier(0.6, 0, 0.2, 1) 250ms forwards;
+
+/* Révélation douce au chargement (accueil) */
+.revele {
+  animation: var(--animate-fade-up);
 }
-@keyframes apparait {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.revele-1 {
+  animation-delay: 60ms;
 }
-.cote-label {
-  opacity: 0;
-  animation: apparait 300ms ease-out 1000ms forwards;
+.revele-2 {
+  animation-delay: 140ms;
 }
+.revele-3 {
+  animation-delay: 220ms;
+}
+.revele-4 {
+  animation-delay: 320ms;
+}
+
 
 .guide h2 {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-stretch: 112%;
-  font-size: 2.1rem;
-  line-height: 1;
-  letter-spacing: -0.02em;
+  font-weight: 650;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
 }
 
 .prose-legal h2 {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-stretch: 110%;
-  font-size: 1.55rem;
-  margin: 2.25rem 0 0.5rem;
-  letter-spacing: -0.015em;
+  font-weight: 650;
+  font-size: 1.4rem;
+  margin: 2.5rem 0 0.6rem;
+  letter-spacing: -0.025em;
 }
 .prose-legal h3 {
-  font-weight: 650;
-  margin: 1.25rem 0 0.25rem;
+  font-weight: 600;
+  margin: 1.4rem 0 0.3rem;
 }
 .prose-legal p,
 .prose-legal li {
   color: var(--color-encre-2);
-  max-width: 68ch;
+  max-width: 70ch;
 }
 .prose-legal ul {
-  list-style: square;
+  list-style: disc;
   padding-left: 1.25rem;
   margin: 0.5rem 0;
+}
+.prose-legal li::marker {
+  color: var(--color-trait-fort);
 }
 .prose-legal a {
   color: var(--color-bleu);
   text-decoration: underline;
+  text-decoration-color: rgb(47 91 234 / 0.35);
   text-underline-offset: 3px;
+}
+.prose-legal a:hover {
+  text-decoration-color: currentColor;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-  .cote-trace {
-    stroke-dashoffset: 0;
-  }
-  .cote-label {
-    opacity: 1;
   }
 }
 
@@ -257,4 +359,50 @@ p {
     box-shadow: none !important;
     border: 1px solid #bbb;
   }
+}
+
+/* Curseur de plage : piste fine, poignée blanche ombrée */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-enduit-2);
+  box-shadow: inset 0 0 0 1px rgb(11 18 32 / 0.06);
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-enduit-2);
+}
+input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-bleu);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -7px;
+  height: 20px;
+  width: 20px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(11 18 32 / 0.15),
+    0 2px 6px rgb(11 18 32 / 0.18);
+}
+input[type="range"]::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(11 18 32 / 0.15),
+    0 2px 6px rgb(11 18 32 / 0.18);
 }
