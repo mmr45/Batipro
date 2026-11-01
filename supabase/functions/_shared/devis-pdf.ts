@@ -1,5 +1,5 @@
 import { C, LARGEUR, MARGE, Pdf, clean, dateFr, euro } from "./pdf.ts";
-import { calculerTotaux, construireMentions, nomEmetteur, FORMES, type DevisData } from "./rules/devis.ts";
+import { calculerTotaux, construireMentions, libelleMetier, nomEmetteur, FORMES, type DevisData } from "./rules/devis.ts";
 import { NATURE_TRAVAUX_LABEL, RETRACTATION } from "./rules/reglementation.ts";
 
 export interface MetaDevis {
@@ -21,7 +21,7 @@ export async function buildDevisPdf(d: DevisData, meta: MetaDevis): Promise<Uint
   const xTxt = MARGE + w;
   pdf.at(emetteur, xTxt, top - 14, { size: 13, bold: true });
   pdf.at(
-    [forme, d.em_capital && !/^(micro|ei)$/.test(d.em_forme) ? `capital ${d.em_capital} €` : ""].filter(Boolean).join(" — "),
+    [libelleMetier(d.em_metier), forme, d.em_capital && !/^(micro|ei)$/.test(d.em_forme) ? `capital ${d.em_capital} €` : ""].filter(Boolean).join(" — "),
     xTxt,
     top - 27,
     { size: 8.5, color: C.gris },
@@ -117,7 +117,12 @@ export async function buildDevisPdf(d: DevisData, meta: MetaDevis): Promise<Uint
   pdf.space(10);
 
   // ---------- Totaux ----------
-  const rows: [string, string, boolean][] = [["Total HT", euro(t.totalHT), false]];
+  const rows: [string, string, boolean][] = [];
+  if (t.remise > 0) {
+    rows.push(["Total HT avant remise", euro(t.totalHTBrut), false]);
+    rows.push([`Remise (${String(d.co_remise_pct).replace(".", ",")} %)`, `- ${euro(t.remise)}`, false]);
+  }
+  rows.push([t.remise > 0 ? "Total HT net" : "Total HT", euro(t.totalHT), false]);
   if (d.em_franchise) rows.push(["TVA", "non applicable (art. 293 B CGI)", false]);
   else for (const v of t.tvaParTaux) rows.push([`TVA ${String(v.taux).replace(".", ",")} % (base ${euro(v.base)})`, euro(v.montant), false]);
   rows.push(["Total TTC", euro(t.totalTTC), true]);
