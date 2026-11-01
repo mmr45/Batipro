@@ -107,3 +107,13 @@ Stripe et les emails. Après le merge :
    [supabase/templates/README.md](../supabase/templates/README.md)).
 3. **Stripe → Paramètres → Marque** (reçus, factures, portail client) : icône `public/icon-512.png`, logo
    `public/logo.svg` exporté en PNG, couleur de marque `#2F5BEA`, couleur d'accent `#0B1220`.
+
+## 11. Déploiement automatique (GitHub Actions)
+
+Le workflow [`.github/workflows/supabase.yml`](../.github/workflows/supabase.yml) déploie toutes les Edge Functions à
+chaque merge sur `main` qui touche `supabase/functions/`. Il vérifie d'abord les types avec `deno check`.
+
+- **Une seule fois** : créer un jeton sur supabase.com → Account → Access Tokens, puis l'ajouter dans GitHub →
+  Settings → Secrets and variables → Actions sous le nom `SUPABASE_ACCESS_TOKEN`.
+- **Emails d'authentification** : onglet Actions → Supabase → Run workflow, cocher « Installer aussi les emails ».
+  Seuls les sujets et les modèles d'emails sont modifiés, le reste de la configuration Auth n'est pas touché.
