@@ -10,7 +10,7 @@ Production : [batipro-ten.vercel.app](https://batipro-ten.vercel.app)
 | Offre | Prix | Contenu | Clé `entitlements` |
 | --- | --- | --- | --- |
 | Gratuit | 0 € | Qualification, statut, guides | — |
-| Pack Lancement | 89 € une fois | Dossier INPI + pièces, assurance décennale | `dossier` |
+| Pack Lancement | 89 € une fois | Fiche de saisie INPI, pièces en PDF, assurance décennale | `dossier` |
 | Pro | 19 €/mois | Éditeur de devis, numérotation, archive | `pro` |
 
 Les deux offres payantes sont indépendantes.
@@ -31,7 +31,7 @@ supabase/
     create-portal-session     Portail client Stripe (factures, résiliation)
     stripe-webhook            Seul point d'écriture des droits d'accès
     generate-devis-pdf        Devis : contrôle, numérotation, archive, PDF
-    generate-inpi-pdf         Dossier de création + pièces jointes
+    generate-inpi-pdf         Dossier de création (.zip : fiche de saisie, DNC, pièces en PDF)
     delete-account            Suppression RGPD du compte
 scripts/sitemap.ts            Génère public/sitemap.xml
 ```

@@ -4,7 +4,7 @@ import { Container, Notice, PageHeader } from "@/components/ui";
 import { seo } from "@/lib/seo";
 import { A_COMPLETER, EDITEUR } from "@/lib/editeur";
 
-const MAJ = "26 octobre 2026";
+const MAJ = "1er novembre 2026";
 const v = (x: string) => x || A_COMPLETER;
 const incomplet = !EDITEUR.siret || !EDITEUR.adresse || !EDITEUR.forme;
 
@@ -60,7 +60,13 @@ const PAGES: Record<string, { titre: string; description: string; contenu: () =>
           Les résultats sont des informations générales et des pré-orientations calculées à partir de vos réponses. Ils ne
           constituent pas un conseil juridique, fiscal ou en assurance personnalisé et ne remplacent ni un expert-comptable, ni un
           avocat, ni un assureur, ni la Chambre de Métiers et de l'Artisanat. Bâtipro n'effectue aucune formalité à votre place :
-          l'immatriculation se fait par vous sur le Guichet unique de l'INPI.
+          l'immatriculation se fait par vous sur le Guichet unique de l'INPI (procedures.inpi.fr).
+        </p>
+        <p>
+          Bâtipro est un service privé, sans lien avec l'INPI, l'INSEE, l'Urssaf ou les Chambres de Métiers et de l'Artisanat. La
+          déclaration de création sur le Guichet unique est gratuite pour un entrepreneur individuel et peut être faite sans recourir à
+          Bâtipro. Le prix du Pack Lancement rémunère uniquement l'aide à la préparation ; il ne comprend pas les frais légaux éventuels
+          (greffe, annonce légale, frais bancaires), payés directement aux organismes concernés.
         </p>
         <p>
           Vous restez responsable de l'exactitude des informations saisies et du contenu des devis que vous émettez, notamment de
@@ -74,7 +80,7 @@ const PAGES: Record<string, { titre: string; description: string; contenu: () =>
         <h2>4. Offres et prix</h2>
         <ul>
           <li>Gratuit : test de qualification, simulateur de statut et guides.</li>
-          <li>Pack Lancement : 89 €, paiement unique, accès sans limite de durée au dossier de création et au dimensionnement de l'assurance.</li>
+          <li>Pack Lancement : 89 €, paiement unique, accès sans limite de durée à la préparation du dossier de création (fiche de saisie pour le Guichet unique, déclaration de non-condamnation pré-remplie, conversion des pièces en PDF) et au dimensionnement de l'assurance.</li>
           <li>Abonnement Pro : 19 € par mois, sans engagement, accès à l'éditeur de devis et à l'archive.</li>
         </ul>
         <p>Prix exprimés en euros. {EDITEUR.tva}. Une facture est émise pour chaque paiement.</p>

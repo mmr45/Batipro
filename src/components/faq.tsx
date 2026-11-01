@@ -10,7 +10,7 @@ export interface Faq {
 export const FAQ_ACCUEIL: Faq[] = [
   {
     q: "Bâtipro immatricule-t-il mon entreprise à ma place ?",
-    a: "Non. Le Pack Lancement prépare un dossier complet (informations, pièces, déclaration de non-condamnation) que vous recopiez sur le Guichet unique de l'INPI, seul canal officiel. La Chambre de Métiers contrôle ensuite votre qualification.",
+    a: "Non. Bâtipro est un service privé, indépendant de l'INPI. Le Pack Lancement prépare vos réponses, vos pièces en PDF et la déclaration de non-condamnation ; vous faites ensuite vous-même la déclaration sur procedures.inpi.fr, seul site officiel, gratuitement pour un entrepreneur individuel. La Chambre de Métiers contrôle ensuite votre qualification.",
   },
   {
     q: "Le Pack Lancement et l'abonnement Pro, c'est la même chose ?",

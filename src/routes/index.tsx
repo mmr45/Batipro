@@ -390,7 +390,7 @@ function Bento() {
             offre="Pack Lancement"
             icon={<FileText aria-hidden />}
             titre="Dossier de création INPI"
-            texte="Les informations du Guichet unique, vos pièces et la déclaration de non-condamnation, réunies en un PDF."
+            texte="Vos réponses rangées dans l'ordre du Guichet unique, vos pièces en PDF et la déclaration de non-condamnation pré-remplie."
           >
             <div className="flex flex-wrap gap-1.5">
               <span className="rounded-full bg-enduit px-2.5 py-1 text-[12px] font-medium text-encre-2">Identité</span>
@@ -568,7 +568,7 @@ function DevisVivant() {
 const PARCOURS = [
   { titre: "Vérifier sa qualification", texte: "Savoir si la CMA validera votre métier.", to: "/outils/qualification", Icon: BadgeCheck },
   { titre: "Choisir son statut", texte: "Micro, EI au réel ou SASU, chiffres à l'appui.", to: "/outils/statut", Icon: Scale },
-  { titre: "Préparer le dossier INPI", texte: "Toutes les informations et pièces en un PDF.", to: "/outils/inpi", Icon: FileText },
+  { titre: "Préparer le dossier INPI", texte: "Réponses et pièces prêtes pour le Guichet unique.", to: "/outils/inpi", Icon: FileText },
   { titre: "Dimensionner la décennale", texte: "Plafonds et budget avant d'appeler.", to: "/outils/assurance", Icon: ShieldCheck },
   { titre: "Envoyer des devis conformes", texte: "Mentions, numérotation, archive.", to: "/outils/devis", Icon: FileSignature },
 ] as const;

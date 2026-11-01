@@ -1,11 +1,24 @@
 // Génère le dossier de création (Pack Lancement requis) à partir de la
-// dernière soumission INPI du compte, avec les pièces déposées dans le
-// bucket privé « justificatifs ».
-import { HttpError, adminClient, hasEntitlement, pdfResponse, requireUser, serve } from "../_shared/http.ts";
-import { buildInpiPdf, type PieceJointe } from "../_shared/inpi-pdf.ts";
+// dernière soumission INPI du compte. Renvoie une archive ZIP :
+//   1-fiche-de-saisie.pdf                  réponses à reporter sur le Guichet unique
+//   2-declaration-non-condamnation.pdf     à dater, signer et scanner
+//   pieces/…pdf                            une pièce = un PDF, prêt pour sa case
+import { HttpError, adminClient, corsHeaders, hasEntitlement, requireUser, serve } from "../_shared/http.ts";
+import { buildDncPdf, buildFichePdf, pieceEnPdf, type PieceJointe } from "../_shared/inpi-pdf.ts";
 import { PIECES, normaliserInpi, type PieceKey } from "../_shared/rules/inpi.ts";
+import { zip, type ZipEntry } from "../_shared/zip.ts";
 
-const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
+const MAX_TOTAL_BYTES = 30 * 1024 * 1024;
+
+function slug(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
+}
 
 serve(async (req) => {
   const user = await requireUser(req);
@@ -28,7 +41,7 @@ serve(async (req) => {
 
   const pieces: PieceJointe[] = [];
   let total = 0;
-  for (const p of PIECES) {
+  for (const p of PIECES.filter((x) => !x.generee)) {
     const { data: files } = await db.storage.from("justificatifs").list(`${user.id}/${p.key}`, { limit: 5 });
     for (const f of files ?? []) {
       if (!f.name || f.name.startsWith(".")) continue;
@@ -41,6 +54,31 @@ serve(async (req) => {
     }
   }
 
-  const bytes = await buildInpiPdf(d, ref, pieces);
-  return pdfResponse(req, bytes, `dossier-creation-${ref}.pdf`);
+  const entries: ZipEntry[] = [];
+  const pretes = new Set<PieceKey>();
+  const compte: Partial<Record<PieceKey, number>> = {};
+  for (const p of pieces) {
+    const bytes = await pieceEnPdf(p);
+    if (!bytes) continue;
+    pretes.add(p.key);
+    const n = (compte[p.key] = (compte[p.key] ?? 0) + 1);
+    const label = PIECES.find((x) => x.key === p.key)?.label ?? p.key;
+    entries.push({ nom: `pieces/${slug(label)}${n > 1 ? `-${n}` : ""}.pdf`, data: bytes });
+  }
+
+  entries.unshift(
+    { nom: "1-fiche-de-saisie.pdf", data: await buildFichePdf(d, ref, [...pretes]) },
+    { nom: "2-declaration-non-condamnation-a-signer.pdf", data: await buildDncPdf(d) },
+  );
+
+  const nom = `dossier-creation-${ref}.zip`;
+  return new Response(zip(entries) as unknown as BodyInit, {
+    status: 200,
+    headers: {
+      ...corsHeaders(req),
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="${nom}"`,
+      "Cache-Control": "no-store",
+    },
+  });
 });

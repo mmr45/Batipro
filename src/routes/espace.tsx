@@ -115,7 +115,7 @@ function Espace() {
           icon={<FileText aria-hidden />}
           actif={access.dossier}
           texteActif="Acheté : dossier de création et assurance débloqués."
-          texteInactif="89 € une fois : dossier INPI complet et dimensionnement de la décennale."
+          texteInactif="89 € une fois : fiche de saisie INPI, pièces prêtes à téléverser et dimensionnement de la décennale."
           produit="dossier"
         />
         <Offre
@@ -278,7 +278,7 @@ function TelechargerInpi() {
       onClick={async () => {
         setBusy(true);
         try {
-          await downloadPdf("generate-inpi-pdf", {}, "dossier-creation.pdf");
+          await downloadPdf("generate-inpi-pdf", {}, "dossier-creation.zip");
         } catch (e) {
           toast.error((e as Error).message);
         } finally {
@@ -286,7 +286,7 @@ function TelechargerInpi() {
         }
       }}
     >
-      <Download className="h-4 w-4" aria-hidden /> Télécharger le PDF
+      <Download className="h-4 w-4" aria-hidden /> Télécharger le dossier
     </button>
   );
 }
