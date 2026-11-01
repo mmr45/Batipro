@@ -13,7 +13,6 @@ import {
   FORMES,
   MOYENS_PAIEMENT,
   TAUX_TVA_LIGNE,
-  appliquerModele,
   calculerTotaux,
   construireMentions,
   estIndividuelle,
@@ -27,7 +26,8 @@ import {
   type TauxTva,
 } from "@rules/devis.ts";
 import { METIERS, getMetier } from "@rules/metiers.ts";
-import { MODELES_PAR_METIER, bibliotheque, mentionsMetier, modelesMetier, totalModeleHT, type LigneModele } from "@rules/modeles-devis.ts";
+import { MODELES_PAR_METIER, appliquerModele, bibliotheque, modelesMetier, totalModeleHT, type LigneModele } from "@rules/modeles-devis.ts";
+import { mentionsMetier } from "@rules/mentions-metier.ts";
 import { NATURE_TRAVAUX_LABEL, PAIEMENT, TVA_FRANCHISE_PRESTATIONS, formatEuro, formatMontant, type NatureTravaux } from "@rules/reglementation.ts";
 
 export const Route = createFileRoute("/outils/devis")({

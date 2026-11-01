@@ -15,7 +15,7 @@ import {
   type NatureTravaux,
 } from "./reglementation.ts";
 import { METIERS, getMetier } from "./metiers.ts";
-import { mentionsMetier, modelesMetier, tvaLigne, type ModeleDevis } from "./modeles-devis.ts";
+import { mentionsMetier, tvaLigne } from "./mentions-metier.ts";
 
 export type FormeJuridique = "micro" | "ei" | "eurl" | "sarl" | "sasu" | "sas" | "autre";
 
@@ -391,31 +391,4 @@ export function tauxPourLigne(nature: NatureTravaux, ligne: Pick<LigneDevis, "en
 export function libelleMetier(slug: string): string {
   const m = getMetier(slug);
   return m && m.slug !== "autre" ? m.label : "";
-}
-
-/**
- * Préremplit un devis à partir d'un modèle du métier : prestations, unités,
- * TVA selon la nature des locaux, intitulé, durée et gestion des déchets.
- * Les informations de l'entreprise et du client sont conservées.
- */
-export function appliquerModele(d: DevisData, slug: string, modeleId?: string): DevisData {
-  const ref = modelesMetier(slug);
-  if (!ref) return { ...d, em_metier: slug };
-  const modele: ModeleDevis = ref.modeles.find((m) => m.id === modeleId) ?? ref.modeles[0];
-  return {
-    ...d,
-    em_metier: slug,
-    ch_intitule: modele.intitule || d.ch_intitule,
-    ch_duree: modele.duree || d.ch_duree,
-    de_quantite: ref.dechets.quantite || d.de_quantite,
-    de_modalites: ref.dechets.modalites || d.de_modalites,
-    lignes: modele.lignes.map((l) => ({
-      designation: l.designation,
-      unite: l.unite,
-      quantite: l.quantite,
-      prixUnitaireHT: l.prixUnitaireHT,
-      tva: tauxPourLigne(d.ch_nature, l),
-      ...(l.energie ? { energie: true } : {}),
-    })),
-  };
 }
