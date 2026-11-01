@@ -17,8 +17,8 @@ export async function buildDevisPdf(d: DevisData, meta: MetaDevis): Promise<Uint
   pdf.page.drawRectangle({ x: 0, y: 841.89 - 5, width: 595.28, height: 5, color: C.marque });
   const logo = await pdf.logo(d.em_logo_dataurl);
   const top = pdf.y;
-  const { w } = pdf.drawImageFit(logo, MARGE, top, 54, 40);
-  const xTxt = MARGE + w + 10;
+  const w = logo ? pdf.drawImageFit(logo, MARGE, top, 54, 40).w + 10 : 0;
+  const xTxt = MARGE + w;
   pdf.at(emetteur, xTxt, top - 14, { size: 13, bold: true });
   pdf.at(
     [forme, d.em_capital && !/^(micro|ei)$/.test(d.em_forme) ? `capital ${d.em_capital} €` : ""].filter(Boolean).join(" — "),

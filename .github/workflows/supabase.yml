@@ -26,6 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
+        if: env.SUPABASE_ACCESS_TOKEN != ''
         with:
           version: latest
       - uses: denoland/setup-deno@v2
@@ -35,6 +36,8 @@ jobs:
         working-directory: supabase/functions
         run: deno check */index.ts
       - name: Déployer toutes les fonctions
+        # Sans jeton, on s'arrête après la vérification des types au lieu d'échouer.
+        if: env.SUPABASE_ACCESS_TOKEN != ''
         # verify_jwt de chaque fonction vient de supabase/config.toml.
         run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api
 

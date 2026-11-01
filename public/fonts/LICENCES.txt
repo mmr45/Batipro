@@ -2,3 +2,5 @@ Inter — Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/
 JetBrains Mono — Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
 Les deux polices sont distribuées sous licence SIL Open Font License 1.1 : https://openfontlicense.org
 Fichiers issus de Fontsource (@fontsource-variable/inter, @fontsource-variable/jetbrains-mono).
+
+public/pdf/inter-*.ttf : sous-ensembles Latin-1 d'Inter (SIL Open Font License 1.1), utilisés par les PDF générés.

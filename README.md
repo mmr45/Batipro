@@ -45,7 +45,7 @@ scripts/sitemap.ts            Génère public/sitemap.xml
 
 - **Typographie unique** : Inter (axe optique) pour tout le texte, JetBrains Mono pour les références légales et les
   numéros. Les fichiers sont servis depuis `public/fonts/` (aucun appel à Google Fonts). La même Inter est embarquée dans
-  les PDF (`supabase/functions/_shared/fonts.ts`), demandée à Stripe Checkout et utilisée par les emails
+  les PDF (`public/pdf/`, téléchargée par les Edge Functions), demandée à Stripe Checkout et utilisée par les emails
   (`supabase/templates/`).
 - **Jetons** : couleurs, rayons et ombres dans `src/styles.css` (`@theme`). Bleu `#2F5BEA` pour l'action, orange
   `#FF6A1F` pour l'accent, nuit `#070C19` pour les grands aplats.

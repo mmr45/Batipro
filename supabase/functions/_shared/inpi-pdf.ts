@@ -14,7 +14,7 @@ export async function buildInpiPdf(d: InpiData, ref: string, pieces: PieceJointe
   const pdf = await Pdf.create(`Bâtipro — Dossier de création ${ref} — document préparatoire, non transmis à l'INPI`);
   const logo = await pdf.logo();
   const top = pdf.y;
-  pdf.drawImageFit(logo, MARGE, top, 36, 36);
+  if (logo) pdf.drawImageFit(logo, MARGE, top, 36, 36);
   pdf.at("Dossier de création d'entreprise", MARGE + 46, top - 15, { size: 15, bold: true });
   pdf.at(`Réf. ${ref} — préparé le ${dateFr(new Date())}`, MARGE + 46, top - 29, { size: 8.5, color: C.gris });
   pdf.y = top - 48;

@@ -2,8 +2,6 @@
 // retour à la ligne automatique, saut de page, en-tête et pied de page.
 import { PDFDocument, PDFFont, PDFImage, PDFPage, StandardFonts, rgb, type RGB } from "npm:pdf-lib@1.17.1";
 import fontkit from "npm:@pdf-lib/fontkit@1.1.1";
-import { LOGO_BATIPRO_PNG_BASE64 } from "./logo.ts";
-import { INTER_REGULAR_TTF_BASE64, INTER_SEMIBOLD_TTF_BASE64 } from "./fonts.ts";
 
 export const A4: [number, number] = [595.28, 841.89];
 export const MARGE = 44;
@@ -23,7 +21,7 @@ export const C = {
 };
 
 /**
- * Les PDF utilisent Inter, sous-ensemble Latin-1 (voir fonts.ts), et
+ * Les PDF utilisent Inter, sous-ensemble Latin-1 (public/pdf/), et
  * Helvetica en secours. Ni l'une ni l'autre ne savent
  * afficher tous les caractères Unicode : on remplace les plus courants
  * et on supprime ceux qui feraient planter pdf-lib.
@@ -67,6 +65,26 @@ export function base64ToBytes(b64: string): Uint8Array {
   return out;
 }
 
+// Police et logo servis par le site (public/pdf/) plutôt qu'embarqués dans le code :
+// les fonctions restent légères. Téléchargés une fois par instance, puis gardés en mémoire.
+const ASSETS_URL = (Deno.env.get("ASSETS_URL") ?? "https://batipro-ten.vercel.app").replace(/\/$/, "");
+const cache = new Map<string, Promise<Uint8Array | null>>();
+
+export function asset(nom: string): Promise<Uint8Array | null> {
+  let p = cache.get(nom);
+  if (!p) {
+    p = fetch(`${ASSETS_URL}/pdf/${nom}`, { signal: AbortSignal.timeout(5000) })
+      .then(async (r) => (r.ok ? new Uint8Array(await r.arrayBuffer()) : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .catch((e) => {
+        console.error(`Ressource PDF indisponible : ${nom}`, e);
+        cache.delete(nom);
+        return null;
+      });
+    cache.set(nom, p);
+  }
+  return p;
+}
+
 export interface TextOpts {
   size?: number;
   bold?: boolean;
@@ -91,9 +109,11 @@ export class Pdf {
     p.doc = await PDFDocument.create();
     try {
       // Inter, comme sur le site ; sous-ensemble pour garder des PDF légers.
+      const [regular, semibold] = await Promise.all([asset("inter-regular.ttf"), asset("inter-semibold.ttf")]);
+      if (!regular || !semibold) throw new Error("police non téléchargée");
       p.doc.registerFontkit(fontkit);
-      p.font = await p.doc.embedFont(base64ToBytes(INTER_REGULAR_TTF_BASE64), { subset: true });
-      p.bold = await p.doc.embedFont(base64ToBytes(INTER_SEMIBOLD_TTF_BASE64), { subset: true });
+      p.font = await p.doc.embedFont(regular, { subset: true });
+      p.bold = await p.doc.embedFont(semibold, { subset: true });
     } catch (e) {
       console.error("Inter indisponible, repli sur Helvetica", e);
       p.font = await p.doc.embedFont(StandardFonts.Helvetica);
@@ -197,7 +217,8 @@ export class Pdf {
     }
   }
 
-  async logo(dataUrl?: string): Promise<PDFImage> {
+  /** Logo de l'émetteur s'il est fourni, sinon celui de Bâtipro ; null si aucun n'est disponible. */
+  async logo(dataUrl?: string): Promise<PDFImage | null> {
     const m = (dataUrl ?? "").match(/^data:image\/(png|jpeg);base64,([A-Za-z0-9+/=]+)$/);
     if (m) {
       try {
@@ -207,7 +228,8 @@ export class Pdf {
         console.warn("Logo illisible, logo Bâtipro utilisé :", e);
       }
     }
-    return this.doc.embedPng(base64ToBytes(LOGO_BATIPRO_PNG_BASE64));
+    const bytes = await asset("logo.png");
+    return bytes ? this.doc.embedPng(bytes) : null;
   }
 
   drawImageFit(img: PDFImage, x: number, y: number, maxW: number, maxH: number) {
